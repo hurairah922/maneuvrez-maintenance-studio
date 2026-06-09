@@ -1,5 +1,5 @@
 === Maintenance Mode Studio ===
-Contributors: abuhurarrah
+Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page
 Requires at least: 6.4
 Tested up to: 6.5

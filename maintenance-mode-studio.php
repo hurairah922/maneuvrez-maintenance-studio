@@ -5,7 +5,7 @@
  * Description: Create interactive maintenance, coming soon, launch, and private site pages with games, forms, contact options, social links, login access, and modern responsive animations.
  * Version: 0.1.1
  * Author: Abu Hurarrah
- * Author URI: https://abuhurarrah.com
+ * Author URI: https://profiles.wordpress.org/hurairah922/
  * Text Domain: maintenance-mode-studio
  * Domain Path: /languages
  * License: GPL-2.0-or-later
@@ -14,7 +14,7 @@
 
 /**
  * Created by Abu Hurarrah.
- * Creator URI: https://abuhurarrah.com
+ * Creator URI: https://profiles.wordpress.org/hurairah922/
  */
 
 defined( 'ABSPATH' ) || exit;

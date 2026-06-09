@@ -486,3 +486,158 @@ Do not expand scope beyond Phase 3.
 Prefer simple fixes over large rewrites.
 
 Call out anything that could break WordPress plugin behavior, public rendering, or future extensibility.
+
+
+
+
+### Settings Tabs Review
+
+Check that the Phase 3 admin settings are divided into clear tabs.
+
+Required tabs:
+
+```text id="d6d93c"
+General
+Template
+Design
+Components
+Social Links
+Advanced
+```
+
+Review that:
+
+* The tab labels are clear
+* Settings are grouped logically
+* The active tab remains usable after saving
+* The save flow still works
+* Required settings are not hidden in confusing places
+* The tab UI follows WordPress admin conventions
+* The tab UI is keyboard accessible
+* The settings page does not become overloaded or hard to scan
+
+Flag as medium priority if the settings page is still one long page.
+
+Flag as high priority if tabs break saving or hide required fields.
+
+### Social Links Repeater Review
+
+Check that social links use a removable repeater field.
+
+The admin should support:
+
+* Add new social item
+* Remove social item
+* Platform dropdown
+* URL or email value field
+* Custom platform name only for `custom`
+* Custom icon upload only for `custom`
+* Optional open in new tab setting
+
+Known platform items should only ask for:
+
+* Platform
+* URL or email value
+* Optional open in new tab setting
+
+Known platform items should not ask for manual labels.
+
+The visible label should come from the selected platform.
+
+Supported platform values:
+
+```text id="hjyuzw"
+facebook
+instagram
+linkedin
+x
+youtube
+github
+tiktok
+threads
+website
+email
+custom
+```
+
+Review saved data sanitization:
+
+* Platform is allowlisted
+* URL is validated
+* Email values are validated
+* Custom platform name is sanitized
+* Custom icon ID is sanitized as an integer
+* Open in new tab is normalized to boolean
+* Invalid rows are skipped or removed safely
+
+### Custom Social Icon Review
+
+Check that custom social platforms can optionally use uploaded icons.
+
+Review that:
+
+* Custom icons use the WordPress media library
+* The plugin stores attachment IDs, not raw markup
+* The frontend resolves icon URLs safely
+* Icon URLs are escaped
+* Alt text is escaped
+* Missing icons fall back to a generic icon
+* Broken image URLs do not render
+* Raw user SVG or HTML is not rendered
+
+For SVG:
+
+* Flag as high priority if raw SVG upload/rendering exists without sanitization
+* Prefer raster formats only for Phase 3 unless safe SVG handling is implemented
+
+Preferred safe custom icon types:
+
+```text id="qhnwe7"
+png
+jpg
+jpeg
+webp
+```
+
+### Social Icon Layout Review
+
+Check that icons stay fully visible and aligned in the public template.
+
+Review that:
+
+* Icons use fixed width and height
+* Icons use `object-fit: contain`
+* Icons do not crop
+* Icons do not stretch
+* Icons do not overflow
+* Social links wrap on mobile
+* Social links do not create horizontal overflow
+* Text aligns cleanly with icons
+* Uploaded custom icons behave like built-in icons
+
+Flag as high priority if social icons overflow or break mobile layout.
+
+### Updated Scope Check Rows
+
+Add these rows to the scope check table:
+
+```markdown id="da2xxn"
+| Admin settings tabs | Pass/Fail/Partial | Notes |
+| Social links repeater | Pass/Fail/Partial | Notes |
+| Known platform URL-only flow | Pass/Fail/Partial | Notes |
+| Custom social platform field | Pass/Fail/Partial | Notes |
+| Custom social icon upload | Pass/Fail/Partial | Notes |
+| Social icon layout constraints | Pass/Fail/Partial | Notes |
+```
+
+### Additional High-Priority Issues To Flag
+
+Flag as high priority if:
+
+* Settings tabs break saving
+* Known social platforms require manual labels
+* Social rows save unsafe or unsupported platform values
+* Invalid social URLs render publicly
+* Custom icons render raw user HTML or unsanitized SVG
+* Uploaded icons overflow, crop, stretch, or break layout
+* Social links create horizontal overflow on mobile

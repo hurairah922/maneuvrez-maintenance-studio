@@ -29,6 +29,10 @@ Website:
 
     https://abuhurarrah.com
 
+WordPress.org profile:
+
+    https://profiles.wordpress.org/hurairah922/
+
 Email:
 
     hello@abuhurarrah.com

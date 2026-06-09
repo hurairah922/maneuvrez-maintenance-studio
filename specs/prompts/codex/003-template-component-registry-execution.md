@@ -589,3 +589,272 @@ When complete, provide:
 * Any assumptions made
 * Any known risks or incomplete items
 * Manual testing notes
+
+
+
+### Admin Settings Tabs
+
+Update the admin settings page so Phase 3 settings are grouped into simple tabs.
+
+Use these tabs:
+
+```text id="rtmcm2"
+General
+Template
+Design
+Components
+Social Links
+Advanced
+```
+
+Expected grouping:
+
+| Tab          | Settings                                         |
+| ------------ | ------------------------------------------------ |
+| General      | Mode type, page title, message, login visibility |
+| Template     | Template selection and layout basics             |
+| Design       | Theme mode, colors, text readability settings    |
+| Components   | Component enable/disable settings                |
+| Social Links | Social links repeater                            |
+| Advanced     | Asset/debug-safe settings for later phases       |
+
+Implementation rules:
+
+* Keep the settings page simple
+* Use WordPress admin UI conventions
+* Preserve the active tab after save when possible
+* Do not break settings saving
+* Do not add heavy dependencies
+* Do not hide required fields in confusing places
+* Keep tabs keyboard accessible
+
+### Social Links Repeater
+
+Replace any single social link setting or manual label setup with a repeater-style social links field.
+
+The user should be able to:
+
+* Add a new social item
+* Remove a social item
+* Choose the platform from a dropdown
+* Enter the URL or email value
+* Add a custom platform name only when platform is `custom`
+* Upload a custom icon only when platform is `custom`
+* Save all items safely
+
+Known platforms should ask only for:
+
+* Platform
+* URL or email value
+* Open in new tab setting, optional
+
+Known platforms should not ask for custom labels.
+
+The visible label should come from the selected platform.
+
+Custom platforms should ask for:
+
+* Platform set to `custom`
+* Custom platform name
+* URL
+* Optional custom icon upload
+* Open in new tab setting, optional
+
+Supported platform dropdown values:
+
+```text id="h04f7r"
+facebook
+instagram
+linkedin
+x
+youtube
+github
+tiktok
+threads
+website
+email
+custom
+```
+
+Default labels:
+
+```php id="eyvbz2"
+[
+    'facebook' => 'Facebook',
+    'instagram' => 'Instagram',
+    'linkedin' => 'LinkedIn',
+    'x' => 'X',
+    'youtube' => 'YouTube',
+    'github' => 'GitHub',
+    'tiktok' => 'TikTok',
+    'threads' => 'Threads',
+    'website' => 'Website',
+    'email' => 'Email',
+    'custom' => 'Link',
+]
+```
+
+### Social Link Saved Data Shape
+
+Use a simple array shape for saved social links.
+
+Recommended shape:
+
+```php id="2j36le"
+[
+    [
+        'platform' => 'instagram',
+        'url' => 'https://instagram.com/example',
+        'custom_name' => '',
+        'custom_icon_id' => 0,
+        'open_new_tab' => true,
+    ],
+    [
+        'platform' => 'custom',
+        'url' => 'https://example.com/community',
+        'custom_name' => 'Community',
+        'custom_icon_id' => 123,
+        'open_new_tab' => true,
+    ],
+]
+```
+
+Sanitize every item before saving.
+
+Sanitization rules:
+
+* Platform must exist in the allowlist
+* URL must be valid for normal platforms
+* Email platform must accept a valid email or safe `mailto:` URL
+* Custom name must be sanitized as text
+* Custom icon ID must be a positive integer attachment ID
+* Open in new tab must be normalized to boolean
+* Empty or invalid rows should be removed
+
+### Custom Social Icon Upload
+
+For custom social platforms, add an optional icon upload using the WordPress media library.
+
+Preferred safe file types:
+
+```text id="b8ua5b"
+png
+jpg
+jpeg
+webp
+```
+
+Do not allow raw SVG uploads unless the project already has safe SVG sanitization.
+
+If SVG support is added, it must be sanitized before rendering.
+
+Implementation rules:
+
+* Store the icon as an attachment ID
+* Resolve the attachment URL during rendering
+* Escape the resolved URL
+* Use the custom platform name as alt text
+* Fall back to `Link` as alt text when custom name is empty
+* Do not store raw image markup
+* Do not render raw user-provided SVG or HTML
+* Do not render broken image URLs
+
+### Social Icon Rendering
+
+Make sure social icons stay fully visible and aligned.
+
+Use consistent sizing for all known and custom icons.
+
+Required frontend behavior:
+
+* Icons have fixed width and height
+* Icons use `object-fit: contain`
+* Icons do not crop
+* Icons do not stretch
+* Icons do not overflow their container
+* Text remains aligned with icons
+* Social links wrap on mobile
+* Social section does not create horizontal overflow
+
+Add or adapt CSS similar to:
+
+```css id="rbr2zc"
+.mm-social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.mm-social-link {
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+}
+
+.mm-social-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.mm-social-icon img,
+.mm-social-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+}
+```
+
+### Social Links Frontend Rendering Rules
+
+Update the social links component rendering rules:
+
+* Render social links from the saved repeater array
+* Use automatic labels for known platforms
+* Use custom platform name only for `custom`
+* Use internal allowlisted icons for known platforms
+* Use uploaded icon only for `custom`
+* Fall back to a generic link icon when custom icon is missing
+* Skip missing platforms
+* Skip unsupported platforms
+* Skip invalid URLs
+* Skip invalid email values
+* Escape labels
+* Escape URLs
+* Escape image URLs
+* Escape alt text
+* Add `rel="noopener noreferrer"` when opening in a new tab
+* Do not render raw custom SVG or HTML from settings
+
+### Additional Testing Checklist
+
+After implementation, verify:
+
+* Settings are divided into tabs
+* The settings save flow still works
+* The active tab remains usable after saving
+* `Add new social` adds a new item
+* Remove deletes a social item
+* Platform dropdown works
+* Known platforms ask only for platform and URL/email value
+* Custom platform shows custom name and icon upload fields
+* Custom icon uploads through the WordPress media library
+* Saved social links sanitize correctly
+* Invalid social rows are removed or skipped
+* Known platform labels render automatically
+* Custom platform names render safely
+* Known platform icons render correctly
+* Custom uploaded icons render correctly
+* Missing custom icons fall back safely
+* Icons remain fully visible
+* Icons do not stretch or crop
+* Social links wrap on mobile
+* Social links do not create horizontal overflow
