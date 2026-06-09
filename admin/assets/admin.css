@@ -1,0 +1,16 @@
+.mmsm-settings-page .mmsm-settings-intro {
+	max-width: 64ch;
+	margin-bottom: 1rem;
+}
+
+.mmsm-settings-page .form-table th {
+	width: 220px;
+}
+
+.mmsm-settings-page .form-table td p.description {
+	max-width: 64ch;
+}
+
+.mmsm-settings-page .mmsm-color-field {
+	max-width: 120px;
+}

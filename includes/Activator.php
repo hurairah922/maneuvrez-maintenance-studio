@@ -7,6 +7,8 @@
 
 namespace Maneuvrez\MaintenanceModeStudio;
 
+use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -19,15 +21,13 @@ class Activator {
 	 * @return void
 	 */
 	public static function activate() {
-		$settings = get_option( MMSM_SETTINGS_OPTION, array() );
+		$settings = get_option( MMSM_SETTINGS_OPTION, false );
 
-		if ( ! is_array( $settings ) || ! array_key_exists( 'enabled', $settings ) ) {
-			add_option(
-				MMSM_SETTINGS_OPTION,
-				array(
-					'enabled' => 0,
-				)
-			);
+		if ( false === $settings ) {
+			$legacy_settings = get_option( MMSM_LEGACY_SETTINGS_OPTION, array() );
+			add_option( MMSM_SETTINGS_OPTION, Sanitizer::get_settings( $legacy_settings ) );
+		} else {
+			update_option( MMSM_SETTINGS_OPTION, Sanitizer::get_settings( $settings ) );
 		}
 
 		update_option( MMSM_VERSION_OPTION, MMSM_VERSION );

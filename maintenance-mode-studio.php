@@ -44,7 +44,11 @@ if ( ! defined( 'MMSM_TEXT_DOMAIN' ) ) {
 }
 
 if ( ! defined( 'MMSM_SETTINGS_OPTION' ) ) {
-	define( 'MMSM_SETTINGS_OPTION', 'mmsm_settings' );
+	define( 'MMSM_SETTINGS_OPTION', 'maintenance_mode_settings' );
+}
+
+if ( ! defined( 'MMSM_LEGACY_SETTINGS_OPTION' ) ) {
+	define( 'MMSM_LEGACY_SETTINGS_OPTION', 'mmsm_settings' );
 }
 
 if ( ! defined( 'MMSM_VERSION_OPTION' ) ) {

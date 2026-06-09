@@ -7,6 +7,8 @@
 
 namespace Maneuvrez\MaintenanceModeStudio\Frontend;
 
+use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -44,26 +46,32 @@ class MaintenanceRouter {
 	 * @return void
 	 */
 	public function maybe_render_maintenance_page() {
-		if ( ! $this->is_enabled() || $this->should_bypass() ) {
+		$settings = $this->get_settings();
+
+		if ( ! $this->is_enabled( $settings ) || $this->should_bypass() ) {
 			return;
 		}
 
-		status_header( 503 );
-		nocache_headers();
-		header( 'Retry-After: 600' );
+		if ( 'maintenance' === $settings['mode_type'] ) {
+			status_header( 503 );
+			header( 'Retry-After: 600' );
+		} else {
+			status_header( 200 );
+		}
 
-		$this->renderer->render();
+		nocache_headers();
+		$this->enqueue_assets();
+		$this->renderer->render( $settings );
 		exit;
 	}
 
 	/**
 	 * Determine whether maintenance mode is enabled.
 	 *
+	 * @param array<string,int|string> $settings Sanitized settings.
 	 * @return bool
 	 */
-	private function is_enabled() {
-		$settings = get_option( MMSM_SETTINGS_OPTION, array() );
-
+	private function is_enabled( array $settings ) {
 		return ! empty( $settings['enabled'] );
 	}
 
@@ -116,5 +124,38 @@ class MaintenanceRouter {
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
 		return '' !== $request_uri && false !== strpos( $request_uri, '/' . $rest_prefix );
+	}
+
+	/**
+	 * Register and enqueue public assets only when the maintenance template renders.
+	 *
+	 * @return void
+	 */
+	private function enqueue_assets() {
+		wp_enqueue_style(
+			'mmsm-public',
+			MMSM_PLUGIN_URL . 'public/assets/public.css',
+			array(),
+			MMSM_VERSION
+		);
+
+		wp_enqueue_script(
+			'mmsm-public',
+			MMSM_PLUGIN_URL . 'public/assets/public.js',
+			array(),
+			MMSM_VERSION,
+			false
+		);
+
+		wp_script_add_data( 'mmsm-public', 'defer', true );
+	}
+
+	/**
+	 * Load the merged settings for frontend use.
+	 *
+	 * @return array<string,int|string>
+	 */
+	private function get_settings() {
+		return Sanitizer::get_settings( get_option( MMSM_SETTINGS_OPTION, array() ) );
 	}
 }

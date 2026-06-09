@@ -16,10 +16,14 @@ defined( 'ABSPATH' ) || exit;
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title><?php echo esc_html( $context['title'] ); ?></title>
 	<meta name="robots" content="noindex,nofollow" />
-	<link rel="stylesheet" href="<?php echo esc_url( $context['styles_url'] ); ?>" />
+	<?php wp_print_styles( array( $context['styles_handle'] ) ); ?>
 </head>
 <body class="mmsm-maintenance-page">
-	<main class="mmsm-shell" aria-labelledby="mmsm-title">
+	<main
+		class="<?php echo esc_attr( $context['wrapper_class'] ); ?>"
+		style="<?php echo esc_attr( $context['wrapper_style'] ); ?>"
+		aria-labelledby="mmsm-title"
+	>
 		<section class="mmsm-card">
 			<p class="mmsm-badge"><?php echo esc_html( $context['status'] ); ?></p>
 			<h1 id="mmsm-title"><?php echo esc_html( $context['title'] ); ?></h1>
@@ -31,17 +35,19 @@ defined( 'ABSPATH' ) || exit;
 				<div class="mmsm-orb-ring mmsm-orb-ring-two"></div>
 			</div>
 
-			<div class="mmsm-actions">
-				<a class="mmsm-button" href="<?php echo esc_url( $context['login_url'] ); ?>">
-					<?php echo esc_html__( 'Log in', MMSM_TEXT_DOMAIN ); ?>
-				</a>
-			</div>
+			<?php if ( ! empty( $context['show_login_button'] ) ) : ?>
+				<div class="mmsm-actions">
+					<a class="mmsm-button" href="<?php echo esc_url( $context['login_url'] ); ?>">
+						<?php echo esc_html__( 'Log in', MMSM_TEXT_DOMAIN ); ?>
+					</a>
+				</div>
+			<?php endif; ?>
 		</section>
 
 		<footer class="mmsm-footer">
 			<span><?php echo esc_html( $context['site_name'] ); ?></span>
 		</footer>
 	</main>
-	<script src="<?php echo esc_url( $context['script_url'] ); ?>" defer></script>
+	<?php wp_print_scripts( array( $context['script_handle'] ) ); ?>
 </body>
 </html>
