@@ -31,7 +31,7 @@ class ContactRevealComponent implements ComponentInterface {
 	 * {@inheritDoc}
 	 */
 	public function get_supported_zones() {
-		return array( 'main' );
+		return array( 'main', 'footer' );
 	}
 
 	/**

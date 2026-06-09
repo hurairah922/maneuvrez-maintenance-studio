@@ -26,11 +26,19 @@ class TemplateRegistry {
 				'description' => __( 'A polished maintenance page with reusable status, contact, social, and login sections.', MMSM_TEXT_DOMAIN ),
 				'file'        => MMSM_PLUGIN_PATH . 'templates/public/default.php',
 				'zones'       => array( 'main', 'footer' ),
-				'assets'      => array(
-					'styles'  => array( 'mmsm-public-template-default' ),
-					'scripts' => array( 'mmsm-public-template-default' ),
-				),
-				'layout'      => array(
+					'assets'      => array(
+						'styles'  => array( 'mmsm-public-template-default' ),
+						'scripts' => array( 'mmsm-public-template-default' ),
+					),
+					'asset_sources' => array(
+						'styles'  => array(
+							'mmsm-public-template-default' => 'assets/css/public-template-default.css',
+						),
+						'scripts' => array(
+							'mmsm-public-template-default' => 'assets/js/public-template-default.js',
+						),
+					),
+					'layout'      => array(
 					'main'   => array( 'hero', 'status_progress', 'contact_reveal' ),
 					'footer' => array( 'social_links', 'login' ),
 				),

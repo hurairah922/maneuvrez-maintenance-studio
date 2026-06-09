@@ -290,6 +290,209 @@ dark
 system
 ```
 
+### Color Picker Fields
+
+Add color picker support for editable color settings.
+
+The admin settings should use WordPress-compatible color picker fields instead of plain text fields for color values.
+
+Color fields should include:
+
+* Background color
+* Surface/card color
+* Primary/accent color
+* Heading text color
+* Body text color
+* Muted text color
+* Link text color
+* Button text color
+* Border color
+
+Implementation rules:
+
+* Save only sanitized hex color values
+* Accept only values like `#000000`
+* Reject unsupported color formats
+* Fall back to safe defaults when a color is missing or invalid
+* Do not allow arbitrary CSS values
+* Do not allow raw CSS variables
+* Do not allow gradients
+* Do not allow JavaScript or malformed values
+
+Use WordPress sanitization helpers where possible.
+
+Expected sanitization behavior:
+
+```php
+sanitize_hex_color( $value )
+```
+
+If `sanitize_hex_color()` returns empty or invalid output, use the default color for that role.
+
+### Dark Mode Readability Fix
+
+Fix low-contrast text in dark mode.
+
+All public text must remain readable in light, dark, and system theme modes.
+
+Add or update these CSS variables:
+
+```css
+--mm-heading-text;
+--mm-body-text;
+--mm-muted-text;
+--mm-link-text;
+--mm-button-text;
+```
+
+Use these variables across the template and components.
+
+Do not hardcode component text colors.
+
+Required text roles to check:
+
+* Hero heading
+* Hero message
+* Eyebrow text
+* Status label
+* Progress value text
+* Contact label
+* Contact message
+* Social link labels
+* Login link label
+* Button text
+* Footer text
+* Empty-state text
+
+Suggested default light theme values:
+
+```css
+--mm-bg: #f8fafc;
+--mm-surface: #ffffff;
+--mm-heading-text: #0f172a;
+--mm-body-text: #334155;
+--mm-muted-text: #64748b;
+--mm-link-text: #2563eb;
+--mm-primary: #2563eb;
+--mm-button-text: #ffffff;
+--mm-border: #e2e8f0;
+```
+
+Suggested default dark theme values:
+
+```css
+--mm-bg: #020617;
+--mm-surface: #0f172a;
+--mm-heading-text: #f8fafc;
+--mm-body-text: #cbd5e1;
+--mm-muted-text: #94a3b8;
+--mm-link-text: #93c5fd;
+--mm-primary: #60a5fa;
+--mm-button-text: #020617;
+--mm-border: #334155;
+```
+
+Dark mode must not reuse low-contrast light mode text colors.
+
+If custom colors are missing or invalid, fall back to the theme defaults.
+
+### Social Icon and Label Choices
+
+Update the social links component so each social link item supports icon/platform selection and custom labels.
+
+Each social link item should support:
+
+* Platform key
+* Custom label
+* URL
+* Open in new tab setting, optional
+
+Initial platform keys:
+
+```text
+facebook
+instagram
+linkedin
+x
+youtube
+github
+tiktok
+threads
+website
+email
+custom
+```
+
+Default labels:
+
+```php
+[
+    'facebook' => 'Facebook',
+    'instagram' => 'Instagram',
+    'linkedin' => 'LinkedIn',
+    'x' => 'X',
+    'youtube' => 'YouTube',
+    'github' => 'GitHub',
+    'tiktok' => 'TikTok',
+    'threads' => 'Threads',
+    'website' => 'Website',
+    'email' => 'Email',
+    'custom' => 'Link',
+]
+```
+
+Rendering rules:
+
+* Render the selected platform icon when available
+* Render a generic link icon for `custom`
+* Render a generic website icon for `website`
+* Render a mail icon for `email`
+* Use the custom label when provided
+* Use the default platform label when the custom label is empty
+* Skip the item if the URL is missing or invalid
+* Skip the item if the platform key is unsupported
+* Escape labels
+* Escape URLs
+* Do not render raw user-provided SVG or HTML
+
+Icon implementation rules:
+
+* Use a controlled internal icon allowlist
+* Prefer lightweight inline SVG from internal code
+* Do not load a large third-party icon library
+* Do not allow user-submitted icon markup
+* Provide text fallback if the icon cannot render
+
+For email social links:
+
+* Accept a valid email address and convert it to a safe `mailto:` URL
+* Accept a safe `mailto:` URL
+* Reject malformed email values
+* Escape the final URL before rendering
+
+### Additional Testing Checklist
+
+After implementation, verify:
+
+* Color settings use color picker UI
+* Hex color values save correctly
+* Invalid color values fall back safely
+* Light mode text is readable
+* Dark mode text is readable
+* System mode text is readable
+* Hero text uses theme text variables
+* Contact text uses theme text variables
+* Social labels use theme text variables
+* Login link uses theme text variables
+* Button text remains readable against the selected primary color
+* Social platform choices render the correct icons
+* Custom social labels render correctly
+* Empty social labels fall back to platform labels
+* Invalid social URLs are skipped
+* Unsupported social platform keys are skipped
+* No raw SVG or HTML from settings is rendered
+
+
 ### 11. Responsive Shell
 
 Create a polished responsive shell.

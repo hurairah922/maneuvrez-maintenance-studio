@@ -3,7 +3,7 @@
  * Plugin Name: Maintenance Mode Studio
  * Plugin URI: https://abuhurarrah.com/plugins/maintenance-mode-studio
  * Description: Create interactive maintenance, coming soon, launch, and private site pages with games, forms, contact options, social links, login access, and modern responsive animations.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Author: Abu Hurarrah
  * Author URI: https://abuhurarrah.com
  * Text Domain: maintenance-mode-studio
@@ -20,7 +20,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'MMSM_VERSION' ) ) {
-	define( 'MMSM_VERSION', '0.1.0' );
+	define( 'MMSM_VERSION', '0.1.1' );
 }
 
 if ( ! defined( 'MMSM_PLUGIN_FILE' ) ) {

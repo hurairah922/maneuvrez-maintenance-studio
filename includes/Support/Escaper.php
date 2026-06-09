@@ -70,4 +70,32 @@ class Escaper {
 
 		return $url;
 	}
+
+	/**
+	 * Return a validated mailto URL or an empty string.
+	 *
+	 * @param string $value Raw value.
+	 * @return string
+	 */
+	public static function email_url( $value ) {
+		$value = trim( (string) $value );
+
+		if ( '' === $value ) {
+			return '';
+		}
+
+		if ( 0 === strpos( strtolower( $value ), 'mailto:' ) ) {
+			$email = trim( substr( $value, 7 ) );
+		} else {
+			$email = $value;
+		}
+
+		$email = sanitize_email( $email );
+
+		if ( ! is_email( $email ) ) {
+			return '';
+		}
+
+		return 'mailto:' . $email;
+	}
 }

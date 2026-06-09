@@ -267,6 +267,144 @@ Check that the page does not break when:
 * Email is invalid
 * Progress is invalid
 
+### Color Picker and Theme Readability Review
+
+Check that editable color settings use proper color picker fields.
+
+The implementation should not require users to manually type color values into plain text inputs.
+
+Review that:
+
+* Background color uses a color picker
+* Surface/card color uses a color picker
+* Primary/accent color uses a color picker
+* Heading text color uses a color picker
+* Body text color uses a color picker
+* Muted text color uses a color picker
+* Link text color uses a color picker
+* Button text color uses a color picker
+* Border color uses a color picker
+
+Check sanitization:
+
+* Only valid hex colors are saved
+* Invalid color values fall back safely
+* Arbitrary CSS values are rejected
+* Gradients are rejected
+* Raw CSS variables are rejected
+* Malformed values do not reach public output
+
+Expected sanitizer:
+
+```php
+sanitize_hex_color()
+```
+
+Check dark mode readability carefully.
+
+The following text must be clearly readable in dark mode:
+
+* Hero heading
+* Hero message
+* Eyebrow text
+* Status label
+* Progress text
+* Contact label
+* Contact message
+* Social labels
+* Login link
+* Button text
+* Footer text
+
+Required text color variables:
+
+```css
+--mm-heading-text;
+--mm-body-text;
+--mm-muted-text;
+--mm-link-text;
+--mm-button-text;
+```
+
+Flag any hardcoded color that causes unreadable text in dark mode.
+
+Flag any component that bypasses theme variables.
+
+### Social Icon and Label Review
+
+Check that the social links component allows both icon/platform choice and label choice.
+
+Each social link item should support:
+
+* Platform/icon choice
+* Custom label
+* URL
+* Optional open in new tab setting
+
+Supported platforms should include:
+
+```text
+facebook
+instagram
+linkedin
+x
+youtube
+github
+tiktok
+threads
+website
+email
+custom
+```
+
+Review that:
+
+* Known platforms render matching icons
+* `custom` renders a generic link icon
+* `website` renders a generic website/link icon
+* `email` renders a mail icon
+* Custom labels display when provided
+* Empty custom labels fall back to default platform labels
+* Empty or invalid URLs are skipped
+* Unsupported platform keys are skipped
+* Labels are escaped
+* URLs are escaped
+* User-provided raw SVG or HTML is not rendered
+* No large third-party icon library is added unnecessarily
+
+For email links, check that:
+
+* Valid email addresses become safe `mailto:` links
+* Safe `mailto:` URLs work
+* Invalid email values are rejected
+* Malformed `mailto:` links are skipped
+
+### Updated Scope Check Rows
+
+Add these rows to the scope check table:
+
+```markdown
+| Color picker fields | Pass/Fail/Partial | Notes |
+| Hex color sanitization | Pass/Fail/Partial | Notes |
+| Dark mode text readability | Pass/Fail/Partial | Notes |
+| Theme text color variables | Pass/Fail/Partial | Notes |
+| Social icon choices | Pass/Fail/Partial | Notes |
+| Social custom labels | Pass/Fail/Partial | Notes |
+```
+
+### Additional High-Priority Issues To Flag
+
+Flag as high priority if:
+
+* Dark mode text is hard to read
+* Public text color uses unsafe raw setting values
+* Color settings accept arbitrary CSS
+* Invalid color values break public styles
+* Social icons render raw user-provided SVG or HTML
+* Social links render invalid URLs
+* Email social links expose broken `mailto:` links
+
+
 ## Output Format
 
 Return the review using this structure:

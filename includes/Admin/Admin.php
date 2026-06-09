@@ -7,6 +7,7 @@
 
 namespace Maneuvrez\MaintenanceModeStudio\Admin;
 
+use Maneuvrez\MaintenanceModeStudio\Components\SocialLinksComponent;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 
@@ -173,6 +174,70 @@ class Admin {
 			'mmsm_appearance_section'
 		);
 
+		add_settings_field(
+			'mmsm_background_color',
+			__( 'Background Color', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_background_color_field' ),
+			$this->page_slug,
+			'mmsm_appearance_section'
+		);
+
+		add_settings_field(
+			'mmsm_surface_color',
+			__( 'Surface Color', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_surface_color_field' ),
+			$this->page_slug,
+			'mmsm_appearance_section'
+		);
+
+		add_settings_field(
+			'mmsm_heading_text_color',
+			__( 'Heading Text Color', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_heading_text_color_field' ),
+			$this->page_slug,
+			'mmsm_appearance_section'
+		);
+
+		add_settings_field(
+			'mmsm_body_text_color',
+			__( 'Body Text Color', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_body_text_color_field' ),
+			$this->page_slug,
+			'mmsm_appearance_section'
+		);
+
+		add_settings_field(
+			'mmsm_muted_text_color',
+			__( 'Muted Text Color', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_muted_text_color_field' ),
+			$this->page_slug,
+			'mmsm_appearance_section'
+		);
+
+		add_settings_field(
+			'mmsm_link_text_color',
+			__( 'Link Text Color', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_link_text_color_field' ),
+			$this->page_slug,
+			'mmsm_appearance_section'
+		);
+
+		add_settings_field(
+			'mmsm_button_text_color',
+			__( 'Button Text Color', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_button_text_color_field' ),
+			$this->page_slug,
+			'mmsm_appearance_section'
+		);
+
+		add_settings_field(
+			'mmsm_border_color',
+			__( 'Border Color', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_border_color_field' ),
+			$this->page_slug,
+			'mmsm_appearance_section'
+		);
+
 		add_settings_section(
 			'mmsm_components_section',
 			__( 'Components', MMSM_TEXT_DOMAIN ),
@@ -276,37 +341,18 @@ class Admin {
 			'mmsm_components_section'
 		);
 
-		add_settings_field(
-			'mmsm_social_x_url',
-			__( 'X URL', MMSM_TEXT_DOMAIN ),
-			array( $this, 'render_social_x_url_field' ),
-			$this->page_slug,
-			'mmsm_components_section'
-		);
-
-		add_settings_field(
-			'mmsm_social_instagram_url',
-			__( 'Instagram URL', MMSM_TEXT_DOMAIN ),
-			array( $this, 'render_social_instagram_url_field' ),
-			$this->page_slug,
-			'mmsm_components_section'
-		);
-
-		add_settings_field(
-			'mmsm_social_facebook_url',
-			__( 'Facebook URL', MMSM_TEXT_DOMAIN ),
-			array( $this, 'render_social_facebook_url_field' ),
-			$this->page_slug,
-			'mmsm_components_section'
-		);
-
-		add_settings_field(
-			'mmsm_social_linkedin_url',
-			__( 'LinkedIn URL', MMSM_TEXT_DOMAIN ),
-			array( $this, 'render_social_linkedin_url_field' ),
-			$this->page_slug,
-			'mmsm_components_section'
-		);
+		for ( $index = 1; $index <= 4; $index++ ) {
+			add_settings_field(
+				'mmsm_social_item_' . $index,
+				sprintf( __( 'Social Item %d', MMSM_TEXT_DOMAIN ), $index ),
+				array( $this, 'render_social_item_field' ),
+				$this->page_slug,
+				'mmsm_components_section',
+				array(
+					'index' => $index,
+				)
+			);
+		}
 	}
 
 	/**
@@ -355,6 +401,16 @@ class Admin {
 			array(),
 			MMSM_VERSION
 		);
+
+		wp_enqueue_style( 'wp-color-picker' );
+
+		wp_enqueue_script(
+			'mmsm-admin-settings-script',
+			MMSM_PLUGIN_URL . 'admin/assets/admin.js',
+			array( 'jquery', 'wp-color-picker' ),
+			MMSM_VERSION,
+			true
+		);
 	}
 
 	/**
@@ -389,7 +445,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_appearance_section() {
-		echo '<p>' . esc_html__( 'Choose the template shell and visual theme used for the public maintenance page.', MMSM_TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Choose the template shell, theme mode, and safe color roles used for the public maintenance page.', MMSM_TEXT_DOMAIN ) . '</p>';
 	}
 
 	/**
@@ -548,18 +604,115 @@ class Admin {
 	 * @return void
 	 */
 	public function render_primary_color_field() {
-		$settings = $this->get_settings();
-		?>
-		<input
-			type="text"
-			class="regular-text code mmsm-color-field"
-			id="mmsm-primary-color"
-			name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[primary_color]"
-			value="<?php echo esc_attr( $settings['primary_color'] ); ?>"
-			placeholder="#2563eb"
-		/>
-		<p class="description"><?php echo esc_html__( 'Use a hex color value such as #2563eb.', MMSM_TEXT_DOMAIN ); ?></p>
-		<?php
+		$this->render_color_picker_input(
+			'primary_color',
+			'mmsm-primary-color',
+			__( 'Accent color used for buttons, focus accents, and status styling.', MMSM_TEXT_DOMAIN )
+		);
+	}
+
+	/**
+	 * Render the background color field.
+	 *
+	 * @return void
+	 */
+	public function render_background_color_field() {
+		$this->render_color_picker_input(
+			'background_color',
+			'mmsm-background-color',
+			__( 'Page background color. Invalid values fall back to the theme default.', MMSM_TEXT_DOMAIN )
+		);
+	}
+
+	/**
+	 * Render the surface color field.
+	 *
+	 * @return void
+	 */
+	public function render_surface_color_field() {
+		$this->render_color_picker_input(
+			'surface_color',
+			'mmsm-surface-color',
+			__( 'Card and panel surface color.', MMSM_TEXT_DOMAIN )
+		);
+	}
+
+	/**
+	 * Render the heading text color field.
+	 *
+	 * @return void
+	 */
+	public function render_heading_text_color_field() {
+		$this->render_color_picker_input(
+			'heading_text_color',
+			'mmsm-heading-text-color',
+			__( 'Main heading and section title color.', MMSM_TEXT_DOMAIN )
+		);
+	}
+
+	/**
+	 * Render the body text color field.
+	 *
+	 * @return void
+	 */
+	public function render_body_text_color_field() {
+		$this->render_color_picker_input(
+			'body_text_color',
+			'mmsm-body-text-color',
+			__( 'Primary body copy color for messages and descriptions.', MMSM_TEXT_DOMAIN )
+		);
+	}
+
+	/**
+	 * Render the muted text color field.
+	 *
+	 * @return void
+	 */
+	public function render_muted_text_color_field() {
+		$this->render_color_picker_input(
+			'muted_text_color',
+			'mmsm-muted-text-color',
+			__( 'Secondary copy color for quieter supporting text.', MMSM_TEXT_DOMAIN )
+		);
+	}
+
+	/**
+	 * Render the link text color field.
+	 *
+	 * @return void
+	 */
+	public function render_link_text_color_field() {
+		$this->render_color_picker_input(
+			'link_text_color',
+			'mmsm-link-text-color',
+			__( 'Link and social label color.', MMSM_TEXT_DOMAIN )
+		);
+	}
+
+	/**
+	 * Render the button text color field.
+	 *
+	 * @return void
+	 */
+	public function render_button_text_color_field() {
+		$this->render_color_picker_input(
+			'button_text_color',
+			'mmsm-button-text-color',
+			__( 'Text color shown on primary buttons.', MMSM_TEXT_DOMAIN )
+		);
+	}
+
+	/**
+	 * Render the border color field.
+	 *
+	 * @return void
+	 */
+	public function render_border_color_field() {
+		$this->render_color_picker_input(
+			'border_color',
+			'mmsm-border-color',
+			__( 'Border color for cards, pills, and link chips.', MMSM_TEXT_DOMAIN )
+		);
 	}
 
 	/**
@@ -743,55 +896,71 @@ class Admin {
 	}
 
 	/**
-	 * Render the X social URL field.
+	 * Render one grouped social item field.
 	 *
+	 * @param array<string,mixed> $args Field arguments.
 	 * @return void
 	 */
-	public function render_social_x_url_field() {
-		$this->render_url_input(
-			'social_x_url',
-			'mmsm-social-x-url',
-			__( 'Optional full URL for your X profile.', MMSM_TEXT_DOMAIN )
-		);
-	}
-
-	/**
-	 * Render the Instagram social URL field.
-	 *
-	 * @return void
-	 */
-	public function render_social_instagram_url_field() {
-		$this->render_url_input(
-			'social_instagram_url',
-			'mmsm-social-instagram-url',
-			__( 'Optional full URL for your Instagram profile.', MMSM_TEXT_DOMAIN )
-		);
-	}
-
-	/**
-	 * Render the Facebook social URL field.
-	 *
-	 * @return void
-	 */
-	public function render_social_facebook_url_field() {
-		$this->render_url_input(
-			'social_facebook_url',
-			'mmsm-social-facebook-url',
-			__( 'Optional full URL for your Facebook page.', MMSM_TEXT_DOMAIN )
-		);
-	}
-
-	/**
-	 * Render the LinkedIn social URL field.
-	 *
-	 * @return void
-	 */
-	public function render_social_linkedin_url_field() {
-		$this->render_url_input(
-			'social_linkedin_url',
-			'mmsm-social-linkedin-url',
-			__( 'Optional full URL for your LinkedIn page.', MMSM_TEXT_DOMAIN )
-		);
+	public function render_social_item_field( $args ) {
+		$index     = isset( $args['index'] ) ? (int) $args['index'] : 1;
+		$settings  = $this->get_settings();
+		$platforms = SocialLinksComponent::get_platform_labels();
+		$platform  = isset( $settings[ 'social_item_' . $index . '_platform' ] ) ? (string) $settings[ 'social_item_' . $index . '_platform' ] : '';
+		$label     = isset( $settings[ 'social_item_' . $index . '_label' ] ) ? (string) $settings[ 'social_item_' . $index . '_label' ] : '';
+		$url       = isset( $settings[ 'social_item_' . $index . '_url' ] ) ? (string) $settings[ 'social_item_' . $index . '_url' ] : '';
+		$new_tab   = ! empty( $settings[ 'social_item_' . $index . '_new_tab' ] );
+		?>
+		<div class="mmsm-social-item-group">
+			<p>
+				<label for="mmsm-social-item-<?php echo esc_attr( (string) $index ); ?>-platform"><?php echo esc_html__( 'Platform', MMSM_TEXT_DOMAIN ); ?></label><br />
+				<select
+					id="mmsm-social-item-<?php echo esc_attr( (string) $index ); ?>-platform"
+					name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_item_<?php echo esc_attr( (string) $index ); ?>_platform]"
+				>
+					<option value=""><?php echo esc_html__( 'Select a platform', MMSM_TEXT_DOMAIN ); ?></option>
+					<?php foreach ( $platforms as $platform_key => $platform_label ) : ?>
+						<option value="<?php echo esc_attr( $platform_key ); ?>" <?php selected( $platform, $platform_key ); ?>>
+							<?php echo esc_html( $platform_label ); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+			</p>
+			<p>
+				<label for="mmsm-social-item-<?php echo esc_attr( (string) $index ); ?>-label"><?php echo esc_html__( 'Custom Label', MMSM_TEXT_DOMAIN ); ?></label><br />
+				<input
+					type="text"
+					class="regular-text"
+					id="mmsm-social-item-<?php echo esc_attr( (string) $index ); ?>-label"
+					name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_item_<?php echo esc_attr( (string) $index ); ?>_label]"
+					value="<?php echo esc_attr( $label ); ?>"
+				/>
+			</p>
+			<p>
+				<label for="mmsm-social-item-<?php echo esc_attr( (string) $index ); ?>-url"><?php echo esc_html__( 'URL or Email', MMSM_TEXT_DOMAIN ); ?></label><br />
+				<input
+					type="text"
+					class="regular-text code"
+					id="mmsm-social-item-<?php echo esc_attr( (string) $index ); ?>-url"
+					name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_item_<?php echo esc_attr( (string) $index ); ?>_url]"
+					value="<?php echo esc_attr( $url ); ?>"
+					placeholder="https://example.com or hello@example.com"
+				/>
+			</p>
+			<p>
+				<label for="mmsm-social-item-<?php echo esc_attr( (string) $index ); ?>-new-tab">
+					<input
+						type="checkbox"
+						id="mmsm-social-item-<?php echo esc_attr( (string) $index ); ?>-new-tab"
+						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_item_<?php echo esc_attr( (string) $index ); ?>_new_tab]"
+						value="1"
+						<?php checked( $new_tab ); ?>
+					/>
+					<?php echo esc_html__( 'Open in a new tab when supported.', MMSM_TEXT_DOMAIN ); ?>
+				</label>
+			</p>
+			<p class="description"><?php echo esc_html__( 'Use email addresses or mailto: links for the email platform. Unsupported platforms or invalid values are skipped safely.', MMSM_TEXT_DOMAIN ); ?></p>
+		</div>
+		<?php
 	}
 
 	/**
@@ -843,6 +1012,29 @@ class Admin {
 			name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[<?php echo esc_attr( $key ); ?>]"
 			value="<?php echo esc_attr( (string) $settings[ $key ] ); ?>"
 			placeholder="https://"
+		/>
+		<p class="description"><?php echo esc_html( $description ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render a WordPress color picker input.
+	 *
+	 * @param string $key Field key.
+	 * @param string $id Input id.
+	 * @param string $description Help text.
+	 * @return void
+	 */
+	private function render_color_picker_input( $key, $id, $description ) {
+		$settings = $this->get_settings();
+		?>
+		<input
+			type="text"
+			class="mmsm-color-picker"
+			id="<?php echo esc_attr( $id ); ?>"
+			name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[<?php echo esc_attr( $key ); ?>]"
+			value="<?php echo esc_attr( (string) $settings[ $key ] ); ?>"
+			data-default-color="<?php echo esc_attr( (string) Sanitizer::get_default_settings()[ $key ] ); ?>"
 		/>
 		<p class="description"><?php echo esc_html( $description ); ?></p>
 		<?php

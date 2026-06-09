@@ -11,6 +11,21 @@
 	max-width: 64ch;
 }
 
-.mmsm-settings-page .mmsm-color-field {
+.mmsm-settings-page .mmsm-color-picker {
 	max-width: 120px;
+}
+
+.mmsm-settings-page .mmsm-social-item-group {
+	max-width: 520px;
+	padding: 12px 0;
+	border-top: 1px solid #dcdcde;
+}
+
+.mmsm-settings-page .mmsm-social-item-group:first-child {
+	padding-top: 0;
+	border-top: 0;
+}
+
+.mmsm-settings-page .mmsm-social-item-group p {
+	margin: 0 0 10px;
 }

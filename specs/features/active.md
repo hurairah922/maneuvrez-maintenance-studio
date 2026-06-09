@@ -305,6 +305,228 @@ The renderer should expose theme settings as safe class names and CSS variables.
 
 Do not output untrusted CSS without validation.
 
+## Color Picker and Readability Controls
+
+Phase 3 must use proper color picker fields for all editable color values in the admin settings.
+
+The admin settings should not require users to manually type hex color values.
+
+Color settings should include:
+
+* Background color
+* Surface/card color
+* Primary/accent color
+* Heading text color
+* Body text color
+* Muted text color
+* Button text color
+* Border color
+
+Each color field should:
+
+* Use a WordPress-compatible color picker UI
+* Save a sanitized hex color value
+* Fall back to a safe default if the value is missing or invalid
+* Avoid saving arbitrary CSS strings
+* Avoid allowing unsafe values such as gradients, raw CSS, JavaScript, or malformed color values
+
+Accepted color format for Phase 3:
+
+```text
+#000000
+```
+
+Do not allow unsupported color formats in saved settings during this phase.
+
+Examples of unsupported values:
+
+```text
+rgb(0,0,0)
+var(--custom-color)
+linear-gradient(...)
+red
+inherit
+```
+
+## Light and Dark Theme Color Constraints
+
+Phase 3 must include readable text color constraints for light and dark modes.
+
+The dark theme currently risks low-contrast text in some areas.
+
+The implementation must make sure all public text remains easy to read in both light and dark modes.
+
+Required readable text roles:
+
+* Page heading
+* Body message
+* Muted/secondary text
+* Status text
+* Contact text
+* Social link labels
+* Login link label
+* Button text
+* Progress/status label
+
+The renderer and CSS should use theme-specific color variables instead of hardcoded text colors.
+
+Required text variables:
+
+```css
+--mm-heading-text;
+--mm-body-text;
+--mm-muted-text;
+--mm-link-text;
+--mm-button-text;
+```
+
+These should map safely in light mode and dark mode.
+
+Suggested default light theme values:
+
+```css
+--mm-bg: #f8fafc;
+--mm-surface: #ffffff;
+--mm-heading-text: #0f172a;
+--mm-body-text: #334155;
+--mm-muted-text: #64748b;
+--mm-link-text: #2563eb;
+--mm-primary: #2563eb;
+--mm-button-text: #ffffff;
+--mm-border: #e2e8f0;
+```
+
+Suggested default dark theme values:
+
+```css
+--mm-bg: #020617;
+--mm-surface: #0f172a;
+--mm-heading-text: #f8fafc;
+--mm-body-text: #cbd5e1;
+--mm-muted-text: #94a3b8;
+--mm-link-text: #93c5fd;
+--mm-primary: #60a5fa;
+--mm-button-text: #020617;
+--mm-border: #334155;
+```
+
+The dark theme must not reuse low-contrast light theme text colors.
+
+Avoid these dark mode mistakes:
+
+* Muted text that is too close to the background
+* Button text that blends into the button color
+* Social labels that look disabled
+* Contact text that appears faded
+* Progress labels that are hard to read
+* Links that do not stand out from body text
+
+## Contrast Safety Rules
+
+The implementation should apply simple contrast safety rules.
+
+At minimum:
+
+* Heading text must be clearly readable against the page background and surface
+* Body text must be clearly readable against the page background and surface
+* Muted text must remain readable, not barely visible
+* Button text must be readable against the primary/accent color
+* Link text must be visibly different from normal body text
+* Focus states must remain visible in light and dark mode
+
+If a custom color value creates unreadable output, the system should fall back to a safe default for that color role.
+
+Phase 3 does not need a full WCAG contrast calculator.
+
+However, it must avoid known bad combinations and provide safe defaults.
+
+## Social Media Icon and Label Choices
+
+The social links component must allow users to choose both the social media icon and the visible label.
+
+Each social link item should support:
+
+* Platform/icon choice
+* Custom label
+* URL
+* Open in new tab setting, optional
+
+Initial supported platform/icon choices:
+
+```text
+facebook
+instagram
+linkedin
+x
+youtube
+github
+tiktok
+threads
+website
+email
+custom
+```
+
+Expected behavior:
+
+* If a known platform is selected, render the matching icon
+* If `custom` is selected, render a generic link icon
+* If `email` is selected, validate the value as an email or safe `mailto:` URL
+* If `website` is selected, render a generic website/link icon
+* If the custom label is empty, use the selected platform label
+* If both label and platform are empty, skip the item safely
+* If the URL is empty or invalid, skip the item safely
+
+Default platform labels:
+
+| Platform  | Default Label |
+| --------- | ------------- |
+| facebook  | Facebook      |
+| instagram | Instagram     |
+| linkedin  | LinkedIn      |
+| x         | X             |
+| youtube   | YouTube       |
+| github    | GitHub        |
+| tiktok    | TikTok        |
+| threads   | Threads       |
+| website   | Website       |
+| email     | Email         |
+| custom    | Link          |
+
+The social links component should not invent social media URLs.
+
+Icons should be implemented in a lightweight way.
+
+Preferred options:
+
+* Inline SVG icons from a controlled internal allowlist
+* CSS-based simple icons
+* Text fallback if icons are unavailable
+
+Do not load a large icon library in Phase 3.
+
+Do not allow users to paste raw SVG or HTML for icons.
+
+## Updated Phase 3 Exit Criteria
+
+Phase 3 is complete when:
+
+* At least one polished template renders cleanly
+* The page works across desktop, tablet, mobile, and small mobile
+* Components render from saved settings
+* Empty states are handled safely
+* Public output is escaped safely
+* Template assets load only when needed
+* Editable color values use color picker fields
+* Invalid color values fall back safely
+* Light mode text remains readable
+* Dark mode text remains readable
+* Theme variables control all public text colors
+* Social links allow icon/platform selection
+* Social links allow custom labels
+* Social links skip invalid URLs safely
+
+
 ## Light and Dark Mode
 
 Support these theme modes:

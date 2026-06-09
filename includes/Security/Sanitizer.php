@@ -7,6 +7,7 @@
 
 namespace Maneuvrez\MaintenanceModeStudio\Security;
 
+use Maneuvrez\MaintenanceModeStudio\Components\SocialLinksComponent;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsSchema;
 use Maneuvrez\MaintenanceModeStudio\Support\Escaper;
 
@@ -80,11 +81,20 @@ class Sanitizer {
 			$settings['contact_email'] = '';
 		}
 
-		$primary_color = isset( $input['primary_color'] ) ? sanitize_hex_color( $input['primary_color'] ) : '';
-		$settings['primary_color'] = empty( $primary_color ) ? $defaults['primary_color'] : $primary_color;
+		$settings['background_color']   = self::sanitize_hex_color_setting( $input, 'background_color', $defaults );
+		$settings['surface_color']      = self::sanitize_hex_color_setting( $input, 'surface_color', $defaults );
+		$settings['primary_color']      = self::sanitize_hex_color_setting( $input, 'primary_color', $defaults );
+		$settings['heading_text_color'] = self::sanitize_hex_color_setting( $input, 'heading_text_color', $defaults );
+		$settings['body_text_color']    = self::sanitize_hex_color_setting( $input, 'body_text_color', $defaults );
+		$settings['muted_text_color']   = self::sanitize_hex_color_setting( $input, 'muted_text_color', $defaults );
+		$settings['link_text_color']    = self::sanitize_hex_color_setting( $input, 'link_text_color', $defaults );
+		$settings['button_text_color']  = self::sanitize_hex_color_setting( $input, 'button_text_color', $defaults );
+		$settings['border_color']       = self::sanitize_hex_color_setting( $input, 'border_color', $defaults );
 
 		$progress_value = isset( $input['progress_value'] ) ? (int) $input['progress_value'] : (int) $defaults['progress_value'];
 		$settings['progress_value'] = max( 0, min( 100, $progress_value ) );
+
+		$settings = self::sanitize_social_items( $input, $settings, $defaults );
 
 		return $settings;
 	}
@@ -158,5 +168,91 @@ class Sanitizer {
 		}
 
 		return Escaper::public_url( (string) $input[ $key ] );
+	}
+
+	/**
+	 * Sanitize a hex color field and fall back to defaults when invalid.
+	 *
+	 * @param array<string,mixed> $input Submitted settings.
+	 * @param string              $key Field key.
+	 * @param array<string,mixed> $defaults Default values.
+	 * @return string
+	 */
+	private static function sanitize_hex_color_setting( array $input, $key, array $defaults ) {
+		$color = isset( $input[ $key ] ) ? sanitize_hex_color( $input[ $key ] ) : '';
+
+		if ( empty( $color ) ) {
+			return (string) $defaults[ $key ];
+		}
+
+		return $color;
+	}
+
+	/**
+	 * Sanitize social item fields with legacy migration fallback.
+	 *
+	 * @param array<string,mixed> $input Submitted settings.
+	 * @param array<string,mixed> $settings Sanitized settings so far.
+	 * @param array<string,mixed> $defaults Default settings.
+	 * @return array<string,mixed>
+	 */
+	private static function sanitize_social_items( array $input, array $settings, array $defaults ) {
+		$supported_platforms = array_keys( SocialLinksComponent::get_platform_labels() );
+		$has_new_social_data = false;
+
+		for ( $index = 1; $index <= 4; $index++ ) {
+			$platform_key = 'social_item_' . $index . '_platform';
+			$label_key    = 'social_item_' . $index . '_label';
+			$url_key      = 'social_item_' . $index . '_url';
+			$new_tab_key  = 'social_item_' . $index . '_new_tab';
+
+			$platform = isset( $input[ $platform_key ] ) ? sanitize_key( $input[ $platform_key ] ) : '';
+			$label    = isset( $input[ $label_key ] ) ? sanitize_text_field( $input[ $label_key ] ) : '';
+			$url      = isset( $input[ $url_key ] ) ? (string) $input[ $url_key ] : '';
+
+			if ( '' !== $platform || '' !== $label || '' !== $url || ! empty( $input[ $new_tab_key ] ) ) {
+				$has_new_social_data = true;
+			}
+
+			if ( ! in_array( $platform, $supported_platforms, true ) ) {
+				$platform = '';
+			}
+
+			$settings[ $platform_key ] = $platform;
+			$settings[ $label_key ]    = $label;
+			$settings[ $new_tab_key ]  = ! empty( $input[ $new_tab_key ] ) ? 1 : 0;
+
+			if ( 'email' === $platform ) {
+				$settings[ $url_key ] = Escaper::email_url( $url );
+			} else {
+				$settings[ $url_key ] = Escaper::public_url( $url );
+			}
+		}
+
+		if ( $has_new_social_data ) {
+			return $settings;
+		}
+
+		$legacy_map = array(
+			1 => array( 'platform' => 'x', 'url_key' => 'social_x_url' ),
+			2 => array( 'platform' => 'instagram', 'url_key' => 'social_instagram_url' ),
+			3 => array( 'platform' => 'facebook', 'url_key' => 'social_facebook_url' ),
+			4 => array( 'platform' => 'linkedin', 'url_key' => 'social_linkedin_url' ),
+		);
+
+		foreach ( $legacy_map as $index => $legacy ) {
+			$legacy_url = self::sanitize_url( $input, $legacy['url_key'] );
+
+			if ( '' === $legacy_url ) {
+				continue;
+			}
+
+			$settings[ 'social_item_' . $index . '_platform' ] = $legacy['platform'];
+			$settings[ 'social_item_' . $index . '_label' ]    = '';
+			$settings[ 'social_item_' . $index . '_url' ]      = $legacy_url;
+			$settings[ 'social_item_' . $index . '_new_tab' ]  = 0;
+		}
+
+		return $settings;
 	}
 }

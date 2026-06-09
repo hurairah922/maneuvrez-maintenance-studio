@@ -1,14 +1,19 @@
 :root {
-	--mm-bg: #eff4ff;
-	--mm-surface: rgba(255, 255, 255, 0.84);
-	--mm-text: #0f1f35;
-	--mm-muted: #5e6c82;
-	--mm-border: rgba(37, 99, 235, 0.14);
+	--mm-bg: #f8fafc;
+	--mm-surface: #ffffff;
+	--mm-heading-text: #0f172a;
+	--mm-body-text: #334155;
+	--mm-muted-text: #64748b;
+	--mm-link-text: #2563eb;
 	--mm-primary: #2563eb;
-	--mm-primary-text: #ffffff;
+	--mm-button-text: #ffffff;
+	--mm-border: #e2e8f0;
 	--mm-shadow: 0 24px 80px rgba(15, 23, 42, 0.16);
 	--mm-radius: 28px;
 	--mm-content-width: 1120px;
+	--mm-text: var(--mm-body-text);
+	--mm-muted: var(--mm-muted-text);
+	--mm-primary-text: var(--mm-button-text);
 }
 
 *,
@@ -25,7 +30,7 @@ body {
 
 body.mmsm-maintenance-page {
 	background: var(--mm-bg);
-	color: var(--mm-text);
+	color: var(--mm-body-text);
 	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -40,16 +45,22 @@ body.mmsm-maintenance-page {
 }
 
 .mmsm-shell.mmsm-theme-dark {
-	--mm-bg: #08111f;
-	--mm-surface: rgba(9, 19, 33, 0.82);
-	--mm-text: #f2f6ff;
-	--mm-muted: #aabbd5;
-	--mm-border: rgba(148, 163, 184, 0.22);
-	--mm-primary-text: #ffffff;
-	--mm-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+	--mm-bg: var(--mm-dark-bg);
+	--mm-surface: var(--mm-dark-surface);
+	--mm-heading-text: var(--mm-dark-heading-text);
+	--mm-body-text: var(--mm-dark-body-text);
+	--mm-muted-text: var(--mm-dark-muted-text);
+	--mm-link-text: var(--mm-dark-link-text);
+	--mm-primary: var(--mm-dark-primary);
+	--mm-button-text: var(--mm-dark-button-text);
+	--mm-border: var(--mm-dark-border);
+	--mm-shadow: var(--mm-dark-shadow);
+	--mm-text: var(--mm-body-text);
+	--mm-muted: var(--mm-muted-text);
+	--mm-primary-text: var(--mm-button-text);
 	background:
-		radial-gradient(circle at top, rgba(96, 165, 250, 0.16), transparent 24%),
-		radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.16), transparent 28%),
+		radial-gradient(circle at top, rgba(96, 165, 250, 0.14), transparent 24%),
+		radial-gradient(circle at bottom right, rgba(96, 165, 250, 0.12), transparent 28%),
 		linear-gradient(160deg, var(--mm-bg) 0%, #040b15 100%);
 }
 
@@ -62,16 +73,22 @@ body.mmsm-maintenance-page {
 
 @media (prefers-color-scheme: dark) {
 	.mmsm-shell.mmsm-theme-system {
-		--mm-bg: #08111f !important;
-		--mm-surface: rgba(9, 19, 33, 0.82) !important;
-		--mm-text: #f2f6ff !important;
-		--mm-muted: #aabbd5 !important;
-		--mm-border: rgba(148, 163, 184, 0.22) !important;
-		--mm-primary-text: #ffffff !important;
-		--mm-shadow: 0 24px 80px rgba(0, 0, 0, 0.34) !important;
+		--mm-bg: var(--mm-dark-bg);
+		--mm-surface: var(--mm-dark-surface);
+		--mm-heading-text: var(--mm-dark-heading-text);
+		--mm-body-text: var(--mm-dark-body-text);
+		--mm-muted-text: var(--mm-dark-muted-text);
+		--mm-link-text: var(--mm-dark-link-text);
+		--mm-primary: var(--mm-dark-primary);
+		--mm-button-text: var(--mm-dark-button-text);
+		--mm-border: var(--mm-dark-border);
+		--mm-shadow: var(--mm-dark-shadow);
+		--mm-text: var(--mm-body-text);
+		--mm-muted: var(--mm-muted-text);
+		--mm-primary-text: var(--mm-button-text);
 		background:
-			radial-gradient(circle at top, rgba(96, 165, 250, 0.16), transparent 24%),
-			radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.16), transparent 28%),
+			radial-gradient(circle at top, rgba(96, 165, 250, 0.14), transparent 24%),
+			radial-gradient(circle at bottom right, rgba(96, 165, 250, 0.12), transparent 28%),
 			linear-gradient(160deg, var(--mm-bg) 0%, #040b15 100%);
 	}
 }
@@ -130,7 +147,7 @@ body.mmsm-maintenance-page {
 	border: 1px solid var(--mm-border);
 	border-radius: 999px;
 	background: rgba(255, 255, 255, 0.32);
-	color: var(--mm-primary);
+	color: var(--mm-link-text);
 	font-size: 0.78rem;
 	font-weight: 700;
 	letter-spacing: 0.08em;
@@ -145,7 +162,7 @@ body.mmsm-maintenance-page {
 
 .mmsm-eyebrow {
 	margin: 0 0 10px;
-	color: var(--mm-primary);
+	color: var(--mm-link-text);
 	font-size: 0.88rem;
 	font-weight: 700;
 	letter-spacing: 0.08em;
@@ -154,22 +171,18 @@ body.mmsm-maintenance-page {
 
 .mmsm-hero-title {
 	margin: 0;
+	color: var(--mm-heading-text);
 	font-size: clamp(2.35rem, 5vw, 4.9rem);
 	line-height: 0.98;
 	letter-spacing: -0.04em;
 }
 
-.mmsm-hero-message,
-.mmsm-section-text,
-.mmsm-site-copy {
-	color: var(--mm-muted);
-	line-height: 1.7;
-}
-
 .mmsm-hero-message {
 	max-width: 38rem;
 	margin: 18px 0 0;
+	color: var(--mm-body-text);
 	font-size: clamp(1rem, 1.8vw, 1.15rem);
+	line-height: 1.7;
 }
 
 .mmsm-actions {
@@ -207,13 +220,13 @@ body.mmsm-maintenance-page {
 .mmsm-button-secondary {
 	border-color: var(--mm-border);
 	background: transparent;
-	color: var(--mm-text);
+	color: var(--mm-heading-text);
 }
 
 .mmsm-button:focus-visible,
 .mmsm-social-link:focus-visible,
 .mmsm-inline-link:focus-visible {
-	outline: 3px solid rgba(37, 99, 235, 0.36);
+	outline: 3px solid var(--mm-link-text);
 	outline-offset: 2px;
 }
 
@@ -230,7 +243,7 @@ body.mmsm-maintenance-page {
 	padding: 10px 14px;
 	border-radius: 999px;
 	background: rgba(37, 99, 235, 0.1);
-	color: var(--mm-text);
+	color: var(--mm-body-text);
 	font-weight: 600;
 }
 
@@ -251,7 +264,7 @@ body.mmsm-maintenance-page {
 	justify-content: space-between;
 	gap: 12px;
 	margin-bottom: 10px;
-	color: var(--mm-muted);
+	color: var(--mm-muted-text);
 	font-size: 0.92rem;
 }
 
@@ -277,6 +290,7 @@ body.mmsm-maintenance-page {
 
 .mmsm-section-title {
 	margin: 0 0 10px;
+	color: var(--mm-heading-text);
 	font-size: 1rem;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
@@ -287,9 +301,14 @@ body.mmsm-maintenance-page {
 	margin: 0;
 }
 
+.mmsm-section-text {
+	color: var(--mm-body-text);
+	line-height: 1.7;
+}
+
 .mmsm-inline-link,
 .mmsm-social-link {
-	color: var(--mm-primary);
+	color: var(--mm-link-text);
 	font-weight: 600;
 	text-decoration: none;
 }
@@ -306,11 +325,39 @@ body.mmsm-maintenance-page {
 .mmsm-social-link {
 	display: inline-flex;
 	align-items: center;
+	gap: 10px;
 	min-height: 44px;
 	padding: 0 14px;
 	border: 1px solid var(--mm-border);
 	border-radius: 999px;
 	background: rgba(255, 255, 255, 0.18);
+}
+
+.mmsm-social-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	flex: 0 0 18px;
+}
+
+.mmsm-social-icon svg {
+	width: 18px;
+	height: 18px;
+	fill: none;
+	stroke: currentColor;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 1.8;
+}
+
+.mmsm-social-icon text {
+	fill: currentColor;
+	font-family: Arial, sans-serif;
+	font-size: 7px;
+	font-weight: 700;
+	stroke: none;
 }
 
 .mmsm-footer-meta {
@@ -320,12 +367,14 @@ body.mmsm-maintenance-page {
 
 .mmsm-site-name {
 	margin: 0;
+	color: var(--mm-heading-text);
 	font-size: 1rem;
 	font-weight: 700;
 }
 
 .mmsm-site-copy {
 	margin: 0;
+	color: var(--mm-muted-text);
 	font-size: 0.95rem;
 }
 

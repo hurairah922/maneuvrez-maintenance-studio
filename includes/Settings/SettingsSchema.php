@@ -19,6 +19,27 @@ class SettingsSchema {
 	 * @return array<string,array<string,mixed>>
 	 */
 	public static function get_fields() {
+		$social_fields = array();
+
+		for ( $index = 1; $index <= 4; $index++ ) {
+			$social_fields[ 'social_item_' . $index . '_platform' ] = array(
+				'type'    => 'select',
+				'default' => '',
+			);
+			$social_fields[ 'social_item_' . $index . '_label' ]    = array(
+				'type'    => 'text',
+				'default' => '',
+			);
+			$social_fields[ 'social_item_' . $index . '_url' ]      = array(
+				'type'    => 'text',
+				'default' => '',
+			);
+			$social_fields[ 'social_item_' . $index . '_new_tab' ]  = array(
+				'type'    => 'checkbox',
+				'default' => 0,
+			);
+		}
+
 		return array(
 			'enabled'                => array(
 				'type'    => 'checkbox',
@@ -67,9 +88,41 @@ class SettingsSchema {
 				'default' => 'light',
 				'choices' => array( 'light', 'dark', 'system' ),
 			),
+			'background_color'       => array(
+				'type'    => 'color',
+				'default' => '#f8fafc',
+			),
+			'surface_color'          => array(
+				'type'    => 'color',
+				'default' => '#ffffff',
+			),
 			'primary_color'          => array(
 				'type'    => 'color',
 				'default' => '#2563eb',
+			),
+			'heading_text_color'     => array(
+				'type'    => 'color',
+				'default' => '#0f172a',
+			),
+			'body_text_color'        => array(
+				'type'    => 'color',
+				'default' => '#334155',
+			),
+			'muted_text_color'       => array(
+				'type'    => 'color',
+				'default' => '#64748b',
+			),
+			'link_text_color'        => array(
+				'type'    => 'color',
+				'default' => '#2563eb',
+			),
+			'button_text_color'      => array(
+				'type'    => 'color',
+				'default' => '#ffffff',
+			),
+			'border_color'           => array(
+				'type'    => 'color',
+				'default' => '#e2e8f0',
 			),
 			'contact_label'          => array(
 				'type'    => 'text',
@@ -105,6 +158,7 @@ class SettingsSchema {
 				'type'    => 'text',
 				'default' => 'Admin login',
 			),
+			// Legacy social URL fields are preserved for safe migration.
 			'social_x_url'           => array(
 				'type'    => 'url',
 				'default' => '',
@@ -121,7 +175,7 @@ class SettingsSchema {
 				'type'    => 'url',
 				'default' => '',
 			),
-		);
+		) + $social_fields;
 	}
 
 	/**
