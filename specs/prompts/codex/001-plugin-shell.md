@@ -22,11 +22,11 @@ Extended title:
 
 Publisher:
 
-    Maneuvrez
+    Abu Hurarrah
 
 Publisher domain:
 
-    https://maneuvrez.com
+    https://abuhurarrah.com
 
 Creator credit:
 
@@ -35,6 +35,10 @@ Creator credit:
 Creator domain:
 
     https://abuhurarrah.com
+
+Contact email:
+
+    hello@abuhurarrah.com
 
 Plugin slug:
 
@@ -127,11 +131,11 @@ The plugin must:
 Use this header in `maintenance-mode-studio.php`:
 
     Plugin Name: Maintenance Mode Studio
-    Plugin URI: https://maneuvrez.com
+    Plugin URI: https://abuhurarrah.com/plugins/maintenance-mode-studio
     Description: Create interactive maintenance, coming soon, launch, and private site pages with games, forms, contact options, social links, login access, and modern responsive animations.
     Version: 0.1.0
-    Author: Maneuvrez
-    Author URI: https://maneuvrez.com
+    Author: Abu Hurarrah
+    Author URI: https://abuhurarrah.com
     Text Domain: maintenance-mode-studio
     Domain Path: /languages
     License: GPL-2.0-or-later

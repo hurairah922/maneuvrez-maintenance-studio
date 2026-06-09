@@ -78,51 +78,33 @@ Reason:
 
 ## 5. Directory Structure
 
+Phase 1 must use one canonical plugin shell layout. Additional feature folders can be introduced later, but the first implementation milestone should start with this structure:
+
 ```text
 maintenance-mode-studio/
 ├── maintenance-mode-studio.php
 ├── readme.txt
-├── package.json
-├── composer.json
-├── phpcs.xml.dist
 ├── uninstall.php
+├── composer.json
+├── package.json
+├── phpcs.xml.dist
 ├── includes/
-│   ├── Plugin.php
+│   ├── Admin/
+│   │   └── Admin.php
+│   ├── Frontend/
+│   │   ├── MaintenanceRouter.php
+│   │   └── TemplateRenderer.php
+│   ├── Security/
+│   │   └── Sanitizer.php
 │   ├── Activator.php
 │   ├── Deactivator.php
-│   ├── Capabilities.php
-│   ├── Settings.php
-│   ├── ModeManager.php
-│   ├── MaintenanceRouter.php
-│   ├── TemplateRenderer.php
-│   ├── ComponentRegistry.php
-│   ├── LayoutRegistry.php
-│   ├── AssetManager.php
-│   ├── RestApi.php
-│   ├── Forms/
-│   ├── Games/
-│   ├── Access/
-│   ├── Security/
-│   └── Utilities/
-├── admin/
-│   ├── Admin.php
-│   ├── pages/
-│   └── assets/
-├── src/
-│   ├── admin/
-│   ├── public/
-│   └── shared/
-├── build/
+│   └── Plugin.php
 ├── public/
 │   ├── templates/
-│   ├── components/
+│   │   └── default.php
 │   └── assets/
-├── assets/
-│   ├── images/
-│   ├── icons/
-│   └── models/
-├── languages/
-└── docs/
+│       ├── public.css
+│       └── public.js
 ```
 
 ## 6. Option Keys

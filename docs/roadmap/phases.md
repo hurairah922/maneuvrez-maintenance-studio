@@ -20,9 +20,9 @@ Exit criteria:
 - V1 scope approved
 - first build milestone defined
 
-## Phase 1 — Plugin Core Shell
+## Phase 1 — Plugin Shell and Minimal Maintenance Mode
 
-Goal: create a working WordPress plugin foundation.
+Goal: create a working WordPress plugin foundation with a safe minimal maintenance-mode flow.
 
 Build:
 
@@ -30,10 +30,14 @@ Build:
 - namespaced loader
 - activation/deactivation classes
 - constants
-- autoload pattern
 - admin menu shell
-- settings registration
-- asset loading foundation
+- basic settings registration
+- maintenance mode enable/disable
+- frontend request interception
+- admin bypass
+- login page bypass
+- REST/AJAX/cron/WP-CLI bypass rules
+- basic default maintenance page
 - WordPress.org-ready readme scaffold
 
 Exit criteria:
@@ -41,56 +45,44 @@ Exit criteria:
 - plugin activates without fatal errors
 - admin menu appears
 - settings page loads
-- no frontend changes yet unless enabled
+- logged-out visitors see the default maintenance page only when enabled
+- logged-in admins see the real site
+- bypass rules work safely
 
-## Phase 2 — Mode Manager and Router
+## Phase 2 — Admin Settings Foundation
 
-Goal: make maintenance/coming soon mode functional.
+Goal: expand the basic shell into a more complete settings-driven mode manager.
 
 Build:
 
-- mode enable/disable
 - mode type selection
-- frontend request interception
-- admin bypass
-- login page bypass
-- REST/AJAX bypass rules
-- secret bypass token foundation
-- basic default maintenance page
+- page title and message settings
+- theme mode and color controls
+- login button setting
+- asset loading foundation
+- settings UX cleanup
 
 Exit criteria:
 
-- logged-out visitors see maintenance page
-- logged-in admins see real site
-- bypass rules work safely
+- settings cover the Phase 1 public template
+- settings persist safely
+- the admin experience remains simple
 
-## Phase 3 — Template Renderer
+## Phase 3 — Template and Component Registry
 
-Goal: render polished public pages.
+Goal: render polished public pages and define reusable frontend building blocks.
 
 Build:
 
 - PHP template renderer
 - template registry
+- component registry
+- zone compatibility rules
 - theme variables
 - light/dark mode
 - responsive shell
 - default copy
 - asset loading per template
-
-Exit criteria:
-
-- at least one premium frontend template renders cleanly
-- page works across desktop, tablet, mobile, small mobile
-
-## Phase 4 — Component Registry
-
-Goal: create reusable frontend/admin components.
-
-Build:
-
-- component registry
-- zone compatibility rules
 - component settings schema
 - hero component
 - social links component
@@ -100,11 +92,12 @@ Build:
 
 Exit criteria:
 
-- components can be enabled/disabled
+- at least one polished template renders cleanly
+- page works across desktop, tablet, mobile, and small mobile
 - components render from saved settings
 - empty states are handled safely
 
-## Phase 5 — Forms and Submissions
+## Phase 4 — Forms and Submissions
 
 Goal: collect visitor input safely.
 
@@ -127,7 +120,7 @@ Exit criteria:
 - admin can export CSV
 - spam basics are active
 
-## Phase 6 — Reaction Challenge and Leaderboard
+## Phase 5 — Games and Leaderboard
 
 Goal: add the first interactive game.
 
@@ -147,7 +140,7 @@ Exit criteria:
 - leaderboard can be enabled/disabled
 - score submissions are rate-limited
 
-## Phase 7 — Visual Preview and Drag Zones
+## Phase 6 — Visual Preview and Drag Zones
 
 Goal: make admin page configuration visual.
 
@@ -166,50 +159,26 @@ Exit criteria:
 - preview reflects settings
 - saved layout renders on frontend
 
-## Phase 8 — Templates, Motion, and Assets
+## Phase 7 — Access Rules and Bypass Links
 
-Goal: add visual polish and template variety.
-
-Build:
-
-- Arcade Launch template
-- Studio Pause template
-- Neon Console template
-- Calm Coming Soon template
-- pointer-reactive motion
-- animation intensity setting
-- logo/background/icon upload controls
-- optional 3D asset setting if safe
-
-Exit criteria:
-
-- 3+ templates are production-ready
-- animations degrade cleanly
-- uploaded assets render safely
-
-## Phase 9 — Access Rules and Multi-Experience Support
-
-Goal: support multiple mode-based experiences.
+Goal: expand access controls and visitor bypass behavior safely.
 
 Build:
 
-- multiple experiences
-- maintenance experience
-- coming soon experience
-- launch experience
-- private site experience
-- active mode assignment
-- basic route exclusions
+- secret bypass token foundation
+- password-protected visitor access
+- multiple experience assignment rules
+- route exclusions
+- admin controls for bypass management
 
 Exit criteria:
 
-- admin can create more than one experience
-- admin can choose active mode/experience
-- complexity remains manageable
+- bypass flows remain safe and revocable
+- admins can manage access rules without confusion
 
-## Phase 10 — QA and WordPress.org Release Prep
+## Phase 8 — Polish, QA, and WordPress.org Release
 
-Goal: prepare for public release.
+Goal: polish the product and prepare the public release package.
 
 Build/check:
 

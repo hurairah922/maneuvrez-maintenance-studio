@@ -21,21 +21,17 @@ The plugin will support:
 - Responsive animations
 - Admin-controlled layouts
 
-## Publisher
+## Owner And Publisher
 
-Maneuvrez
-
-Website:
-
-    https://maneuvrez.com
-
-## Creator Credit
-
-Created by Abu Hurarrah.
+Abu Hurarrah
 
 Website:
 
     https://abuhurarrah.com
+
+Email:
+
+    hello@abuhurarrah.com
 
 ## Plugin Constants
 
@@ -65,7 +61,7 @@ This plugin is in early development.
 
 Current phase:
 
-    Phase 1 - Plugin Shell
+    Phase 1 - Plugin Shell and Minimal Maintenance Mode
 
 ## Source Of Truth
 

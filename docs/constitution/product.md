@@ -6,13 +6,13 @@
 
 **Extended listing title:** Maintenance Mode Studio — Coming Soon, Games, Forms & Interactive Pages
 
-**Publisher:** Maneuvrez
+**Publisher:** Abu Hurarrah
 
-**Creator credit:** Abu Hurairah / Shafi may be credited in the plugin author profile, readme, credits section, or product site.
+**Creator credit:** Abu Hurarrah may be credited in the plugin author profile, readme, credits section, or product site.
 
-**Primary domain:** maneuvrez.com
+**Primary domain:** abuhurarrah.com
 
-**Secondary creator domain:** abuhurairah.com
+**Primary contact email:** hello@abuhurarrah.com
 
 **WordPress.org slug target:** maintenance-mode-studio
 
