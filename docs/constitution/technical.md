@@ -105,12 +105,6 @@ maintenance-mode-studio/
 │   └── assets/
 │       ├── public.css
 │       └── public.js
-├── src/
-│   └── admin/
-│       ├── index.js
-│       └── index.scss
-├── build/
-└── languages/
 ```
 
 ## 6. Option Keys

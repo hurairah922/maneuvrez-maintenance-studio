@@ -1,0 +1,12 @@
+{
+  "name": "abuhurarrah/maintenance-mode-studio",
+  "description": "A modern WordPress plugin for interactive maintenance, coming soon, launch, and private site pages.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "autoload": {
+    "psr-4": {
+      "Maneuvrez\\MaintenanceModeStudio\\": "includes/"
+    }
+  },
+  "require": {}
+}
