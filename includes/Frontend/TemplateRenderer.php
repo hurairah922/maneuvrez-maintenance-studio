@@ -129,7 +129,7 @@ class TemplateRenderer {
 					$style_handle,
 					MMSM_PLUGIN_URL . ltrim( $style_path, '/' ),
 					array(),
-					MMSM_VERSION
+					$this->get_asset_version( $style_path )
 				);
 			}
 		}
@@ -140,8 +140,8 @@ class TemplateRenderer {
 					$script_handle,
 					MMSM_PLUGIN_URL . ltrim( $script_path, '/' ),
 					array(),
-					MMSM_VERSION,
-					false
+					$this->get_asset_version( $script_path ),
+					true
 				);
 				wp_script_add_data( $script_handle, 'defer', true );
 			}
@@ -488,5 +488,21 @@ class TemplateRenderer {
 		</body>
 		</html>
 		<?php
+	}
+
+	/**
+	 * Resolve an asset version from file modification time with a safe fallback.
+	 *
+	 * @param string $relative_path Asset path relative to the plugin root.
+	 * @return string
+	 */
+	private function get_asset_version( $relative_path ) {
+		$absolute_path = MMSM_PLUGIN_PATH . ltrim( (string) $relative_path, '/' );
+
+		if ( file_exists( $absolute_path ) ) {
+			return (string) filemtime( $absolute_path );
+		}
+
+		return MMSM_VERSION;
 	}
 }

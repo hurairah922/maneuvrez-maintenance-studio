@@ -98,7 +98,7 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_general_section',
-			__( 'General Settings', MMSM_TEXT_DOMAIN ),
+			__( 'General', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_general_section' ),
 			$this->page_slug
 		);
@@ -107,14 +107,6 @@ class Admin {
 			'mmsm_enabled',
 			__( 'Enable maintenance mode', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_enabled_field' ),
-			$this->page_slug,
-			'mmsm_general_section'
-		);
-
-		add_settings_field(
-			'mmsm_mode_type',
-			__( 'Mode Type', MMSM_TEXT_DOMAIN ),
-			array( $this, 'render_mode_type_field' ),
 			$this->page_slug,
 			'mmsm_general_section'
 		);
@@ -135,18 +127,33 @@ class Admin {
 			'mmsm_general_section'
 		);
 
+		add_settings_section(
+			'mmsm_template_section',
+			__( 'Template', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_template_section' ),
+			$this->page_slug
+		);
+
 		add_settings_field(
-			'mmsm_show_login_button',
-			__( 'Show Login Button', MMSM_TEXT_DOMAIN ),
-			array( $this, 'render_show_login_button_field' ),
+			'mmsm_mode_type',
+			__( 'Mode Type', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_mode_type_field' ),
 			$this->page_slug,
-			'mmsm_general_section'
+			'mmsm_template_section'
+		);
+
+		add_settings_field(
+			'mmsm_template_key',
+			__( 'Template', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_template_key_field' ),
+			$this->page_slug,
+			'mmsm_template_section'
 		);
 
 		add_settings_section(
-			'mmsm_appearance_section',
-			__( 'Appearance', MMSM_TEXT_DOMAIN ),
-			array( $this, 'render_appearance_section' ),
+			'mmsm_design_section',
+			__( 'Design', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_design_section' ),
 			$this->page_slug
 		);
 
@@ -155,15 +162,7 @@ class Admin {
 			__( 'Theme Mode', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_theme_mode_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
-		);
-
-		add_settings_field(
-			'mmsm_template_key',
-			__( 'Template', MMSM_TEXT_DOMAIN ),
-			array( $this, 'render_template_key_field' ),
-			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_field(
@@ -171,7 +170,7 @@ class Admin {
 			__( 'Primary Color', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_primary_color_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_field(
@@ -179,7 +178,7 @@ class Admin {
 			__( 'Background Color', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_background_color_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_field(
@@ -187,7 +186,7 @@ class Admin {
 			__( 'Surface Color', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_surface_color_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_field(
@@ -195,7 +194,7 @@ class Admin {
 			__( 'Heading Text Color', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_heading_text_color_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_field(
@@ -203,7 +202,7 @@ class Admin {
 			__( 'Body Text Color', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_body_text_color_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_field(
@@ -211,7 +210,7 @@ class Admin {
 			__( 'Muted Text Color', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_muted_text_color_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_field(
@@ -219,7 +218,7 @@ class Admin {
 			__( 'Link Text Color', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_link_text_color_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_field(
@@ -227,7 +226,7 @@ class Admin {
 			__( 'Button Text Color', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_button_text_color_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_field(
@@ -235,7 +234,7 @@ class Admin {
 			__( 'Border Color', MMSM_TEXT_DOMAIN ),
 			array( $this, 'render_border_color_field' ),
 			$this->page_slug,
-			'mmsm_appearance_section'
+			'mmsm_design_section'
 		);
 
 		add_settings_section(
@@ -333,12 +332,11 @@ class Admin {
 			'mmsm_components_section'
 		);
 
-		add_settings_field(
-			'mmsm_login_label',
-			__( 'Login Label', MMSM_TEXT_DOMAIN ),
-			array( $this, 'render_login_label_field' ),
-			$this->page_slug,
-			'mmsm_components_section'
+		add_settings_section(
+			'mmsm_social_links_section',
+			__( 'Social Links', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_social_links_section' ),
+			$this->page_slug
 		);
 
 		for ( $index = 1; $index <= 4; $index++ ) {
@@ -347,12 +345,35 @@ class Admin {
 				sprintf( __( 'Social Item %d', MMSM_TEXT_DOMAIN ), $index ),
 				array( $this, 'render_social_item_field' ),
 				$this->page_slug,
-				'mmsm_components_section',
+				'mmsm_social_links_section',
 				array(
 					'index' => $index,
 				)
 			);
 		}
+
+		add_settings_section(
+			'mmsm_advanced_section',
+			__( 'Advanced', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_advanced_section' ),
+			$this->page_slug
+		);
+
+		add_settings_field(
+			'mmsm_show_login_button',
+			__( 'Show Login Button', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_show_login_button_field' ),
+			$this->page_slug,
+			'mmsm_advanced_section'
+		);
+
+		add_settings_field(
+			'mmsm_login_label',
+			__( 'Login Label', MMSM_TEXT_DOMAIN ),
+			array( $this, 'render_login_label_field' ),
+			$this->page_slug,
+			'mmsm_advanced_section'
+		);
 	}
 
 	/**
@@ -364,6 +385,8 @@ class Admin {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
+
+		$active_tab = $this->get_active_tab();
 		?>
 		<div class="wrap mmsm-settings-page">
 			<h1><?php echo esc_html__( 'Maintenance Mode Studio', MMSM_TEXT_DOMAIN ); ?></h1>
@@ -372,11 +395,24 @@ class Admin {
 			</p>
 
 			<?php settings_errors( MMSM_SETTINGS_OPTION ); ?>
+			<nav class="nav-tab-wrapper mmsm-settings-tabs" aria-label="<?php echo esc_attr__( 'Maintenance Mode Studio settings sections', MMSM_TEXT_DOMAIN ); ?>">
+				<?php foreach ( $this->get_tabs() as $tab_key => $tab ) : ?>
+					<a
+						href="<?php echo esc_url( $this->get_tab_url( $tab_key ) ); ?>"
+						class="<?php echo esc_attr( 'nav-tab' . ( $active_tab === $tab_key ? ' nav-tab-active' : '' ) ); ?>"
+					>
+						<?php echo esc_html( $tab['label'] ); ?>
+					</a>
+				<?php endforeach; ?>
+			</nav>
 
 			<form action="<?php echo esc_url( admin_url( 'options.php' ) ); ?>" method="post">
 				<?php
 				settings_fields( $this->settings_group );
-				do_settings_sections( $this->page_slug );
+				?>
+				<input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( $this->get_tab_url( $active_tab ) ); ?>" />
+				<?php
+				$this->render_active_tab();
 				submit_button( __( 'Save Settings', MMSM_TEXT_DOMAIN ) );
 				?>
 			</form>
@@ -399,7 +435,7 @@ class Admin {
 			'mmsm-admin-settings',
 			MMSM_PLUGIN_URL . 'admin/assets/admin.css',
 			array(),
-			MMSM_VERSION
+			$this->get_asset_version( 'admin/assets/admin.css' )
 		);
 
 		wp_enqueue_style( 'wp-color-picker' );
@@ -408,7 +444,7 @@ class Admin {
 			'mmsm-admin-settings-script',
 			MMSM_PLUGIN_URL . 'admin/assets/admin.js',
 			array( 'jquery', 'wp-color-picker' ),
-			MMSM_VERSION,
+			$this->get_asset_version( 'admin/assets/admin.js' ),
 			true
 		);
 	}
@@ -444,8 +480,17 @@ class Admin {
 	 *
 	 * @return void
 	 */
-	public function render_appearance_section() {
-		echo '<p>' . esc_html__( 'Choose the template shell, theme mode, and safe color roles used for the public maintenance page.', MMSM_TEXT_DOMAIN ) . '</p>';
+	public function render_template_section() {
+		echo '<p>' . esc_html__( 'Pick the public template shell and the maintenance mode presentation style.', MMSM_TEXT_DOMAIN ) . '</p>';
+	}
+
+	/**
+	 * Render the design section description.
+	 *
+	 * @return void
+	 */
+	public function render_design_section() {
+		echo '<p>' . esc_html__( 'Use WordPress color pickers for the safe theme color roles that drive light, dark, and system modes.', MMSM_TEXT_DOMAIN ) . '</p>';
 	}
 
 	/**
@@ -454,7 +499,25 @@ class Admin {
 	 * @return void
 	 */
 	public function render_components_section() {
-		echo '<p>' . esc_html__( 'These optional settings feed the reusable frontend components used by the default template.', MMSM_TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'These optional settings feed the hero, status, and contact components rendered by the default template.', MMSM_TEXT_DOMAIN ) . '</p>';
+	}
+
+	/**
+	 * Render the social links section description.
+	 *
+	 * @return void
+	 */
+	public function render_social_links_section() {
+		echo '<p>' . esc_html__( 'Choose up to four social or contact destinations with safe platform icons, labels, and URLs.', MMSM_TEXT_DOMAIN ) . '</p>';
+	}
+
+	/**
+	 * Render the advanced section description.
+	 *
+	 * @return void
+	 */
+	public function render_advanced_section() {
+		echo '<p>' . esc_html__( 'Control optional access and login affordances without affecting administrator bypass behavior.', MMSM_TEXT_DOMAIN ) . '</p>';
 	}
 
 	/**
@@ -1038,5 +1101,136 @@ class Admin {
 		/>
 		<p class="description"><?php echo esc_html( $description ); ?></p>
 		<?php
+	}
+
+	/**
+	 * Return available settings tabs.
+	 *
+	 * @return array<string,array<string,string>>
+	 */
+	private function get_tabs() {
+		return array(
+			'general'      => array(
+				'label'   => __( 'General', MMSM_TEXT_DOMAIN ),
+				'section' => 'mmsm_general_section',
+			),
+			'template'     => array(
+				'label'   => __( 'Template', MMSM_TEXT_DOMAIN ),
+				'section' => 'mmsm_template_section',
+			),
+			'design'       => array(
+				'label'   => __( 'Design', MMSM_TEXT_DOMAIN ),
+				'section' => 'mmsm_design_section',
+			),
+			'components'   => array(
+				'label'   => __( 'Components', MMSM_TEXT_DOMAIN ),
+				'section' => 'mmsm_components_section',
+			),
+			'social_links' => array(
+				'label'   => __( 'Social Links', MMSM_TEXT_DOMAIN ),
+				'section' => 'mmsm_social_links_section',
+			),
+			'advanced'     => array(
+				'label'   => __( 'Advanced', MMSM_TEXT_DOMAIN ),
+				'section' => 'mmsm_advanced_section',
+			),
+		);
+	}
+
+	/**
+	 * Return the currently requested tab, falling back safely.
+	 *
+	 * @return string
+	 */
+	private function get_active_tab() {
+		$tabs = $this->get_tabs();
+		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
+
+		if ( ! isset( $tabs[ $tab ] ) ) {
+			return 'general';
+		}
+
+		return $tab;
+	}
+
+	/**
+	 * Render the currently active tab section.
+	 *
+	 * @return void
+	 */
+	private function render_active_tab() {
+		$tabs       = $this->get_tabs();
+		$active_tab = $this->get_active_tab();
+		$section_id = $tabs[ $active_tab ]['section'];
+
+		$this->render_section_fields( $section_id );
+	}
+
+	/**
+	 * Render a registered section title, description, and fields.
+	 *
+	 * @param string $section_id Settings section id.
+	 * @return void
+	 */
+	private function render_section_fields( $section_id ) {
+		global $wp_settings_sections, $wp_settings_fields;
+
+		if ( ! isset( $wp_settings_sections[ $this->page_slug ][ $section_id ] ) ) {
+			return;
+		}
+
+		$section = $wp_settings_sections[ $this->page_slug ][ $section_id ];
+		$has_fields = ! empty( $wp_settings_fields[ $this->page_slug ][ $section_id ] );
+		?>
+		<div class="mmsm-settings-panel">
+			<?php if ( ! empty( $section['title'] ) ) : ?>
+				<h2 class="title"><?php echo esc_html( $section['title'] ); ?></h2>
+			<?php endif; ?>
+			<?php
+			if ( ! empty( $section['callback'] ) ) {
+				call_user_func( $section['callback'], $section );
+			}
+			?>
+			<?php if ( $has_fields ) : ?>
+				<table class="form-table" role="presentation">
+					<?php do_settings_fields( $this->page_slug, $section_id ); ?>
+				</table>
+			<?php else : ?>
+				<p class="description"><?php echo esc_html__( 'No extra settings are available in this tab yet.', MMSM_TEXT_DOMAIN ); ?></p>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Build a settings tab URL.
+	 *
+	 * @param string $tab_key Tab key.
+	 * @return string
+	 */
+	private function get_tab_url( $tab_key ) {
+		return add_query_arg(
+			array(
+				'page' => $this->page_slug,
+				'tab'  => $tab_key,
+			),
+			admin_url( 'options-general.php' )
+		);
+	}
+
+	/**
+	 * Resolve an asset version from file modification time with a safe fallback.
+	 *
+	 * @param string $relative_path Asset path relative to the plugin root.
+	 * @return string
+	 */
+	private function get_asset_version( $relative_path ) {
+		$absolute_path = MMSM_PLUGIN_PATH . ltrim( $relative_path, '/' );
+
+		if ( file_exists( $absolute_path ) ) {
+			return (string) filemtime( $absolute_path );
+		}
+
+		return MMSM_VERSION;
 	}
 }

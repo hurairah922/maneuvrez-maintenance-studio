@@ -118,7 +118,9 @@ class SocialLinksComponent implements ComponentInterface {
 						<a
 							class="mmsm-social-link"
 							href="<?php echo esc_url( $link['url'] ); ?>"
-							<?php echo ! empty( $link['new_tab'] ) ? ' target="_blank" rel="noreferrer noopener"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( ! empty( $link['new_tab'] ) ) : ?>
+								target="_blank" rel="noreferrer noopener"
+							<?php endif; ?>
 						>
 							<span class="mmsm-social-icon" aria-hidden="true">
 								<?php echo $link['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

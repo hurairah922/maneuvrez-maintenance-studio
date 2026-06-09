@@ -3,12 +3,29 @@
 	margin-bottom: 1rem;
 }
 
+.mmsm-settings-page .mmsm-settings-tabs {
+	margin: 1.25rem 0 1rem;
+}
+
+.mmsm-settings-page .mmsm-settings-panel {
+	max-width: 980px;
+	padding: 8px 0 0;
+}
+
+.mmsm-settings-page .mmsm-settings-panel .title {
+	margin-bottom: 0.35rem;
+}
+
 .mmsm-settings-page .form-table th {
 	width: 220px;
 }
 
 .mmsm-settings-page .form-table td p.description {
 	max-width: 64ch;
+}
+
+.mmsm-settings-page .form-table {
+	margin-top: 0.75rem;
 }
 
 .mmsm-settings-page .mmsm-color-picker {

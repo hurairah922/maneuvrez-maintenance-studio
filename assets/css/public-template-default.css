@@ -284,7 +284,7 @@ body.mmsm-maintenance-page {
 
 .mmsm-progress::-webkit-progress-value,
 .mmsm-progress::-moz-progress-bar {
-	background: linear-gradient(90deg, var(--mm-primary) 0%, #7cb3ff 100%);
+	background: linear-gradient(90deg, var(--mm-primary) 0%, var(--mm-link-text) 100%);
 	border-radius: 999px;
 }
 
