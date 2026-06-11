@@ -1,6 +1,6 @@
 {
   "name": "abuhurarrah/maintenance-mode-studio",
-  "description": "A modern WordPress plugin for interactive maintenance, coming soon, launch, and private site pages.",
+  "description": "A WordPress plugin for maintenance and coming soon pages with custom branding, social links, and admin access controls.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "autoload": {

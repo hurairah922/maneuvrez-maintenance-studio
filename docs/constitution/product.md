@@ -8,6 +8,8 @@
 
 **Publisher:** Abu Hurarrah
 
+**WordPress.org profile:** https://profiles.wordpress.org/hurairah922/
+
 **Creator credit:** Abu Hurarrah may be credited in the plugin author profile, readme, credits section, or product site.
 
 **Primary domain:** abuhurarrah.com

@@ -1,25 +1,27 @@
 === Maintenance Mode Studio ===
-Contributors: abuhurarrah
-Tags: maintenance mode, coming soon, maintenance page
+Contributors: hurairah922
+Tags: maintenance mode, coming soon, maintenance page, admin bypass, social links
 Requires at least: 6.4
-Tested up to: 6.5
+Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.1.0
+Stable tag: 1.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Create interactive maintenance, coming soon, launch, and private site pages with a modern default experience.
+Create a responsive maintenance or coming soon page with custom copy, colors, contact details, social links, login access, and administrator bypass.
 
 == Description ==
 
-Maintenance Mode Studio helps WordPress site owners replace boring maintenance screens with a polished, responsive landing page.
+Maintenance Mode Studio helps WordPress site owners replace the default downtime screen with a polished maintenance or coming soon page.
 
-This Phase 1 foundation includes:
+This release includes:
 
-* a safe plugin shell
-* a settings page with a maintenance mode toggle
+* custom page title and message settings
+* maintenance mode and coming soon mode
+* customizable colors for the default template
+* contact details, social links, and login access controls
 * administrator bypass behavior
-* a default responsive maintenance page for logged-out visitors
+* a responsive default public template
 
 == Installation ==
 
@@ -35,10 +37,19 @@ No. Logged-in administrators keep normal access to the site.
 
 = Are login and API requests still available? =
 
-Yes. The Phase 1 shell keeps `wp-login.php`, REST, AJAX, cron, and WP-CLI requests accessible.
+Yes. The plugin keeps `wp-login.php`, REST, AJAX, cron, and WP-CLI requests accessible.
 
 == Changelog ==
 
-= 0.1.0 =
+= 1.0.0 =
 
-* Initial Phase 1 plugin shell.
+* first WordPress.org submission-ready release
+* add a responsive default maintenance and coming soon page template
+* add configurable page title, message, hero eyebrow, and action button fields
+* add customizable colors for background, surface, text, links, borders, and buttons
+* add contact details, status/progress, login button, and footer visibility controls
+* add social links with platform defaults, WordPress Dashicon choices, and uploaded image icons
+* preserve administrator access and keep login, REST, AJAX, cron, and WP-CLI requests available
+* improve settings sanitization, request validation, and Plugin Check compatibility
+* add an uninstall preference so site owners can choose whether settings are removed on plugin deletion
+* clean the release package for WordPress.org submission by excluding development-only files and unused assets

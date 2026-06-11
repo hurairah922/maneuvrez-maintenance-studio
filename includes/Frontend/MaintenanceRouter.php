@@ -7,7 +7,7 @@
 
 namespace Maneuvrez\MaintenanceModeStudio\Frontend;
 
-use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
+use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,12 +23,20 @@ class MaintenanceRouter {
 	private $renderer;
 
 	/**
+	 * Settings repository.
+	 *
+	 * @var SettingsRepository
+	 */
+	private $settings_repository;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param TemplateRenderer $renderer Renderer dependency.
 	 */
-	public function __construct( TemplateRenderer $renderer ) {
-		$this->renderer = $renderer;
+	public function __construct( TemplateRenderer $renderer, $settings_repository = null ) {
+		$this->renderer            = $renderer;
+		$this->settings_repository = $settings_repository instanceof SettingsRepository ? $settings_repository : new SettingsRepository();
 	}
 
 	/**
@@ -60,7 +68,6 @@ class MaintenanceRouter {
 		}
 
 		nocache_headers();
-		$this->enqueue_assets();
 		$this->renderer->render( $settings );
 		exit;
 	}
@@ -68,7 +75,7 @@ class MaintenanceRouter {
 	/**
 	 * Determine whether maintenance mode is enabled.
 	 *
-	 * @param array<string,int|string> $settings Sanitized settings.
+	 * @param array<string,mixed> $settings Sanitized settings.
 	 * @return bool
 	 */
 	private function is_enabled( array $settings ) {
@@ -108,54 +115,28 @@ class MaintenanceRouter {
 	 * @return bool
 	 */
 	private function is_rest_request() {
-		if ( function_exists( 'wp_is_serving_rest_request' ) && wp_is_serving_rest_request() ) {
-			return true;
-		}
-
 		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 			return true;
 		}
 
-		if ( isset( $_GET['rest_route'] ) ) {
+		if ( isset( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only REST route detection does not process or persist user input.
 			return true;
 		}
 
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only request path inspection for routing, sanitized before use.
+			? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+			: '';
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
 		return '' !== $request_uri && false !== strpos( $request_uri, '/' . $rest_prefix );
 	}
 
 	/**
-	 * Register and enqueue public assets only when the maintenance template renders.
-	 *
-	 * @return void
-	 */
-	private function enqueue_assets() {
-		wp_enqueue_style(
-			'mmsm-public',
-			MMSM_PLUGIN_URL . 'public/assets/public.css',
-			array(),
-			MMSM_VERSION
-		);
-
-		wp_enqueue_script(
-			'mmsm-public',
-			MMSM_PLUGIN_URL . 'public/assets/public.js',
-			array(),
-			MMSM_VERSION,
-			false
-		);
-
-		wp_script_add_data( 'mmsm-public', 'defer', true );
-	}
-
-	/**
 	 * Load the merged settings for frontend use.
 	 *
-	 * @return array<string,int|string>
+	 * @return array<string,mixed>
 	 */
 	private function get_settings() {
-		return Sanitizer::get_settings( get_option( MMSM_SETTINGS_OPTION, array() ) );
+		return $this->settings_repository->get_settings();
 	}
 }

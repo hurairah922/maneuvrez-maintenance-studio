@@ -1,25 +1,21 @@
 # Maintenance Mode Studio
 
-A modern WordPress plugin for interactive maintenance, coming soon, launch, and private site pages.
+Development notes for the Maintenance Mode Studio WordPress plugin.
 
 ## Product Summary
 
-Maintenance Mode Studio helps WordPress site owners replace boring maintenance screens with polished interactive landing pages.
+Maintenance Mode Studio helps WordPress site owners replace the default downtime screen with a polished maintenance or coming soon page.
 
-The plugin will support:
+The current shipped plugin includes:
 
 - Maintenance mode
 - Coming soon mode
-- Launch pages
-- Private site mode
-- Interactive games
-- Feedback forms
-- Surveys
-- Contact options
+- Custom colors
+- Contact details
 - Social links
 - Login access
-- Responsive animations
-- Admin-controlled layouts
+- Administrator bypass
+- Responsive default template
 
 ## Owner And Publisher
 
@@ -28,6 +24,10 @@ Abu Hurarrah
 Website:
 
     https://abuhurarrah.com
+
+WordPress.org profile:
+
+    https://profiles.wordpress.org/hurairah922/
 
 Email:
 
@@ -54,14 +54,6 @@ Text domain:
 REST namespace:
 
     mmsm/v1
-
-## Development Status
-
-This plugin is in early development.
-
-Current phase:
-
-    Phase 1 - Plugin Shell and Minimal Maintenance Mode
 
 ## Source Of Truth
 

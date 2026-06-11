@@ -3,6 +3,19 @@
 	margin-bottom: 1rem;
 }
 
+.mmsm-settings-page .mmsm-settings-tabs {
+	margin: 1.25rem 0 1rem;
+}
+
+.mmsm-settings-page .mmsm-settings-panel {
+	max-width: 980px;
+	padding: 8px 0 0;
+}
+
+.mmsm-settings-page .mmsm-settings-panel .title {
+	margin-bottom: 0.35rem;
+}
+
 .mmsm-settings-page .form-table th {
 	width: 220px;
 }
@@ -11,6 +24,58 @@
 	max-width: 64ch;
 }
 
-.mmsm-settings-page .mmsm-color-field {
+.mmsm-settings-page .form-table {
+	margin-top: 0.75rem;
+}
+
+.mmsm-settings-page .mmsm-color-picker {
 	max-width: 120px;
+}
+
+.mmsm-settings-page .mmsm-social-item-group {
+	max-width: 520px;
+	margin-bottom: 16px;
+	padding: 16px;
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	background: #fff;
+}
+
+.mmsm-settings-page .mmsm-social-item-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 10px;
+}
+
+.mmsm-settings-page .mmsm-social-item-group p {
+	margin: 0 0 10px;
+}
+
+.mmsm-settings-page .mmsm-social-custom-fields.is-hidden,
+.mmsm-settings-page .mmsm-social-icon-library-fields.is-hidden,
+.mmsm-settings-page .mmsm-social-icon-upload-fields.is-hidden,
+.mmsm-settings-page .mmsm-social-icon-preview.is-hidden,
+.mmsm-settings-page .mmsm-remove-social-icon.is-hidden {
+	display: none;
+}
+
+.mmsm-settings-page .mmsm-social-icon-picker {
+	border-top: 1px solid #f0f0f1;
+	padding-top: 12px;
+}
+
+.mmsm-settings-page .mmsm-social-icon-preview-wrap {
+	margin-bottom: 10px;
+}
+
+.mmsm-settings-page .mmsm-social-icon-preview {
+	display: block;
+	width: 48px;
+	height: 48px;
+	object-fit: contain;
+	border: 1px solid #dcdcde;
+	border-radius: 10px;
+	background: #f6f7f7;
 }

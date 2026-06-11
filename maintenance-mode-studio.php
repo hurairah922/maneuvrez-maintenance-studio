@@ -1,9 +1,8 @@
 <?php
 /**
  * Plugin Name: Maintenance Mode Studio
- * Plugin URI: https://abuhurarrah.com/plugins/maintenance-mode-studio
- * Description: Create interactive maintenance, coming soon, launch, and private site pages with games, forms, contact options, social links, login access, and modern responsive animations.
- * Version: 0.1.0
+ * Description: Create a responsive maintenance or coming soon page with custom copy, colors, contact details, social links, login access, and administrator bypass.
+ * Version: 1.0.0
  * Author: Abu Hurarrah
  * Author URI: https://abuhurarrah.com
  * Text Domain: maintenance-mode-studio
@@ -12,15 +11,10 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
 
-/**
- * Created by Abu Hurarrah.
- * Creator URI: https://abuhurarrah.com
- */
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'MMSM_VERSION' ) ) {
-	define( 'MMSM_VERSION', '0.1.0' );
+	define( 'MMSM_VERSION', '1.0.0' );
 }
 
 if ( ! defined( 'MMSM_PLUGIN_FILE' ) ) {
@@ -55,8 +49,19 @@ if ( ! defined( 'MMSM_VERSION_OPTION' ) ) {
 	define( 'MMSM_VERSION_OPTION', 'mmsm_version' );
 }
 
+require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsSchema.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsRepository.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Support/Escaper.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Security/Sanitizer.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Components/ComponentInterface.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Components/HeroComponent.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Components/SocialLinksComponent.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Components/ContactRevealComponent.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Components/LoginComponent.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Components/StatusProgressComponent.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Components/ComponentRegistry.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Admin/Admin.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Frontend/TemplateRegistry.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Frontend/TemplateRenderer.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Frontend/MaintenanceRouter.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Activator.php';
@@ -74,10 +79,7 @@ register_deactivation_hook(
 );
 
 /**
- * Bootstrap the Phase 1 plugin shell.
- *
- * Future Pro extension points should compose around the Plugin class rather than
- * branching from this entry file.
+ * Bootstrap the plugin runtime.
  */
 function mmsm_run_plugin() {
 	$plugin = new Maneuvrez\MaintenanceModeStudio\Plugin();

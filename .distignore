@@ -4,12 +4,15 @@ specs/
 tests/
 tools/
 src/
+public/
 node_modules/
 vendor/
 .git/
 .gitignore
 .distignore
 .editorconfig
+README.md
+build-zip.sh
 package.json
 package-lock.json
 composer.json

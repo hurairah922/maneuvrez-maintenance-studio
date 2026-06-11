@@ -8,14 +8,17 @@
 namespace Maneuvrez\MaintenanceModeStudio;
 
 use Maneuvrez\MaintenanceModeStudio\Admin\Admin;
+use Maneuvrez\MaintenanceModeStudio\Components\ComponentRegistry;
 use Maneuvrez\MaintenanceModeStudio\Frontend\MaintenanceRouter;
+use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRegistry;
 use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRenderer;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
+use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Orchestrates the Phase 1 admin and frontend services.
+ * Orchestrates the plugin admin and frontend services.
  */
 class Plugin {
 	/**
@@ -36,9 +39,13 @@ class Plugin {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$renderer     = new TemplateRenderer();
-		$this->admin  = new Admin();
-		$this->router = new MaintenanceRouter( $renderer );
+		$settings_repository = new SettingsRepository();
+		$template_registry   = new TemplateRegistry();
+		$component_registry  = new ComponentRegistry();
+		$renderer            = new TemplateRenderer( $template_registry, $component_registry, $settings_repository );
+
+		$this->admin  = new Admin( $settings_repository );
+		$this->router = new MaintenanceRouter( $renderer, $settings_repository );
 	}
 
 	/**
@@ -49,14 +56,12 @@ class Plugin {
 	public function run() {
 		$this->maybe_seed_settings();
 
-		add_action( 'init', array( $this, 'load_textdomain' ) );
-
 		$this->admin->register();
 		$this->router->register();
 	}
 
 	/**
-	 * Ensure the Phase 2 settings option exists and migrate legacy data once.
+	 * Ensure the current settings option exists and migrate legacy data once.
 	 *
 	 * @return void
 	 */
@@ -71,16 +76,4 @@ class Plugin {
 		add_option( MMSM_SETTINGS_OPTION, Sanitizer::get_settings( $legacy_settings ) );
 	}
 
-	/**
-	 * Load translation files.
-	 *
-	 * @return void
-	 */
-	public function load_textdomain() {
-		load_plugin_textdomain(
-			MMSM_TEXT_DOMAIN,
-			false,
-			dirname( MMSM_PLUGIN_BASENAME ) . '/languages'
-		);
-	}
 }
