@@ -1328,7 +1328,7 @@ class Admin {
 	 */
 	private function get_active_tab() {
 		$tabs = $this->get_tabs();
-		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
+		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only tab selection for admin UI state, sanitized and not persisted.
 
 		if ( ! isset( $tabs[ $tab ] ) ) {
 			return 'general';

@@ -115,19 +115,15 @@ class MaintenanceRouter {
 	 * @return bool
 	 */
 	private function is_rest_request() {
-		$is_rest_request = function_exists( 'wp_is_serving_rest_request' )
-			? wp_is_serving_rest_request()
-			: ( defined( 'REST_REQUEST' ) && REST_REQUEST );
-
-		if ( $is_rest_request ) {
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 			return true;
 		}
 
-		if ( isset( $_GET['rest_route'] ) ) {
+		if ( isset( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only REST route detection does not process or persist user input.
 			return true;
 		}
 
-		$request_uri = isset( $_SERVER['REQUEST_URI'] )
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only request path inspection for routing, sanitized before use.
 			? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
 			: '';
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
