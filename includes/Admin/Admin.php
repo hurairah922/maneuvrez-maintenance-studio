@@ -466,13 +466,6 @@ class Admin {
 			$input['social_links'] = array();
 		}
 
-		add_settings_error(
-			MMSM_SETTINGS_OPTION,
-			'mmsm_settings_saved',
-			__( 'Settings saved.', MMSM_TEXT_DOMAIN ),
-			'updated'
-		);
-
 		return Sanitizer::sanitize_settings( array_merge( $existing, $input ) );
 	}
 

@@ -173,8 +173,6 @@ class TemplateRenderer {
 	 * @return array<string,mixed>
 	 */
 	private function build_context( array $settings, array $template, array $assets ) {
-		$theme_variables = $this->get_theme_variables( $settings );
-
 		return array(
 			'charset'        => get_bloginfo( 'charset' ),
 			'language'       => get_bloginfo( 'language' ),
@@ -191,278 +189,160 @@ class TemplateRenderer {
 					'mmsm-mode-' . (string) $settings['mode_type'],
 				)
 			),
-			'shell_style'    => Escaper::css_variables( $theme_variables ),
+			'shell_style'    => $this->build_shell_style( $settings ),
 			'assets'         => $assets,
 			'template'       => $template,
 		);
 	}
 
 	/**
-	 * Build theme variables for light and dark modes with safe fallbacks.
+	 * Return the canonical setting-to-variable map for public colors.
 	 *
-	 * @param array<string,mixed> $settings Normalized settings.
 	 * @return array<string,string>
 	 */
-	private function get_theme_variables( array $settings ) {
+	private function get_color_variable_map() {
+		return array(
+			'background_color'   => '--mm-bg',
+			'surface_color'      => '--mm-surface',
+			'primary_color'      => '--mm-primary',
+			'heading_text_color' => '--mm-heading-text',
+			'body_text_color'    => '--mm-body-text',
+			'muted_text_color'   => '--mm-muted-text',
+			'link_text_color'    => '--mm-link-text',
+			'button_text_color'  => '--mm-button-text',
+			'border_color'       => '--mm-border',
+		);
+	}
+
+	/**
+	 * Return default colors for the selected theme mode.
+	 *
+	 * System mode uses the light defaults as its inline fallback base while the
+	 * stylesheet applies dark defaults through the media query when no custom
+	 * override is printed for a given variable.
+	 *
+	 * @param string $theme_mode Selected theme mode.
+	 * @return array<string,string>
+	 */
+	private function get_default_colors_for_theme_mode( $theme_mode ) {
 		$light_defaults = array(
-			'mm-bg'           => '#f8fafc',
-			'mm-surface'      => '#ffffff',
-			'mm-heading-text' => '#0f172a',
-			'mm-body-text'    => '#334155',
-			'mm-muted-text'   => '#64748b',
-			'mm-link-text'    => '#2563eb',
-			'mm-primary'      => '#2563eb',
-			'mm-button-text'  => '#ffffff',
-			'mm-border'       => '#e2e8f0',
-			'mm-shadow'       => '0 24px 80px rgba(15,23,42,0.16)',
+			'background_color'   => '#f8fafc',
+			'surface_color'      => '#ffffff',
+			'primary_color'      => '#2563eb',
+			'heading_text_color' => '#0f172a',
+			'body_text_color'    => '#334155',
+			'muted_text_color'   => '#64748b',
+			'link_text_color'    => '#2563eb',
+			'button_text_color'  => '#ffffff',
+			'border_color'       => '#e2e8f0',
 		);
 		$dark_defaults  = array(
-			'mm-bg'           => '#020617',
-			'mm-surface'      => '#0f172a',
-			'mm-heading-text' => '#f8fafc',
-			'mm-body-text'    => '#cbd5e1',
-			'mm-muted-text'   => '#94a3b8',
-			'mm-link-text'    => '#93c5fd',
-			'mm-primary'      => '#60a5fa',
-			'mm-button-text'  => '#020617',
-			'mm-border'       => '#334155',
-			'mm-shadow'       => '0 24px 80px rgba(0,0,0,0.34)',
+			'background_color'   => '#020617',
+			'surface_color'      => '#0f172a',
+			'primary_color'      => '#60a5fa',
+			'heading_text_color' => '#f8fafc',
+			'body_text_color'    => '#cbd5e1',
+			'muted_text_color'   => '#94a3b8',
+			'link_text_color'    => '#93c5fd',
+			'button_text_color'  => '#020617',
+			'border_color'       => '#334155',
 		);
 
-		$light_palette = $this->build_theme_palette( $settings, $light_defaults, false );
-		$dark_palette  = $this->build_theme_palette( $settings, $dark_defaults, true );
+		if ( 'dark' === $theme_mode ) {
+			return $dark_defaults;
+		}
 
-		return array(
-			'mm-bg'                => $light_palette['mm-bg'],
-			'mm-surface'           => $light_palette['mm-surface'],
-			'mm-heading-text'      => $light_palette['mm-heading-text'],
-			'mm-body-text'         => $light_palette['mm-body-text'],
-			'mm-muted-text'        => $light_palette['mm-muted-text'],
-			'mm-link-text'         => $light_palette['mm-link-text'],
-			'mm-primary'           => $light_palette['mm-primary'],
-			'mm-button-text'       => $light_palette['mm-button-text'],
-			'mm-border'            => $light_palette['mm-border'],
-			'mm-shadow'            => $light_palette['mm-shadow'],
-			'mm-radius'            => '28px',
-			'mm-content-width'     => '1120px',
-			'mm-text'              => $light_palette['mm-body-text'],
-			'mm-muted'             => $light_palette['mm-muted-text'],
-			'mm-primary-text'      => $light_palette['mm-button-text'],
-			'mm-dark-bg'           => $dark_palette['mm-bg'],
-			'mm-dark-surface'      => $dark_palette['mm-surface'],
-			'mm-dark-heading-text' => $dark_palette['mm-heading-text'],
-			'mm-dark-body-text'    => $dark_palette['mm-body-text'],
-			'mm-dark-muted-text'   => $dark_palette['mm-muted-text'],
-			'mm-dark-link-text'    => $dark_palette['mm-link-text'],
-			'mm-dark-primary'      => $dark_palette['mm-primary'],
-			'mm-dark-button-text'  => $dark_palette['mm-button-text'],
-			'mm-dark-border'       => $dark_palette['mm-border'],
-			'mm-dark-shadow'       => $dark_palette['mm-shadow'],
-		);
+		return $light_defaults;
 	}
 
 	/**
-	 * Build a readable palette for one theme mode.
+	 * Normalize color settings against theme defaults.
 	 *
-	 * @param array<string,mixed>  $settings Normalized settings.
-	 * @param array<string,string> $defaults Safe defaults for the theme.
-	 * @param bool                 $is_dark Whether this is the dark palette.
+	 * @param array<string,mixed> $settings Sanitized settings.
 	 * @return array<string,string>
 	 */
-	private function build_theme_palette( array $settings, array $defaults, $is_dark ) {
-		$background = $this->sanitize_theme_color( $settings['background_color'], $defaults['mm-bg'] );
-		$surface    = $this->sanitize_theme_color( $settings['surface_color'], $defaults['mm-surface'] );
-		$primary    = $this->sanitize_theme_color( $settings['primary_color'], $defaults['mm-primary'] );
-		$heading    = $this->sanitize_theme_color( $settings['heading_text_color'], $defaults['mm-heading-text'] );
-		$body       = $this->sanitize_theme_color( $settings['body_text_color'], $defaults['mm-body-text'] );
-		$muted      = $this->sanitize_theme_color( $settings['muted_text_color'], $defaults['mm-muted-text'] );
-		$link       = $this->sanitize_theme_color( $settings['link_text_color'], $defaults['mm-link-text'] );
-		$button     = $this->sanitize_theme_color( $settings['button_text_color'], $defaults['mm-button-text'] );
-		$border     = $this->sanitize_theme_color( $settings['border_color'], $defaults['mm-border'] );
+	private function normalize_colors( array $settings ) {
+		$defaults   = $this->get_default_colors_for_theme_mode( isset( $settings['theme_mode'] ) ? (string) $settings['theme_mode'] : 'system' );
+		$saved      = array();
+		$color_keys = array_keys( $this->get_color_variable_map() );
 
-		if ( $is_dark && ! $this->is_dark_enough( $background ) ) {
-			$background = $defaults['mm-bg'];
+		foreach ( $color_keys as $key ) {
+			if ( isset( $settings[ $key ] ) ) {
+				$saved[ $key ] = $settings[ $key ];
+			}
 		}
 
-		if ( $is_dark && ! $this->is_dark_enough( $surface ) ) {
-			$surface = $defaults['mm-surface'];
+		$colors = wp_parse_args( $saved, $defaults );
+
+		foreach ( $defaults as $key => $default ) {
+			$color = isset( $colors[ $key ] ) ? sanitize_hex_color( (string) $colors[ $key ] ) : '';
+
+			if ( empty( $color ) ) {
+				$colors[ $key ] = $default;
+				continue;
+			}
+
+			$colors[ $key ] = $color;
 		}
 
-		$heading = $this->ensure_readable_text_color( $heading, $surface, $defaults['mm-heading-text'], 4.5 );
-		$body    = $this->ensure_readable_text_color( $body, $surface, $defaults['mm-body-text'], 4.5 );
-		$muted   = $this->ensure_readable_text_color( $muted, $surface, $defaults['mm-muted-text'], 3.2 );
-		$link    = $this->ensure_distinct_link_color( $link, $surface, $body, $defaults['mm-link-text'] );
-		$button  = $this->ensure_button_text_color( $button, $primary, $defaults['mm-button-text'] );
-		$border  = $this->ensure_border_color( $border, $surface, $defaults['mm-border'] );
-
-		return array(
-			'mm-bg'           => $background,
-			'mm-surface'      => $surface,
-			'mm-heading-text' => $heading,
-			'mm-body-text'    => $body,
-			'mm-muted-text'   => $muted,
-			'mm-link-text'    => $link,
-			'mm-primary'      => $primary,
-			'mm-button-text'  => $button,
-			'mm-border'       => $border,
-			'mm-shadow'       => $defaults['mm-shadow'],
-		);
+		return array_intersect_key( $colors, $this->get_color_variable_map() );
 	}
 
 	/**
-	 * Return a sanitized theme color.
+	 * Build inline shell styles from saved color overrides.
 	 *
-	 * @param mixed  $color Raw color.
-	 * @param string $default Default color.
+	 * @param array<string,mixed> $settings Sanitized settings.
 	 * @return string
 	 */
-	private function sanitize_theme_color( $color, $default ) {
-		$color = sanitize_hex_color( (string) $color );
+	private function build_shell_style( array $settings ) {
+		$defaults  = $this->get_default_colors_for_theme_mode( isset( $settings['theme_mode'] ) ? (string) $settings['theme_mode'] : 'system' );
+		$colors    = $this->normalize_colors( $settings );
+		$overrides = array();
 
-		if ( empty( $color ) ) {
-			return $default;
+		foreach ( $this->get_color_variable_map() as $setting_key => $css_var ) {
+			if ( empty( $colors[ $setting_key ] ) ) {
+				continue;
+			}
+
+			if ( isset( $defaults[ $setting_key ] ) && strtolower( $colors[ $setting_key ] ) === strtolower( $defaults[ $setting_key ] ) ) {
+				continue;
+			}
+
+			$overrides[ $setting_key ] = $colors[ $setting_key ];
 		}
 
-		return $color;
+		return $this->build_color_style_attribute( $overrides );
 	}
 
 	/**
-	 * Ensure a text color remains readable against its surface.
+	 * Build the scoped style attribute for canonical public color variables.
 	 *
-	 * @param string $color Requested color.
-	 * @param string $background Surface color.
-	 * @param string $default Default fallback.
-	 * @param float  $threshold Minimum contrast threshold.
+	 * @param array<string,string> $colors Normalized color values keyed by setting.
 	 * @return string
 	 */
-	private function ensure_readable_text_color( $color, $background, $default, $threshold ) {
-		if ( $this->get_contrast_ratio( $color, $background ) < $threshold ) {
-			return $default;
+	private function build_color_style_attribute( array $colors ) {
+		$map          = $this->get_color_variable_map();
+		$declarations = array();
+
+		foreach ( $map as $setting_key => $css_var ) {
+			if ( empty( $colors[ $setting_key ] ) ) {
+				continue;
+			}
+
+			$color = sanitize_hex_color( $colors[ $setting_key ] );
+
+			if ( empty( $color ) ) {
+				continue;
+			}
+
+			$declarations[] = sprintf(
+				'%s: %s',
+				$css_var,
+				$color
+			);
 		}
 
-		return $color;
-	}
-
-	/**
-	 * Ensure link text is readable and distinct from body text.
-	 *
-	 * @param string $link_color Requested link color.
-	 * @param string $background Surface color.
-	 * @param string $body_color Body text color.
-	 * @param string $default Default fallback.
-	 * @return string
-	 */
-	private function ensure_distinct_link_color( $link_color, $background, $body_color, $default ) {
-		if ( $this->get_contrast_ratio( $link_color, $background ) < 3.5 ) {
-			return $default;
-		}
-
-		if ( $this->get_contrast_ratio( $link_color, $body_color ) < 1.15 ) {
-			return $default;
-		}
-
-		return $link_color;
-	}
-
-	/**
-	 * Ensure button text is readable against the primary color.
-	 *
-	 * @param string $button_color Requested button text color.
-	 * @param string $primary_color Primary button background color.
-	 * @param string $default Default fallback.
-	 * @return string
-	 */
-	private function ensure_button_text_color( $button_color, $primary_color, $default ) {
-		if ( $this->get_contrast_ratio( $button_color, $primary_color ) >= 4.5 ) {
-			return $button_color;
-		}
-
-		if ( $this->get_contrast_ratio( $default, $primary_color ) >= 4.5 ) {
-			return $default;
-		}
-
-		return $this->get_contrast_ratio( '#ffffff', $primary_color ) >= $this->get_contrast_ratio( '#020617', $primary_color ) ? '#ffffff' : '#020617';
-	}
-
-	/**
-	 * Ensure borders remain visible against the surface.
-	 *
-	 * @param string $border_color Requested border color.
-	 * @param string $surface_color Surface color.
-	 * @param string $default Default fallback.
-	 * @return string
-	 */
-	private function ensure_border_color( $border_color, $surface_color, $default ) {
-		if ( $this->get_contrast_ratio( $border_color, $surface_color ) < 1.25 ) {
-			return $default;
-		}
-
-		return $border_color;
-	}
-
-	/**
-	 * Determine whether a color is dark enough for dark mode surfaces.
-	 *
-	 * @param string $hex_color Color value.
-	 * @return bool
-	 */
-	private function is_dark_enough( $hex_color ) {
-		list( $red, $green, $blue ) = $this->hex_to_rgb( $hex_color );
-		$luminance = ( 0.2126 * $red ) + ( 0.7152 * $green ) + ( 0.0722 * $blue );
-
-		return $luminance < 0.35;
-	}
-
-	/**
-	 * Calculate contrast ratio between two colors.
-	 *
-	 * @param string $foreground Foreground color.
-	 * @param string $background Background color.
-	 * @return float
-	 */
-	private function get_contrast_ratio( $foreground, $background ) {
-		$foreground_luminance = $this->get_relative_luminance( $foreground );
-		$background_luminance = $this->get_relative_luminance( $background );
-		$light                = max( $foreground_luminance, $background_luminance );
-		$dark                 = min( $foreground_luminance, $background_luminance );
-
-		return ( $light + 0.05 ) / ( $dark + 0.05 );
-	}
-
-	/**
-	 * Convert a hex color into a relative luminance value.
-	 *
-	 * @param string $hex_color Hex color.
-	 * @return float
-	 */
-	private function get_relative_luminance( $hex_color ) {
-		list( $red, $green, $blue ) = $this->hex_to_rgb( $hex_color );
-
-		$red   = $red <= 0.03928 ? $red / 12.92 : pow( ( $red + 0.055 ) / 1.055, 2.4 );
-		$green = $green <= 0.03928 ? $green / 12.92 : pow( ( $green + 0.055 ) / 1.055, 2.4 );
-		$blue  = $blue <= 0.03928 ? $blue / 12.92 : pow( ( $blue + 0.055 ) / 1.055, 2.4 );
-
-		return ( 0.2126 * $red ) + ( 0.7152 * $green ) + ( 0.0722 * $blue );
-	}
-
-	/**
-	 * Convert a hex color string to normalized RGB channel values.
-	 *
-	 * @param string $hex_color Hex color.
-	 * @return array<int,float>
-	 */
-	private function hex_to_rgb( $hex_color ) {
-		$hex_color = ltrim( (string) $hex_color, '#' );
-
-		if ( 3 === strlen( $hex_color ) ) {
-			$hex_color = $hex_color[0] . $hex_color[0] . $hex_color[1] . $hex_color[1] . $hex_color[2] . $hex_color[2];
-		}
-
-		return array(
-			hexdec( substr( $hex_color, 0, 2 ) ) / 255,
-			hexdec( substr( $hex_color, 2, 2 ) ) / 255,
-			hexdec( substr( $hex_color, 4, 2 ) ) / 255,
-		);
+		return implode( '; ', $declarations );
 	}
 
 	/**

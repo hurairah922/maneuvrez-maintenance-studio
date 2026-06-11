@@ -1,19 +1,6 @@
 :root {
-	--mm-bg: #f8fafc;
-	--mm-surface: #ffffff;
-	--mm-heading-text: #0f172a;
-	--mm-body-text: #334155;
-	--mm-muted-text: #64748b;
-	--mm-link-text: #2563eb;
-	--mm-primary: #2563eb;
-	--mm-button-text: #ffffff;
-	--mm-border: #e2e8f0;
-	--mm-shadow: 0 24px 80px rgba(15, 23, 42, 0.16);
 	--mm-radius: 28px;
 	--mm-content-width: 1120px;
-	--mm-text: var(--mm-body-text);
-	--mm-muted: var(--mm-muted-text);
-	--mm-primary-text: var(--mm-button-text);
 }
 
 *,
@@ -29,67 +16,71 @@ body {
 }
 
 body.mmsm-maintenance-page {
-	background: var(--mm-bg);
-	color: var(--mm-body-text);
+	background: #f8fafc;
+	color: #334155;
 	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .mmsm-shell {
+	--mm-bg: #f8fafc;
+	--mm-surface: #ffffff;
+	--mm-heading-text: #0f172a;
+	--mm-body-text: #334155;
+	--mm-muted-text: #64748b;
+	--mm-link-text: #2563eb;
+	--mm-primary: #2563eb;
+	--mm-button-text: #ffffff;
+	--mm-border: #e2e8f0;
+	--mm-shadow: 0 24px 80px color-mix(in srgb, var(--mm-heading-text) 16%, transparent);
 	position: relative;
 	min-height: 100vh;
 	overflow-x: hidden;
+	color-scheme: light;
+	background-color: var(--mm-bg);
 	background:
-		radial-gradient(circle at top, rgba(255, 255, 255, 0.7), transparent 28%),
-		radial-gradient(circle at bottom left, rgba(37, 99, 235, 0.14), transparent 32%),
-		linear-gradient(145deg, var(--mm-bg) 0%, #f8fbff 100%);
+		radial-gradient(circle at top, color-mix(in srgb, var(--mm-surface) 72%, transparent), transparent 28%),
+		radial-gradient(circle at bottom left, color-mix(in srgb, var(--mm-primary) 14%, transparent), transparent 32%),
+		linear-gradient(145deg, var(--mm-bg) 0%, color-mix(in srgb, var(--mm-bg) 84%, #ffffff) 100%);
 }
 
 .mmsm-shell.mmsm-theme-dark {
-	--mm-bg: var(--mm-dark-bg);
-	--mm-surface: var(--mm-dark-surface);
-	--mm-heading-text: var(--mm-dark-heading-text);
-	--mm-body-text: var(--mm-dark-body-text);
-	--mm-muted-text: var(--mm-dark-muted-text);
-	--mm-link-text: var(--mm-dark-link-text);
-	--mm-primary: var(--mm-dark-primary);
-	--mm-button-text: var(--mm-dark-button-text);
-	--mm-border: var(--mm-dark-border);
-	--mm-shadow: var(--mm-dark-shadow);
-	--mm-text: var(--mm-body-text);
-	--mm-muted: var(--mm-muted-text);
-	--mm-primary-text: var(--mm-button-text);
+	--mm-bg: #020617;
+	--mm-surface: #0f172a;
+	--mm-heading-text: #f8fafc;
+	--mm-body-text: #cbd5e1;
+	--mm-muted-text: #94a3b8;
+	--mm-link-text: #93c5fd;
+	--mm-primary: #60a5fa;
+	--mm-button-text: #020617;
+	--mm-border: #334155;
+	--mm-shadow: 0 24px 80px color-mix(in srgb, #000000 34%, transparent);
+	color-scheme: dark;
 	background:
-		radial-gradient(circle at top, rgba(96, 165, 250, 0.14), transparent 24%),
-		radial-gradient(circle at bottom right, rgba(96, 165, 250, 0.12), transparent 28%),
-		linear-gradient(160deg, var(--mm-bg) 0%, #040b15 100%);
+		radial-gradient(circle at top, color-mix(in srgb, var(--mm-primary) 14%, transparent), transparent 24%),
+		radial-gradient(circle at bottom right, color-mix(in srgb, var(--mm-primary) 12%, transparent), transparent 28%),
+		linear-gradient(160deg, var(--mm-bg) 0%, color-mix(in srgb, var(--mm-bg) 82%, #000000) 100%);
 }
 
 .mmsm-shell.mmsm-theme-system {
-	background:
-		radial-gradient(circle at top, rgba(255, 255, 255, 0.7), transparent 28%),
-		radial-gradient(circle at bottom left, rgba(37, 99, 235, 0.14), transparent 32%),
-		linear-gradient(145deg, var(--mm-bg) 0%, #f8fbff 100%);
+	color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
 	.mmsm-shell.mmsm-theme-system {
-		--mm-bg: var(--mm-dark-bg);
-		--mm-surface: var(--mm-dark-surface);
-		--mm-heading-text: var(--mm-dark-heading-text);
-		--mm-body-text: var(--mm-dark-body-text);
-		--mm-muted-text: var(--mm-dark-muted-text);
-		--mm-link-text: var(--mm-dark-link-text);
-		--mm-primary: var(--mm-dark-primary);
-		--mm-button-text: var(--mm-dark-button-text);
-		--mm-border: var(--mm-dark-border);
-		--mm-shadow: var(--mm-dark-shadow);
-		--mm-text: var(--mm-body-text);
-		--mm-muted: var(--mm-muted-text);
-		--mm-primary-text: var(--mm-button-text);
+		--mm-bg: #020617;
+		--mm-surface: #0f172a;
+		--mm-heading-text: #f8fafc;
+		--mm-body-text: #cbd5e1;
+		--mm-muted-text: #94a3b8;
+		--mm-link-text: #93c5fd;
+		--mm-primary: #60a5fa;
+		--mm-button-text: #020617;
+		--mm-border: #334155;
+		--mm-shadow: 0 24px 80px color-mix(in srgb, #000000 34%, transparent);
 		background:
-			radial-gradient(circle at top, rgba(96, 165, 250, 0.14), transparent 24%),
-			radial-gradient(circle at bottom right, rgba(96, 165, 250, 0.12), transparent 28%),
-			linear-gradient(160deg, var(--mm-bg) 0%, #040b15 100%);
+			radial-gradient(circle at top, color-mix(in srgb, var(--mm-primary) 14%, transparent), transparent 24%),
+			radial-gradient(circle at bottom right, color-mix(in srgb, var(--mm-primary) 12%, transparent), transparent 28%),
+			linear-gradient(160deg, var(--mm-bg) 0%, color-mix(in srgb, var(--mm-bg) 82%, #000000) 100%);
 	}
 }
 
@@ -97,8 +88,8 @@ body.mmsm-maintenance-page {
 	position: absolute;
 	inset: 0;
 	background:
-		radial-gradient(circle at var(--mmsm-glow-x, 22%) var(--mmsm-glow-y, 18%), rgba(37, 99, 235, 0.24), transparent 30%),
-		radial-gradient(circle at 84% 80%, rgba(37, 99, 235, 0.14), transparent 24%);
+		radial-gradient(circle at var(--mmsm-glow-x, 22%) var(--mmsm-glow-y, 18%), color-mix(in srgb, var(--mm-primary) 24%, transparent), transparent 30%),
+		radial-gradient(circle at 84% 80%, color-mix(in srgb, var(--mm-primary) 14%, transparent), transparent 24%);
 	pointer-events: none;
 }
 
@@ -146,7 +137,7 @@ body.mmsm-maintenance-page {
 	padding: 8px 14px;
 	border: 1px solid var(--mm-border);
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.32);
+	background: color-mix(in srgb, var(--mm-surface) 32%, transparent);
 	color: var(--mm-link-text);
 	font-size: 0.78rem;
 	font-weight: 700;
@@ -213,8 +204,8 @@ body.mmsm-maintenance-page {
 .mmsm-button-primary,
 .mmsm-button-tertiary {
 	background: var(--mm-primary);
-	color: var(--mm-primary-text);
-	box-shadow: 0 16px 28px rgba(37, 99, 235, 0.28);
+	color: var(--mm-button-text);
+	box-shadow: 0 16px 28px color-mix(in srgb, var(--mm-primary) 28%, transparent);
 }
 
 .mmsm-button-secondary {
@@ -242,7 +233,7 @@ body.mmsm-maintenance-page {
 	gap: 10px;
 	padding: 10px 14px;
 	border-radius: 999px;
-	background: rgba(37, 99, 235, 0.1);
+	background: color-mix(in srgb, var(--mm-primary) 10%, transparent);
 	color: var(--mm-body-text);
 	font-weight: 600;
 }
@@ -252,7 +243,7 @@ body.mmsm-maintenance-page {
 	height: 10px;
 	border-radius: 999px;
 	background: var(--mm-primary);
-	box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.14);
+	box-shadow: 0 0 0 6px color-mix(in srgb, var(--mm-primary) 14%, transparent);
 }
 
 .mmsm-progress-wrap {
@@ -274,11 +265,11 @@ body.mmsm-maintenance-page {
 	overflow: hidden;
 	border: 0;
 	border-radius: 999px;
-	background: rgba(148, 163, 184, 0.24);
+	background: color-mix(in srgb, var(--mm-muted-text) 24%, transparent);
 }
 
 .mmsm-progress::-webkit-progress-bar {
-	background: rgba(148, 163, 184, 0.24);
+	background: color-mix(in srgb, var(--mm-muted-text) 24%, transparent);
 	border-radius: 999px;
 }
 
@@ -330,7 +321,7 @@ body.mmsm-maintenance-page {
 	padding: 0 14px;
 	border: 1px solid var(--mm-border);
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.18);
+	background: color-mix(in srgb, var(--mm-surface) 18%, transparent);
 }
 
 .mmsm-social-icon {

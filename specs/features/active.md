@@ -1,264 +1,300 @@
-## Phase 3 Fix: Safe Social Defaults and Tab Save Protection
+## Phase 3 Fix: Reliable Color Application and Single Save Notice
 
-Phase 3 must fix the remaining social links and tab-saving issues without breaking existing plugin behavior.
+Phase 3 must fix inconsistent frontend color application and duplicate save notices.
 
-The fix must be backward-compatible.
+The color picker fields are already present and saving correctly.
 
-No saved data should be lost during this change.
+The remaining issue is that saved color values are not always applied correctly on the public template.
 
-## Default Social Link Item
+In some cases, colors appear correctly.
 
-The Social Links tab should show one social media item by default when no social links have been saved yet.
+In other cases, default colors or incorrect theme variables are used.
 
-This default item should make the UI clear and usable.
+This must be fixed with a clear color mapping layer and one source of truth for public theme variables.
 
-Default item:
-
-```php id="kf8d9a"
-[
-    'platform' => 'facebook',
-    'url' => '',
-    'custom_name' => '',
-    'custom_icon_id' => 0,
-    'open_new_tab' => true,
-]
-```
-
-Expected behavior:
-
-* If no social links exist, show one editable social item
-* The default item should not render publicly until it has a valid URL
-* The user can change the platform
-* The user can enter a URL or email value
-* The user can click `Add more` to add another social item
-* The user can remove any social item
-* If all items are removed, the admin UI should still allow adding a new item
-* Empty default rows should not render on the frontend
-* Empty default rows should not create broken links
-
-The frontend should only render valid saved social items.
-
-## Add More Social Flow
-
-The Social Links tab should support this flow:
-
-```text id="tkd54e"
-1. Open Social Links tab
-2. See one social item by default
-3. Choose a platform from the dropdown
-4. Enter the URL or email value
-5. Click Add more to add another social item
-6. Choose another platform
-7. Enter another URL or email value
-8. Remove any item when needed
-9. Save settings
-```
-
-Known platforms should ask only for:
-
-* Platform
-* URL or email value
-* Optional open in new tab setting
-
-Known platforms should not ask for a manual label.
-
-The visible label should come from the platform.
-
-## Custom Social Platform With SVG Icon
-
-The custom platform flow should support a custom SVG icon upload.
-
-When the selected platform is `custom`, show:
-
-* Custom platform name
-* URL
-* Custom icon upload
-* Optional open in new tab setting
-
-The custom icon upload should support SVG, but only with safe handling.
-
-SVG security rules:
-
-* Store the uploaded icon as a WordPress attachment ID
-* Do not store raw SVG markup in plugin options
-* Do not render raw SVG from settings
-* Do not allow pasted SVG code
-* Do not allow pasted HTML
-* Validate that the attachment is an allowed image/icon type
-* Escape the resolved attachment URL before output
-* Render the uploaded SVG as an image URL, not inline markup
-* Use safe alt text from the custom platform name
-* Fall back to `Link` if the custom platform name is empty
-* Fall back to the generic link icon if the uploaded icon is missing or invalid
-
-Allowed custom icon file types:
-
-```text id="yikgf1"
-svg
-png
-jpg
-jpeg
-webp
-```
-
-Important:
-
-SVG upload support must not weaken plugin security.
-
-If safe SVG upload support is not already available, the implementation should either:
-
-* Use WordPress media library attachment IDs and render SVG only as an escaped image URL
-* Or postpone SVG upload support and allow only png, jpg, jpeg, and webp until safe SVG sanitization is available
-
-Do not add unsafe SVG handling just to satisfy the upload field.
-
-## Social Item Removal Rules
-
-Users must be able to remove social media items.
-
-Removal behavior:
-
-* Each repeater item should have a clear remove button
-* Removing an item should remove it from the saved settings after save
-* Removing one item should not remove unrelated settings
-* Removing all social items should save an empty social links array
-* After saving an empty social links array, the admin UI may show one blank default item again for convenience
-* The frontend should render no social links when there are no valid saved social URLs
-
-Do not force a public social link to exist.
-
-The default row is for admin usability only.
-
-## Tab Save Data Protection
-
-Saving settings in one tab must not erase settings from other tabs.
+## Color Application Problem
 
 Current issue:
 
-```text id="pi3zqv"
-When saving items for one tab, other tab items are saved as null.
+```text id="uj75hx"
+Color picker values save correctly, but the selected colors are not applied consistently on the frontend.
 ```
 
-This must be fixed before Phase 3 is considered stable.
+Likely causes to check:
+
+* Saved color keys do not match frontend CSS variable names
+* Renderer maps saved settings to the wrong CSS variables
+* Template uses old variables while settings save new variables
+* CSS fallback values override saved inline variables
+* Light and dark mode variables are mixed incorrectly
+* System mode does not apply saved values consistently
+* Component styles use hardcoded colors instead of theme variables
+* Template wrapper does not receive the generated CSS variables consistently
+* Assets load after inline styles and override saved values
+* Multiple style sources compete with each other
+
+Phase 3 must remove this ambiguity.
+
+## Required Color Mapping Source of Truth
+
+Create one canonical color map that connects saved settings to frontend CSS variables.
+
+The implementation should define a clear map like this:
+
+```php id="p0vqv9"
+[
+    'background_color' => '--mm-bg',
+    'surface_color' => '--mm-surface',
+    'primary_color' => '--mm-primary',
+    'heading_text_color' => '--mm-heading-text',
+    'body_text_color' => '--mm-body-text',
+    'muted_text_color' => '--mm-muted-text',
+    'link_text_color' => '--mm-link-text',
+    'button_text_color' => '--mm-button-text',
+    'border_color' => '--mm-border',
+]
+```
+
+The exact saved setting keys may differ if the plugin already uses different names.
+
+However, the final implementation must have one explicit mapping between:
+
+* Saved option keys
+* Sanitized color values
+* Public CSS variable names
+* Template/component usage
+
+Do not rely on scattered manual mappings.
+
+Do not duplicate different mappings across multiple files.
+
+## Required Public CSS Variables
+
+The public template must consistently use these variables:
+
+```css id="jt7b1b"
+--mm-bg;
+--mm-surface;
+--mm-primary;
+--mm-heading-text;
+--mm-body-text;
+--mm-muted-text;
+--mm-link-text;
+--mm-button-text;
+--mm-border;
+```
+
+Every public component should use these variables instead of hardcoded color values.
+
+Required component mapping:
+
+| UI Element              | CSS Variable        |
+| ----------------------- | ------------------- |
+| Page background         | `--mm-bg`           |
+| Card/surface background | `--mm-surface`      |
+| Main heading            | `--mm-heading-text` |
+| Body/message text       | `--mm-body-text`    |
+| Secondary/muted text    | `--mm-muted-text`   |
+| Links/social labels     | `--mm-link-text`    |
+| Primary buttons         | `--mm-primary`      |
+| Button text             | `--mm-button-text`  |
+| Borders/dividers        | `--mm-border`       |
+| Progress fill/accent    | `--mm-primary`      |
+
+## Color Rendering Strategy
+
+The renderer should generate CSS variables from sanitized saved color settings.
+
+Preferred strategy:
+
+* Load saved settings
+* Merge with defaults
+* Sanitize color values
+* Build the CSS variable map
+* Print or enqueue inline CSS only on the maintenance template
+* Scope variables to the public maintenance wrapper
+
+Example output:
+
+```html id="d79a48"
+<div class="mm-public-shell" style="--mm-bg: #020617; --mm-surface: #0f172a; --mm-heading-text: #f8fafc;">
+```
+
+Or:
+
+```html id="cmyf5h"
+<style>
+.mm-public-shell {
+    --mm-bg: #020617;
+    --mm-surface: #0f172a;
+    --mm-heading-text: #f8fafc;
+}
+</style>
+```
+
+Either approach is acceptable.
+
+Rules:
+
+* Do not output invalid color values
+* Do not output empty CSS variable values
+* Do not output raw unsanitized settings
+* Do not output color CSS globally across the whole site
+* Do not let frontend CSS override saved custom variables with later defaults
+* Do not define conflicting duplicate values for the same variable
+
+## Light, Dark, and System Mode Color Rules
+
+Color mapping must work in all theme modes:
+
+```text id="p01nbd"
+light
+dark
+system
+```
 
 Expected behavior:
 
-* Saving the General tab preserves Template tab settings
-* Saving the General tab preserves Design tab settings
-* Saving the General tab preserves Components tab settings
-* Saving the General tab preserves Social Links tab settings
-* Saving the Social Links tab preserves General tab settings
-* Saving the Social Links tab preserves Design tab settings
-* Saving any tab only updates fields submitted by that tab
-* Missing tab fields must not be interpreted as null values
-* Missing tab fields must not overwrite existing saved values
+* In `light` mode, apply light/default color values plus any saved overrides
+* In `dark` mode, apply dark/default color values plus any saved overrides
+* In `system` mode, use system color defaults and still respect saved overrides
+* Saved custom color values should not randomly disappear after refresh
+* The same saved values should apply consistently after saving, reloading, and reopening the frontend
 
-## Safe Settings Merge Strategy
+If the plugin stores separate light and dark color groups, map each group clearly.
 
-The settings save handler must merge submitted tab values into the existing settings array.
+If the plugin stores one shared color group, apply it consistently across the selected theme mode.
 
-Required save strategy:
+Avoid mixing saved light colors into dark mode unless that is explicitly how the settings are designed.
 
-```text id="fl3msu"
-1. Load existing saved settings.
-2. Load default settings schema.
-3. Read only submitted fields for the active tab.
-4. Sanitize submitted fields.
-5. Merge sanitized submitted fields over existing saved settings.
-6. Preserve all settings not submitted by the current tab.
-7. Save the merged settings array.
+## Component Color Compliance
+
+All Phase 3 public components must use the canonical variables.
+
+Required components to check:
+
+* Hero component
+* Status/progress component
+* Contact reveal component
+* Social links component
+* Login component
+* Public template wrapper
+
+No component should use hardcoded text colors that bypass user-selected colors.
+
+Acceptable hardcoded values:
+
+* Transparent
+* Current color
+* Safe layout-only values
+* Non-color layout values
+
+Avoid hardcoded theme colors like:
+
+```css id="y0qqsh"
+#ffffff
+#000000
+#64748b
+#94a3b8
 ```
 
-Do not replace the entire options array with only the submitted tab values.
+unless they are only used as fallback values inside the canonical defaults.
 
-Do not set missing keys to null.
+## Admin Preview Color Consistency
 
-Do not clear nested arrays unless the active tab intentionally submits an empty array for that setting.
+If the admin settings page includes a preview, the preview should use the same color map as the frontend.
 
-## Nested Settings Merge Rules
+The admin preview should not use a separate color mapping that disagrees with the public template.
 
-Nested settings need special care.
+If maintaining a live preview is too risky, prioritize correct public frontend rendering.
 
-For nested arrays:
+## Duplicate Save Notice Issue
 
-* Preserve existing nested keys when they are not submitted
-* Update only submitted nested keys
-* Save intentional empty arrays only for fields that belong to the active tab
-* Do not recursively replace unrelated tab groups with null
-* Do not delete unrelated component settings when saving social links
-* Do not delete social links when saving design colors
+Current issue:
 
-Example:
-
-If the user saves only the Design tab, the save handler may update:
-
-```text id="pgn35o"
-theme_mode
-colors
+```text id="ntyfat"
+The settings saved notice appears twice after saving.
 ```
 
-It must preserve:
+Phase 3 must show only one save success notice.
 
-```text id="rx7s9m"
-mode_type
-page_title
-page_message
-template_key
-components
-social_links
-login_enabled
+Expected behavior:
+
+* Saving settings shows one success notice
+* The notice text should not duplicate
+* The notice should not appear twice from both WordPress Settings API and a custom notice
+* The notice should not duplicate when switching tabs after saving
+* Failed saves should not show a success notice
+* Validation errors should show separately when needed
+
+## Save Notice Ownership
+
+There must be one owner for the saved notice.
+
+Acceptable approaches:
+
+### Option A: Use WordPress Settings API Notice
+
+Use the default WordPress Settings API updated notice.
+
+Do not also render a custom success notice.
+
+### Option B: Use Custom Notice Only
+
+Suppress or avoid the default WordPress Settings API notice.
+
+Render one custom notice after a successful save.
+
+The implementation should choose one approach and remove duplicate notice output.
+
+Do not use both.
+
+## Save Notice Rules
+
+The save notice should:
+
+* Render once after a successful save
+* Use WordPress admin notice styling
+* Be dismissible if simple to support
+* Preserve active tab state
+* Not show on initial page load
+* Not show twice after redirect
+* Not show if the save failed
+
+Recommended notice text:
+
+```text id="d41u5m"
+Settings saved.
 ```
 
-If the user saves only the Social Links tab, the save handler may update:
+## Data Safety Requirements
 
-```text id="qp1jcr"
-social_links
-```
+This fix must not break previously fixed save behavior.
 
-It must preserve:
+The implementation must still:
 
-```text id="dvsccd"
-mode_type
-page_title
-page_message
-template_key
-theme_mode
-colors
-components
-login_enabled
-```
-
-## Data Loss Prevention Requirements
-
-Before saving settings:
-
-* Existing settings must be loaded
-* Defaults must be available
-* Submitted values must be sanitized
-* Missing values must be ignored unless they belong to the active tab
-* The final saved settings must include all required keys
-* The final saved settings must not contain unexpected null values
-
-After saving settings:
-
-* Previously saved values from other tabs must remain available
-* Public rendering must continue to work
-* Admin fields must remain populated
-* No tab should appear reset unless the user intentionally changed it
+* Preserve settings from other tabs
+* Avoid saving missing fields as null
+* Merge active tab settings into existing settings
+* Preserve nested settings that were not submitted
+* Preserve social links when saving other tabs
+* Preserve colors when saving other tabs
+* Preserve tab state after save
 
 ## Updated Phase 3 Exit Criteria
 
 Phase 3 is complete when:
 
-* One default social item appears in the admin when no social links exist
-* Empty default social rows do not render publicly
-* Users can add more social items
-* Users can remove social items
-* Known platforms ask only for platform and URL/email value
-* Custom platforms support custom name and custom icon upload
-* SVG custom icons are handled safely
-* Social icons stay aligned and fully visible
-* Saving one tab does not erase or null values from other tabs
-* Missing submitted fields do not overwrite existing settings
-* Nested settings are merged safely
-* No saved user data is lost during normal tab saves
+* Saved color picker values apply reliably on the public template
+* Color setting keys map clearly to CSS variables
+* Public components use the canonical CSS variables
+* Light mode colors apply correctly
+* Dark mode colors apply correctly
+* System mode colors apply correctly
+* Saved colors remain applied after refresh
+* No conflicting frontend color mappings exist
+* No invalid color values reach public CSS
+* Admin preview, if present, matches the public color mapping
+* Saving settings shows only one saved notice
+* The saved notice does not duplicate after tab changes or refreshes
+* Existing data preservation fixes remain intact

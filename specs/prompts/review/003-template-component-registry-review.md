@@ -1,887 +1,259 @@
-# Codex Review Prompt
+## Phase 3 Color Mapping and Save Notice Review
 
-## Task
-
-Review the Phase 3 implementation for the Template and Component Registry.
-
-## Context
-
-This is a WordPress maintenance mode / coming soon plugin.
-
-Phase 3 should add a frontend template and component architecture.
-
-Use `specs/features/active.md` as the source of truth.
-
-## Review Goal
-
-Check whether the implementation is safe, complete, simple, and aligned with Phase 3 scope.
+Review the fixes for inconsistent color application and duplicate save notices.
 
 Focus on:
 
-* Correct architecture
-* Public rendering safety
-* Template registry behavior
-* Component registry behavior
-* Zone compatibility
-* Settings fallback behavior
-* Responsive frontend quality
-* Asset loading correctness
-* Empty-state handling
-* WordPress standards
+* Saved color values applying reliably
+* Correct mapping between saved settings and CSS variables
+* Light, dark, and system mode behavior
+* Component usage of theme variables
+* Scoped frontend color output
+* Duplicate admin save notice removal
+* No regression to tab save data preservation
 
-## Expected Phase 3 Features
+## Color Flow Review
 
-The implementation should include:
+Trace the complete color flow:
 
-* PHP template renderer
-* Template registry
-* Component registry
-* Zone compatibility rules
-* Theme variables
-* Light/dark/system mode
-* Responsive shell
-* Default copy
-* Asset loading per template
-* Component settings schema
-* Hero component
-* Social links component
-* Contact reveal component
-* Login component
-* Status/progress component
-
-## Review Checklist
-
-### 1. Architecture
-
-Check that:
-
-* Template rendering is separated from routing
-* Template registry is separated from component registry
-* Components are reusable
-* Components follow a shared interface or consistent contract
-* Settings are normalized before rendering
-* The implementation does not create unnecessary complexity
-* Existing Phase 1 and Phase 2 behavior is preserved
-
-Flag any duplicated architecture or unclear ownership.
-
-### 2. Template Renderer
-
-Check that the renderer:
-
-* Resolves selected template safely
-* Falls back to the default template
-* Passes normalized settings into the template
-* Renders components through the registry
-* Skips missing components safely
-* Skips incompatible zone components safely
-* Does not produce PHP warnings for missing data
-
-### 3. Template Registry
-
-Check that the registry:
-
-* Defines at least the `default` template
-* Provides metadata for the template
-* Defines supported zones
-* Defines required assets
-* Defines a default component layout
-* Handles invalid template keys safely
-
-### 4. Component Registry
-
-Check that the registry:
-
-* Registers all required components
-* Can return available components
-* Can check whether a component exists
-* Can render components safely
-* Enforces zone compatibility
-* Does not fatal on unknown components
-
-Required components:
-
-* Hero
-* Social links
-* Contact reveal
-* Login
-* Status/progress
-
-### 5. Component Settings Schema
-
-Check that each component declares a settings schema or equivalent structure.
-
-Each schema should define:
-
-* Field key
-* Field label
-* Field type
-* Default value
-* Required status where useful
-* Allowed values where useful
-
-Flag missing or inconsistent schemas.
-
-### 6. Hero Component
-
-Check that the hero component:
-
-* Renders title
-* Renders message
-* Supports optional eyebrow text
-* Supports optional primary action
-* Supports optional secondary action
-* Uses defaults when title or message is missing
-* Escapes text and URLs
-* Skips actions with empty or invalid URLs
-
-### 7. Social Links Component
-
-Check that the social links component:
-
-* Renders only valid social links
-* Skips empty URLs
-* Skips invalid URLs
-* Escapes labels
-* Renders nothing when no valid links exist
-* Does not invent fake social links
-
-### 8. Contact Reveal Component
-
-Check that the contact reveal component:
-
-* Renders contact label
-* Renders contact message
-* Supports optional email
-* Validates email before rendering a `mailto:` link
-* Escapes all output
-* Avoids broken contact links
-
-### 9. Login Component
-
-Check that the login component:
-
-* Renders only when enabled
-* Uses WordPress login URL
-* Uses default label when label is empty
-* Escapes URL and label
-* Renders nothing when disabled
-
-### 10. Status/Progress Component
-
-Check that the status/progress component:
-
-* Renders status label
-* Supports optional progress display
-* Uses default progress when missing
-* Clamps progress between `0` and `100`
-* Uses valid accessible progress markup
-* Escapes label text
-
-### 11. Theme Support
-
-Check that the template supports:
-
-* Light mode
-* Dark mode
-* System mode
-
-Required CSS variables:
-
-```css
---mm-bg;
---mm-surface;
---mm-text;
---mm-muted;
---mm-border;
---mm-primary;
---mm-primary-text;
---mm-shadow;
---mm-radius;
---mm-content-width;
+```text id="k7uoei"
+Admin color picker field
+Saved option key
+Sanitized saved value
+Settings repository output
+Renderer color normalization
+CSS variable output
+Template/component CSS usage
+Final public frontend result
 ```
 
-Flag hardcoded theme values that prevent settings from working.
+Check for mismatches at every step.
 
-### 12. Responsive Behavior
+Flag any point where:
 
-Check that the public page works on:
+* A saved key does not map to the expected CSS variable
+* A CSS variable is generated but not used
+* A component uses an old or wrong variable
+* A saved value is overwritten by default CSS
+* A dark mode or system mode rule overrides saved custom values
+* Invalid color values can reach public CSS
 
-* Desktop
-* Tablet
-* Mobile
-* Small mobile
+## Canonical Color Map Review
 
-Look for:
+Confirm there is one clear map between saved color keys and frontend CSS variables.
 
-* Horizontal overflow
-* Tiny tap targets
-* Text too small to read
-* Broken spacing
-* Components overlapping
-* Content cut off on small screens
+Expected target map:
 
-### 13. Asset Loading
-
-Check that public template assets:
-
-* Load only when maintenance mode is active
-* Load only for the selected template
-* Do not load in the WordPress admin unnecessarily
-* Do not load across normal public site pages when maintenance mode is off
-* Avoid duplicate enqueue calls
-
-### 14. Security
-
-Check that:
-
-* Public output is escaped
-* URLs are escaped with `esc_url()`
-* Text is escaped with `esc_html()` or `esc_attr()`
-* Rich text, if any, uses a safe allowlist
-* Saved options are not trusted blindly
-* Invalid saved data cannot break rendering
-
-### 15. Accessibility
-
-Check that:
-
-* The template uses semantic HTML
-* There is a clear heading hierarchy
-* Links and buttons are keyboard accessible
-* Focus states are visible
-* Progress markup is accessible
-* Color contrast is acceptable
-
-### 16. Empty States
-
-Check that the page does not break when:
-
-* Title is missing
-* Message is missing
-* Component settings are missing
-* Template key is invalid
-* Component key is invalid
-* Zone has no components
-* Social links are empty
-* Email is invalid
-* Progress is invalid
-
-### Color Picker and Theme Readability Review
-
-Check that editable color settings use proper color picker fields.
-
-The implementation should not require users to manually type color values into plain text inputs.
-
-Review that:
-
-* Background color uses a color picker
-* Surface/card color uses a color picker
-* Primary/accent color uses a color picker
-* Heading text color uses a color picker
-* Body text color uses a color picker
-* Muted text color uses a color picker
-* Link text color uses a color picker
-* Button text color uses a color picker
-* Border color uses a color picker
-
-Check sanitization:
-
-* Only valid hex colors are saved
-* Invalid color values fall back safely
-* Arbitrary CSS values are rejected
-* Gradients are rejected
-* Raw CSS variables are rejected
-* Malformed values do not reach public output
-
-Expected sanitizer:
-
-```php
-sanitize_hex_color()
-```
-
-Check dark mode readability carefully.
-
-The following text must be clearly readable in dark mode:
-
-* Hero heading
-* Hero message
-* Eyebrow text
-* Status label
-* Progress text
-* Contact label
-* Contact message
-* Social labels
-* Login link
-* Button text
-* Footer text
-
-Required text color variables:
-
-```css
---mm-heading-text;
---mm-body-text;
---mm-muted-text;
---mm-link-text;
---mm-button-text;
-```
-
-Flag any hardcoded color that causes unreadable text in dark mode.
-
-Flag any component that bypasses theme variables.
-
-### Social Icon and Label Review
-
-Check that the social links component allows both icon/platform choice and label choice.
-
-Each social link item should support:
-
-* Platform/icon choice
-* Custom label
-* URL
-* Optional open in new tab setting
-
-Supported platforms should include:
-
-```text
-facebook
-instagram
-linkedin
-x
-youtube
-github
-tiktok
-threads
-website
-email
-custom
-```
-
-Review that:
-
-* Known platforms render matching icons
-* `custom` renders a generic link icon
-* `website` renders a generic website/link icon
-* `email` renders a mail icon
-* Custom labels display when provided
-* Empty custom labels fall back to default platform labels
-* Empty or invalid URLs are skipped
-* Unsupported platform keys are skipped
-* Labels are escaped
-* URLs are escaped
-* User-provided raw SVG or HTML is not rendered
-* No large third-party icon library is added unnecessarily
-
-For email links, check that:
-
-* Valid email addresses become safe `mailto:` links
-* Safe `mailto:` URLs work
-* Invalid email values are rejected
-* Malformed `mailto:` links are skipped
-
-### Updated Scope Check Rows
-
-Add these rows to the scope check table:
-
-```markdown
-| Color picker fields | Pass/Fail/Partial | Notes |
-| Hex color sanitization | Pass/Fail/Partial | Notes |
-| Dark mode text readability | Pass/Fail/Partial | Notes |
-| Theme text color variables | Pass/Fail/Partial | Notes |
-| Social icon choices | Pass/Fail/Partial | Notes |
-| Social custom labels | Pass/Fail/Partial | Notes |
-```
-
-### Additional High-Priority Issues To Flag
-
-Flag as high priority if:
-
-* Dark mode text is hard to read
-* Public text color uses unsafe raw setting values
-* Color settings accept arbitrary CSS
-* Invalid color values break public styles
-* Social icons render raw user-provided SVG or HTML
-* Social links render invalid URLs
-* Email social links expose broken `mailto:` links
-
-
-## Output Format
-
-Return the review using this structure:
-
-```markdown
-# Phase 3 Review
-
-## Verdict
-
-Choose one:
-
-- Pass
-- Pass with minor fixes
-- Needs fixes
-- Blocked
-
-## Summary
-
-Write a short summary of the implementation quality.
-
-## Findings
-
-### High Priority
-
-List blocking or serious issues.
-
-### Medium Priority
-
-List issues that should be fixed soon.
-
-### Low Priority
-
-List polish or maintainability issues.
-
-## Scope Check
-
-| Requirement | Status | Notes |
-|---|---|---|
-| PHP template renderer | Pass/Fail/Partial | Notes |
-| Template registry | Pass/Fail/Partial | Notes |
-| Component registry | Pass/Fail/Partial | Notes |
-| Zone compatibility rules | Pass/Fail/Partial | Notes |
-| Theme variables | Pass/Fail/Partial | Notes |
-| Light/dark/system mode | Pass/Fail/Partial | Notes |
-| Responsive shell | Pass/Fail/Partial | Notes |
-| Default copy | Pass/Fail/Partial | Notes |
-| Asset loading per template | Pass/Fail/Partial | Notes |
-| Component settings schema | Pass/Fail/Partial | Notes |
-| Hero component | Pass/Fail/Partial | Notes |
-| Social links component | Pass/Fail/Partial | Notes |
-| Contact reveal component | Pass/Fail/Partial | Notes |
-| Login component | Pass/Fail/Partial | Notes |
-| Status/progress component | Pass/Fail/Partial | Notes |
-| Empty states | Pass/Fail/Partial | Notes |
-
-## Recommended Fixes
-
-List exact fixes in priority order.
-
-## Files To Inspect Closely
-
-List file paths that need attention.
-
-## Final Notes
-
-Mention any risks, assumptions, or follow-up work.
-```
-
-## Review Rules
-
-Be strict.
-
-Do not approve incomplete architecture just because the page visually renders.
-
-Do not ask for unrelated features.
-
-Do not expand scope beyond Phase 3.
-
-Prefer simple fixes over large rewrites.
-
-Call out anything that could break WordPress plugin behavior, public rendering, or future extensibility.
-
-
-
-
-### Settings Tabs Review
-
-Check that the Phase 3 admin settings are divided into clear tabs.
-
-Required tabs:
-
-```text id="d6d93c"
-General
-Template
-Design
-Components
-Social Links
-Advanced
-```
-
-Review that:
-
-* The tab labels are clear
-* Settings are grouped logically
-* The active tab remains usable after saving
-* The save flow still works
-* Required settings are not hidden in confusing places
-* The tab UI follows WordPress admin conventions
-* The tab UI is keyboard accessible
-* The settings page does not become overloaded or hard to scan
-
-Flag as medium priority if the settings page is still one long page.
-
-Flag as high priority if tabs break saving or hide required fields.
-
-### Social Links Repeater Review
-
-Check that social links use a removable repeater field.
-
-The admin should support:
-
-* Add new social item
-* Remove social item
-* Platform dropdown
-* URL or email value field
-* Custom platform name only for `custom`
-* Custom icon upload only for `custom`
-* Optional open in new tab setting
-
-Known platform items should only ask for:
-
-* Platform
-* URL or email value
-* Optional open in new tab setting
-
-Known platform items should not ask for manual labels.
-
-The visible label should come from the selected platform.
-
-Supported platform values:
-
-```text id="hjyuzw"
-facebook
-instagram
-linkedin
-x
-youtube
-github
-tiktok
-threads
-website
-email
-custom
-```
-
-Review saved data sanitization:
-
-* Platform is allowlisted
-* URL is validated
-* Email values are validated
-* Custom platform name is sanitized
-* Custom icon ID is sanitized as an integer
-* Open in new tab is normalized to boolean
-* Invalid rows are skipped or removed safely
-
-### Custom Social Icon Review
-
-Check that custom social platforms can optionally use uploaded icons.
-
-Review that:
-
-* Custom icons use the WordPress media library
-* The plugin stores attachment IDs, not raw markup
-* The frontend resolves icon URLs safely
-* Icon URLs are escaped
-* Alt text is escaped
-* Missing icons fall back to a generic icon
-* Broken image URLs do not render
-* Raw user SVG or HTML is not rendered
-
-For SVG:
-
-* Flag as high priority if raw SVG upload/rendering exists without sanitization
-* Prefer raster formats only for Phase 3 unless safe SVG handling is implemented
-
-Preferred safe custom icon types:
-
-```text id="qhnwe7"
-png
-jpg
-jpeg
-webp
-```
-
-### Social Icon Layout Review
-
-Check that icons stay fully visible and aligned in the public template.
-
-Review that:
-
-* Icons use fixed width and height
-* Icons use `object-fit: contain`
-* Icons do not crop
-* Icons do not stretch
-* Icons do not overflow
-* Social links wrap on mobile
-* Social links do not create horizontal overflow
-* Text aligns cleanly with icons
-* Uploaded custom icons behave like built-in icons
-
-Flag as high priority if social icons overflow or break mobile layout.
-
-### Updated Scope Check Rows
-
-Add these rows to the scope check table:
-
-```markdown id="da2xxn"
-| Admin settings tabs | Pass/Fail/Partial | Notes |
-| Social links repeater | Pass/Fail/Partial | Notes |
-| Known platform URL-only flow | Pass/Fail/Partial | Notes |
-| Custom social platform field | Pass/Fail/Partial | Notes |
-| Custom social icon upload | Pass/Fail/Partial | Notes |
-| Social icon layout constraints | Pass/Fail/Partial | Notes |
-```
-
-### Additional High-Priority Issues To Flag
-
-Flag as high priority if:
-
-* Settings tabs break saving
-* Known social platforms require manual labels
-* Social rows save unsafe or unsupported platform values
-* Invalid social URLs render publicly
-* Custom icons render raw user HTML or unsanitized SVG
-* Uploaded icons overflow, crop, stretch, or break layout
-* Social links create horizontal overflow on mobile
-
-
-## Phase 3 Stabilization Review
-
-Review the remaining Phase 3 fixes.
-
-Focus on:
-
-* Default social item behavior
-* Add more social item flow
-* Remove social item flow
-* Custom SVG icon safety
-* Tab save data-loss prevention
-* Cross-tab settings preservation
-
-## Default Social Item Review
-
-Check that the Social Links tab shows one default social item when no social links exist.
-
-Expected default item:
-
-```php id="ap2vj4"
+```php id="isc62y"
 [
-    'platform' => 'facebook',
-    'url' => '',
-    'custom_name' => '',
-    'custom_icon_id' => 0,
-    'open_new_tab' => true,
+    'background_color' => '--mm-bg',
+    'surface_color' => '--mm-surface',
+    'primary_color' => '--mm-primary',
+    'heading_text_color' => '--mm-heading-text',
+    'body_text_color' => '--mm-body-text',
+    'muted_text_color' => '--mm-muted-text',
+    'link_text_color' => '--mm-link-text',
+    'button_text_color' => '--mm-button-text',
+    'border_color' => '--mm-border',
 ]
 ```
 
-Review that:
+If the implementation uses different saved keys, confirm that:
 
-* The default item appears in the admin UI
-* The default item does not render publicly without a valid URL
-* The user can change the platform
-* The user can enter a URL or email value
-* The user can remove the item
-* The user can add more items
-* Removing all items saves an empty social links array
-* Empty rows do not create broken frontend links
+* The mapping is explicit
+* Backward compatibility is preserved
+* Existing saved colors still work
+* The public CSS variables are still the canonical output
 
-Flag as high priority if an empty default item renders publicly.
+Flag as high priority if color mapping is scattered across multiple inconsistent files.
 
-## Add More and Remove Social Review
+## Color Normalization Review
 
-Check that social links work like a proper repeater.
+Check that colors are normalized before rendering.
 
 Review that:
 
-* `Add more` creates a new row
-* Each row has a platform dropdown
-* Each row has a URL or email field
-* Each row has a remove button
-* Known platforms do not ask for manual labels
-* Custom platform shows custom name
-* Custom platform shows custom icon upload
-* Removing one row does not remove other rows
-* Saved row order is preserved
-* Invalid rows are skipped or removed safely
+* Saved colors are merged with defaults
+* Every rendered color is sanitized with `sanitize_hex_color()`
+* Invalid colors fall back safely
+* Empty colors are not rendered as empty CSS variables
+* Unknown color keys are ignored
+* Raw saved values are not printed into public CSS
+* Defaults are theme-aware where needed
 
-Supported platforms:
+Flag as high priority if raw option values are printed into a `style` attribute or inline CSS.
 
-```text id="m8eig1"
-facebook
-instagram
-linkedin
-x
-youtube
-github
-tiktok
-threads
-website
-email
-custom
+## Frontend CSS Variable Scope Review
+
+Check where CSS variables are printed.
+
+Acceptable locations:
+
+* Scoped style attribute on the public maintenance wrapper
+* Scoped inline CSS using `wp_add_inline_style()`
+
+Review that:
+
+* Variables are scoped to the maintenance template
+* Variables are not printed globally across the whole site
+* Variables load after default stylesheet if using inline CSS
+* Variables are not redefined later by a more specific selector
+* Saved custom values override defaults reliably
+
+Flag as high priority if saved colors can be overridden by later default CSS.
+
+## Light, Dark, and System Mode Review
+
+Check all theme modes:
+
+```text id="ytf0xc"
+light
+dark
+system
 ```
 
-Flag as high priority if removing one item clears all social links unintentionally.
-
-## Custom SVG Icon Review
-
-Check that custom social icons support SVG safely.
-
 Review that:
 
-* Custom icons are uploaded through the WordPress media library
-* The saved setting stores an attachment ID
-* Raw SVG markup is not stored in options
-* Raw SVG markup is not rendered from settings
-* Pasted SVG or HTML is not accepted as icon input
-* The attachment URL is resolved during rendering
-* The attachment URL is escaped
-* Alt text is escaped
-* Missing or invalid icons fall back to a generic icon
-* Uploaded icons remain fully visible and aligned
+* Light mode applies expected colors
+* Dark mode applies expected colors
+* System mode applies expected colors
+* Saved custom values remain applied after refresh
+* Switching theme modes does not erase saved colors
+* Dark mode does not accidentally reuse unreadable light text colors
+* System mode media queries do not override saved custom variables incorrectly
 
-Allowed icon file types:
+Flag as high priority if colors appear only sometimes or disappear after refresh.
 
-```text id="cmcsao"
-svg
-png
-jpg
-jpeg
-webp
+## Component Color Usage Review
+
+Check all public template/component CSS.
+
+Required components:
+
+* Hero component
+* Status/progress component
+* Contact reveal component
+* Social links component
+* Login component
+* Public shell/template wrapper
+
+Review that each component uses canonical variables:
+
+```css id="a3upf5"
+--mm-bg
+--mm-surface
+--mm-primary
+--mm-heading-text
+--mm-body-text
+--mm-muted-text
+--mm-link-text
+--mm-button-text
+--mm-border
 ```
 
-Important security check:
+Flag hardcoded color values that override user settings.
 
-Flag as high priority if SVG is rendered inline from user input without sanitization.
+Flag old variables that no longer map to saved settings.
 
-Flag as high priority if SVG upload support bypasses WordPress upload security unsafely.
+Flag component-specific colors that bypass the theme system.
 
-## Tab Save Data Loss Review
+## Duplicate Save Notice Review
 
-Check the bug fix for tab saving.
+Check the duplicate save notice issue.
 
-Current bug to verify fixed:
+Current bug:
 
-```text id="tjmznv"
-Saving one tab causes values from other tabs to become null.
+```text id="jxz1dt"
+The settings saved notice appears twice after saving.
 ```
 
 Expected behavior:
 
-* Saving General preserves Template settings
-* Saving General preserves Design settings
-* Saving General preserves Components settings
-* Saving General preserves Social Links settings
-* Saving Design preserves General settings
-* Saving Design preserves Social Links settings
-* Saving Social Links preserves General settings
-* Saving Social Links preserves Design settings
-* Saving Components preserves all unrelated tab settings
+* Initial page load shows no saved notice
+* Successful save shows one saved notice
+* Failed save does not show success
+* Tab switching does not duplicate notice
+* Page refresh does not duplicate notice unexpectedly
+* Notice uses WordPress admin styling
+* Active tab state remains preserved
+
+Check likely duplicate sources:
+
+* `settings_errors()` called more than once
+* Custom HTML notice plus Settings API notice
+* `add_settings_error()` plus manual success query param notice
+* Redirect notice plus admin page callback notice
+* Notice rendered in both parent layout and tab partial
+
+Flag as high priority if more than one success notice appears.
+
+## Regression Review
+
+Confirm this fix did not break previous Phase 3 fixes.
+
+Review that:
+
+* Saving one tab preserves other tab settings
 * Missing submitted fields are not saved as null
-* Unrelated nested settings are not overwritten
+* Social links still use add/remove repeater rows
+* One default social item still appears in admin when needed
+* Empty default social rows do not render publicly
+* Custom social icons still render safely
+* Settings tabs still work
+* Color picker values still save correctly
 
-Flag as high priority if saving any tab erases unrelated saved values.
+## Required Manual Test
 
-## Settings Merge Review
+Verify this flow:
 
-Check that the save handler:
-
-* Loads existing settings before saving
-* Loads defaults before saving
-* Sanitizes only submitted fields for the active tab
-* Uses a tab ownership map or equivalent guard
-* Updates only keys owned by the active tab
-* Preserves missing unrelated keys
-* Does not overwrite unrelated tab groups
-* Does not blindly replace the full settings array
-* Allows intentional empty social links only when saving the Social Links tab
-* Allows intentional empty component arrays only when saving the Components tab
-
-Recommended tab ownership map:
-
-```php id="bt6hyz"
-[
-    'general' => [
-        'mode_type',
-        'page_title',
-        'page_message',
-        'login_enabled',
-    ],
-    'template' => [
-        'template_key',
-    ],
-    'design' => [
-        'theme_mode',
-        'colors',
-    ],
-    'components' => [
-        'components',
-    ],
-    'social-links' => [
-        'social_links',
-    ],
-    'advanced' => [
-        'asset_loading',
-    ],
-]
+```text id="dv16mx"
+1. Open settings page.
+2. Confirm no saved notice appears on initial load.
+3. Open Design tab.
+4. Set custom background color.
+5. Set custom heading text color.
+6. Set custom body text color.
+7. Save Design.
+8. Confirm exactly one saved notice appears.
+9. Open public maintenance page.
+10. Confirm saved colors appear.
+11. Refresh public page.
+12. Confirm saved colors remain.
+13. Switch to dark mode.
+14. Save Design.
+15. Confirm exactly one saved notice appears.
+16. Confirm dark mode colors apply correctly.
+17. Save General tab.
+18. Confirm Design colors remain saved and applied.
+19. Save Social Links tab.
+20. Confirm Design colors remain saved and applied.
 ```
-
-Flag as high priority if the implementation uses submitted form data as the complete saved option.
-
-## Required Regression Test
-
-Run or manually verify this flow:
-
-```text id="su4vbb"
-1. Set page title and message in General.
-2. Save General.
-3. Go to Design.
-4. Set theme mode and colors.
-5. Save Design.
-6. Confirm page title and message still exist.
-7. Go to Social Links.
-8. Add Facebook URL.
-9. Add Instagram URL.
-10. Save Social Links.
-11. Confirm General and Design values still exist.
-12. Remove Instagram.
-13. Save Social Links.
-14. Confirm only Instagram is removed.
-15. Confirm Facebook remains.
-16. Go to General.
-17. Save General again.
-18. Confirm Social Links still exist.
-```
-
-Also verify:
-
-* One empty default social item does not render publicly
-* Empty social links array renders no social section
-* Custom SVG icon renders as an escaped image URL
-* Invalid custom icon falls back safely
-* No unrelated setting becomes null after any tab save
 
 ## Updated Scope Check Rows
 
 Add these rows to the scope check table:
 
-```markdown id="cbw4xn"
-| Default social item | Pass/Fail/Partial | Notes |
-| Add more social row | Pass/Fail/Partial | Notes |
-| Remove social row | Pass/Fail/Partial | Notes |
-| Safe custom SVG icon handling | Pass/Fail/Partial | Notes |
-| Tab save data preservation | Pass/Fail/Partial | Notes |
-| Active tab ownership map | Pass/Fail/Partial | Notes |
-| Safe settings merge | Pass/Fail/Partial | Notes |
+```markdown id="nmzy93"
+| Canonical color mapping | Pass/Fail/Partial | Notes |
+| Saved color frontend application | Pass/Fail/Partial | Notes |
+| Scoped CSS variable output | Pass/Fail/Partial | Notes |
+| Light mode color reliability | Pass/Fail/Partial | Notes |
+| Dark mode color reliability | Pass/Fail/Partial | Notes |
+| System mode color reliability | Pass/Fail/Partial | Notes |
+| Component color variable usage | Pass/Fail/Partial | Notes |
+| Single save notice | Pass/Fail/Partial | Notes |
 ```
 
 ## Additional High-Priority Issues To Flag
 
 Flag as high priority if:
 
-* Saving one tab clears unrelated settings
-* Saving one tab sets unrelated settings to null
-* Empty default social rows render publicly
-* Removing one social item removes unrelated social items
-* Removing all social items fails to save intentionally
-* Known platforms require manual labels
-* Custom SVG is stored or rendered as raw unsanitized markup
-* Invalid custom icons break frontend rendering
-* Social icons overflow, crop, stretch, or break layout
+* Saved colors do not reliably apply on the frontend
+* Saved color keys do not map clearly to CSS variables
+* Components bypass saved colors with hardcoded values
+* Dark mode overrides saved custom colors incorrectly
+* System mode overrides saved custom colors incorrectly
+* Raw unsanitized color values reach public CSS
+* Color CSS is printed globally outside the maintenance template
+* The saved notice appears more than once
+* Fixing colors regresses tab save preservation

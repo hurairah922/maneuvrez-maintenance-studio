@@ -1,1222 +1,358 @@
-# Codex Execution Prompt
+## Phase 3 Fix: Reliable Color Mapping and Duplicate Save Notice
 
-## Task
+Implement the remaining Phase 3 fixes.
 
-Implement Phase 3: Template and Component Registry.
+Current known issues:
 
-## Context
+* Color picker values are saving correctly
+* Saved colors are not always applied correctly on the public template
+* Color mapping appears inconsistent
+* Settings saved notice appears twice after saving
 
-This is a WordPress plugin project for a maintenance mode / coming soon experience.
+Fix these without breaking existing settings, tabs, social links, or data preservation behavior.
 
-The plugin already has a basic maintenance mode screen and admin settings foundation.
+## 1. Audit Existing Color Flow
 
-You are implementing the frontend architecture needed for polished templates and reusable components.
+First inspect the full color flow.
 
-Use `specs/features/active.md` as the source of truth.
+Trace:
 
-## Goal
-
-Build a safe, extensible public template system that can render a polished maintenance mode page from saved settings.
-
-The implementation should introduce:
-
-* PHP template renderer
-* Template registry
-* Component registry
-* Zone compatibility rules
-* Theme variables
-* Light/dark/system mode support
-* Responsive shell
-* Default copy
-* Asset loading per template
-* Component settings schema
-* Hero component
-* Social links component
-* Contact reveal component
-* Login component
-* Status/progress component
-
-## Important Constraints
-
-Keep the implementation simple.
-
-Do not build a drag-and-drop builder.
-
-Do not add unnecessary admin complexity.
-
-Do not introduce third-party dependencies.
-
-Do not break the existing Phase 1 or Phase 2 behavior.
-
-Do not rename existing classes or paths unless required.
-
-If the current project structure differs from the target structure, adapt carefully and preserve the existing working plugin behavior.
-
-## Expected Files
-
-Create or update files as needed.
-
-Preferred target structure:
-
-```text
-includes/
-├── Components/
-│   ├── ComponentInterface.php
-│   ├── ComponentRegistry.php
-│   ├── ContactRevealComponent.php
-│   ├── HeroComponent.php
-│   ├── LoginComponent.php
-│   ├── SocialLinksComponent.php
-│   └── StatusProgressComponent.php
-├── Frontend/
-│   ├── MaintenanceRouter.php
-│   ├── TemplateRenderer.php
-│   └── TemplateRegistry.php
-├── Settings/
-│   ├── SettingsRepository.php
-│   └── SettingsSchema.php
-└── Support/
-    └── Escaper.php
-
-templates/
-└── public/
-    └── default.php
-
-assets/
-├── css/
-│   └── public-template-default.css
-└── js/
-    └── public-template-default.js
+```text id="xbwo35"
+Admin color picker field
+Saved option key
+Sanitization logic
+Settings repository output
+Template renderer input
+Generated CSS variable
+Template/component CSS usage
+Final public frontend style
 ```
 
-If equivalent files already exist, update them instead of duplicating functionality.
-
-## Implementation Requirements
-
-### 1. Template Renderer
-
-Create a frontend template renderer.
-
-It should:
-
-* Resolve the selected template key
-* Fall back to the default template if needed
-* Load normalized settings
-* Pass settings to the template
-* Render registered components
-* Respect zone compatibility rules
-* Avoid fatal errors on missing templates or components
-* Escape output safely
-
-### 2. Template Registry
-
-Create a template registry.
-
-It should register at least one template:
-
-```text
-default
-```
-
-The default template should define:
-
-* Key
-* Name
-* Description
-* File path
-* Supported zones
-* Required styles
-* Required scripts
-* Default component layout
-
-Initial zones:
-
-```text
-main
-footer
-```
-
-### 3. Component Registry
-
-Create a component registry.
-
-It should:
-
-* Register components by key
-* Return component metadata
-* Render components by key
-* Check zone compatibility
-* Skip invalid or incompatible components safely
-
-### 4. Component Interface
-
-Create a shared component interface.
-
-The interface should support:
-
-* Component key
-* Component label
-* Supported zones
-* Settings schema
-* Render method
-
-### 5. Hero Component
-
-Create a hero component.
-
-It should render:
-
-* Optional eyebrow
-* Title
-* Message
-* Optional primary action
-* Optional secondary action
-
-Fallback defaults:
-
-```text
-Title: We'll be back soon
-Message: Our site is getting a quick update. Please check back shortly.
-```
-
-Safety rules:
-
-* Escape all text
-* Escape all URLs
-* Skip empty action URLs
-
-### 6. Social Links Component
-
-Create a social links component.
-
-It should render valid social links only.
-
-Safety rules:
-
-* Skip empty URLs
-* Skip invalid URLs
-* Escape labels
-* Render nothing if no valid social links exist
-
-Do not invent fake social URLs.
-
-### 7. Contact Reveal Component
-
-Create a contact reveal component.
-
-It should render:
-
-* Contact label
-* Contact message
-* Optional email link
-
-Fallback defaults:
-
-```text
-Contact label: Need help?
-Contact message: Contact us for urgent requests.
-```
-
-Safety rules:
-
-* Escape all text
-* Validate email before rendering `mailto:`
-* Render no broken email links
-
-### 8. Login Component
-
-Create a login component.
-
-It should render a WordPress login link when enabled.
-
-Fallback default:
-
-```text
-Admin login
-```
-
-Safety rules:
-
-* Render nothing when disabled
-* Use the WordPress login URL
-* Escape URL and label
-
-### 9. Status/Progress Component
-
-Create a status/progress component.
-
-It should render:
-
-* Status label
-* Optional progress bar
-
-Fallback defaults:
-
-```text
-Status label: Maintenance in progress
-Progress value: 65
-```
-
-Safety rules:
-
-* Clamp progress between `0` and `100`
-* Render valid progress markup
-* Escape status label
-
-### 10. Theme Variables
-
-Add theme variables to the public template.
-
-Required CSS variables:
-
-```css
---mm-bg;
---mm-surface;
---mm-text;
---mm-muted;
---mm-border;
---mm-primary;
---mm-primary-text;
---mm-shadow;
---mm-radius;
---mm-content-width;
-```
-
-Support theme modes:
-
-```text
-light
-dark
-system
-```
-
-### Color Picker Fields
-
-Add color picker support for editable color settings.
-
-The admin settings should use WordPress-compatible color picker fields instead of plain text fields for color values.
-
-Color fields should include:
-
-* Background color
-* Surface/card color
-* Primary/accent color
-* Heading text color
-* Body text color
-* Muted text color
-* Link text color
-* Button text color
-* Border color
-
-Implementation rules:
-
-* Save only sanitized hex color values
-* Accept only values like `#000000`
-* Reject unsupported color formats
-* Fall back to safe defaults when a color is missing or invalid
-* Do not allow arbitrary CSS values
-* Do not allow raw CSS variables
-* Do not allow gradients
-* Do not allow JavaScript or malformed values
-
-Use WordPress sanitization helpers where possible.
-
-Expected sanitization behavior:
-
-```php
-sanitize_hex_color( $value )
-```
-
-If `sanitize_hex_color()` returns empty or invalid output, use the default color for that role.
-
-### Dark Mode Readability Fix
-
-Fix low-contrast text in dark mode.
-
-All public text must remain readable in light, dark, and system theme modes.
-
-Add or update these CSS variables:
-
-```css
---mm-heading-text;
---mm-body-text;
---mm-muted-text;
---mm-link-text;
---mm-button-text;
-```
-
-Use these variables across the template and components.
-
-Do not hardcode component text colors.
-
-Required text roles to check:
-
-* Hero heading
-* Hero message
-* Eyebrow text
-* Status label
-* Progress value text
-* Contact label
-* Contact message
-* Social link labels
-* Login link label
-* Button text
-* Footer text
-* Empty-state text
-
-Suggested default light theme values:
-
-```css
---mm-bg: #f8fafc;
---mm-surface: #ffffff;
---mm-heading-text: #0f172a;
---mm-body-text: #334155;
---mm-muted-text: #64748b;
---mm-link-text: #2563eb;
---mm-primary: #2563eb;
---mm-button-text: #ffffff;
---mm-border: #e2e8f0;
-```
-
-Suggested default dark theme values:
-
-```css
---mm-bg: #020617;
---mm-surface: #0f172a;
---mm-heading-text: #f8fafc;
---mm-body-text: #cbd5e1;
---mm-muted-text: #94a3b8;
---mm-link-text: #93c5fd;
---mm-primary: #60a5fa;
---mm-button-text: #020617;
---mm-border: #334155;
-```
-
-Dark mode must not reuse low-contrast light mode text colors.
-
-If custom colors are missing or invalid, fall back to the theme defaults.
-
-### Social Icon and Label Choices
-
-Update the social links component so each social link item supports icon/platform selection and custom labels.
-
-Each social link item should support:
-
-* Platform key
-* Custom label
-* URL
-* Open in new tab setting, optional
-
-Initial platform keys:
-
-```text
-facebook
-instagram
-linkedin
-x
-youtube
-github
-tiktok
-threads
-website
-email
-custom
-```
-
-Default labels:
-
-```php
-[
-    'facebook' => 'Facebook',
-    'instagram' => 'Instagram',
-    'linkedin' => 'LinkedIn',
-    'x' => 'X',
-    'youtube' => 'YouTube',
-    'github' => 'GitHub',
-    'tiktok' => 'TikTok',
-    'threads' => 'Threads',
-    'website' => 'Website',
-    'email' => 'Email',
-    'custom' => 'Link',
-]
-```
-
-Rendering rules:
-
-* Render the selected platform icon when available
-* Render a generic link icon for `custom`
-* Render a generic website icon for `website`
-* Render a mail icon for `email`
-* Use the custom label when provided
-* Use the default platform label when the custom label is empty
-* Skip the item if the URL is missing or invalid
-* Skip the item if the platform key is unsupported
-* Escape labels
-* Escape URLs
-* Do not render raw user-provided SVG or HTML
-
-Icon implementation rules:
-
-* Use a controlled internal icon allowlist
-* Prefer lightweight inline SVG from internal code
-* Do not load a large third-party icon library
-* Do not allow user-submitted icon markup
-* Provide text fallback if the icon cannot render
-
-For email social links:
-
-* Accept a valid email address and convert it to a safe `mailto:` URL
-* Accept a safe `mailto:` URL
-* Reject malformed email values
-* Escape the final URL before rendering
-
-### Additional Testing Checklist
-
-After implementation, verify:
-
-* Color settings use color picker UI
-* Hex color values save correctly
-* Invalid color values fall back safely
-* Light mode text is readable
-* Dark mode text is readable
-* System mode text is readable
-* Hero text uses theme text variables
-* Contact text uses theme text variables
-* Social labels use theme text variables
-* Login link uses theme text variables
-* Button text remains readable against the selected primary color
-* Social platform choices render the correct icons
-* Custom social labels render correctly
-* Empty social labels fall back to platform labels
-* Invalid social URLs are skipped
-* Unsupported social platform keys are skipped
-* No raw SVG or HTML from settings is rendered
-
-
-### 11. Responsive Shell
-
-Create a polished responsive shell.
-
-It must work on:
-
-* Desktop
-* Tablet
-* Mobile
-* Small mobile
-
-Use scoped CSS.
-
-Avoid horizontal overflow.
-
-Use touch-friendly buttons and links.
-
-### 12. Asset Loading Per Template
-
-Ensure public template assets load only when maintenance mode is active and the selected template is being rendered.
-
-Do not load these assets across the whole WordPress site.
-
-### 13. Empty States
-
-Handle all empty states safely.
-
-The public page should not break when:
-
-* Title is empty
-* Message is empty
-* Template key is invalid
-* Component key is invalid
-* Component settings are missing
-* Social links are empty
-* Email is invalid
-* Progress is invalid
-
-## Security Requirements
-
-Escape all public output.
-
-Use WordPress escaping helpers:
-
-* `esc_html()`
-* `esc_attr()`
-* `esc_url()`
-* `wp_kses_post()`
-
-Sanitize option values before rendering.
-
-Do not output untrusted raw HTML.
-
-## Accessibility Requirements
-
-The default public template should include:
-
-* Semantic HTML
-* Clear heading structure
-* Keyboard-accessible controls
-* Visible focus states
-* Accessible progress markup
-* Good text contrast
-
-## Testing Checklist
-
-After implementation, verify:
-
-* Default template renders with no saved settings
-* Default template renders with saved settings
-* Invalid template key falls back safely
-* Invalid component key is skipped safely
-* Hero renders safely
-* Social links render only valid links
-* Contact email validates before rendering
-* Login link shows only when enabled
-* Progress value clamps between `0` and `100`
-* Light mode works
-* Dark mode works
-* System mode works
-* Desktop layout works
-* Tablet layout works
-* Mobile layout works
-* Small mobile layout works
-* Public template assets load only on the maintenance page
-* No PHP warnings appear on the frontend
-
-
-## Phase 3 Stabilization Fix
-
-Implement the remaining Phase 3 fixes without breaking the plugin.
-
-Focus on:
-
-* One default social item in the admin UI
-* Add more social item behavior
-* Remove social item behavior
-* Custom SVG icon support with safe handling
-* Tab save protection so other tab settings are not saved as null
-* Safe settings merge behavior to prevent data loss
-
-## 1. Default Social Item
-
-When no social links have been saved, the Social Links tab should display one default social item.
-
-Default item:
-
-```php id="xj70dg"
-[
-    'platform' => 'facebook',
-    'url' => '',
-    'custom_name' => '',
-    'custom_icon_id' => 0,
-    'open_new_tab' => true,
-]
-```
-
-Rules:
-
-* Show this default item in the admin UI only
-* Do not render it publicly until it has a valid URL
-* Do not create a broken Facebook link with an empty URL
-* Let the user change the platform
-* Let the user enter the URL or email value
-* Let the user remove the item
-* Let the user add more items
-
-If the user removes all social items and saves, save an empty social links array.
-
-After saving an empty array, the admin UI may show one blank default row again for convenience.
-
-The frontend must render no social links if there are no valid social URLs.
-
-## 2. Add More and Remove Social Items
-
-Update the social repeater UI.
-
-Required behavior:
-
-* `Add more` adds a new social row
-* Each row has a platform dropdown
-* Each row has a URL or email value field
-* Each row has a remove button
-* Known platforms do not show a custom label field
-* Known platform labels are automatic
-* Custom platform shows custom name field
-* Custom platform shows custom icon upload field
-* Remove button deletes the row before save
-* Saved rows preserve their order
-
-Supported platform values:
-
-```text id="ul1n8g"
-facebook
-instagram
-linkedin
-x
-youtube
-github
-tiktok
-threads
-website
-email
-custom
-```
-
-Known platforms ask only for:
-
-* Platform
-* URL or email value
-* Optional open in new tab setting
-
-Custom platform asks for:
-
-* Platform set to `custom`
-* Custom platform name
-* URL
-* Optional SVG/icon upload
-* Optional open in new tab setting
-
-## 3. Custom SVG Icon Upload
-
-Allow custom social platforms to use an uploaded icon.
-
-Allowed file types:
-
-```text id="s5wrkb"
-svg
-png
-jpg
-jpeg
-webp
-```
-
-Security rules:
-
-* Use the WordPress media library
-* Store only the attachment ID
-* Do not store raw SVG markup
-* Do not allow pasted SVG code
-* Do not allow pasted HTML
-* Do not render raw SVG inline from settings
-* Validate the attachment before rendering
-* Resolve the attachment URL during rendering
-* Escape the resolved URL
-* Escape alt text
-* Use the custom platform name as alt text
-* Fall back to `Link` as alt text
-* Fall back to the generic link icon if the upload is missing or invalid
-
-Important:
-
-If the plugin does not already have safe SVG upload/sanitization support, do not introduce unsafe SVG handling.
-
-Accept SVG attachment IDs only if WordPress allows the file and the implementation renders it as an escaped image URL.
-
-Do not implement custom raw SVG sanitization unless it is simple, safe, and tested.
-
-## 4. Social Link Sanitization
-
-Sanitize the social links repeater before saving.
-
-Recommended sanitizer behavior:
-
-```php id="tqhfnk"
-private function sanitize_social_links( $items ): array {
-    $clean = [];
-
-    if ( ! is_array( $items ) ) {
-        return $clean;
-    }
-
-    foreach ( $items as $item ) {
-        if ( ! is_array( $item ) ) {
-            continue;
-        }
-
-        $platform = isset( $item['platform'] ) ? sanitize_key( $item['platform'] ) : '';
-
-        if ( ! $this->is_supported_social_platform( $platform ) ) {
-            continue;
-        }
-
-        $url = isset( $item['url'] ) ? trim( (string) $item['url'] ) : '';
-
-        if ( 'email' === $platform ) {
-            $url = $this->normalize_social_email_url( $url );
-
-            if ( '' === $url ) {
-                continue;
-            }
-        } else {
-            $url = esc_url_raw( $url );
-
-            if ( '' === $url ) {
-                continue;
-            }
-        }
-
-        $custom_name = '';
-
-        if ( 'custom' === $platform ) {
-            $custom_name = isset( $item['custom_name'] ) ? sanitize_text_field( $item['custom_name'] ) : '';
-        }
-
-        $custom_icon_id = 0;
-
-        if ( 'custom' === $platform && isset( $item['custom_icon_id'] ) ) {
-            $custom_icon_id = absint( $item['custom_icon_id'] );
-        }
-
-        $clean[] = [
-            'platform' => $platform,
-            'url' => $url,
-            'custom_name' => $custom_name,
-            'custom_icon_id' => $custom_icon_id,
-            'open_new_tab' => ! empty( $item['open_new_tab'] ),
-        ];
-    }
-
-    return $clean;
+Identify mismatches between saved keys and CSS variables.
+
+Common problems to check:
+
+* Saved color key differs from renderer key
+* Renderer outputs a variable that CSS does not use
+* CSS uses old variable names
+* Component uses hardcoded colors instead of variables
+* Default CSS loads after custom inline CSS and overrides it
+* Dark mode CSS overrides saved custom variables unintentionally
+* System mode media query overrides saved custom variables unintentionally
+* Admin preview uses a different map than the frontend
+
+## 2. Create Canonical Color Map
+
+Create one canonical map between saved setting keys and public CSS variables.
+
+Use this target map unless the project already has equivalent keys:
+
+```php id="s2qbyq"
+private function get_color_variable_map(): array {
+    return [
+        'background_color' => '--mm-bg',
+        'surface_color' => '--mm-surface',
+        'primary_color' => '--mm-primary',
+        'heading_text_color' => '--mm-heading-text',
+        'body_text_color' => '--mm-body-text',
+        'muted_text_color' => '--mm-muted-text',
+        'link_text_color' => '--mm-link-text',
+        'button_text_color' => '--mm-button-text',
+        'border_color' => '--mm-border',
+    ];
 }
 ```
 
-Email normalization rules:
+If current saved keys are different, either:
 
-* Accept `name@example.com`
-* Convert it to `mailto:name@example.com`
-* Accept safe `mailto:name@example.com`
-* Reject malformed email values
-* Reject unsafe protocols
+* Adapt this map to the existing saved keys
+* Or add backward-compatible migration/fallback logic
 
-## 5. Fix Tab Save Data Loss
+Do not break existing saved colors.
 
-Fix the issue where saving one tab sets other tab settings to null.
+Do not rename saved option keys without migration.
 
-This is a high-priority bug.
+## 3. Normalize Color Settings
 
-The save handler must not replace the entire settings array with only the active tab payload.
-
-Required save flow:
-
-```php id="mo9fct"
-$existing = $this->settings_repository->get_settings();
-$defaults = $this->settings_schema->get_defaults();
-
-$existing = wp_parse_args( $existing, $defaults );
-
-$submitted = $this->get_submitted_settings_for_active_tab();
-$sanitized = $this->sanitize_settings_for_active_tab( $submitted, $active_tab );
-
-$merged = $this->merge_settings_without_data_loss( $existing, $sanitized, $active_tab );
-
-$this->settings_repository->save_settings( $merged );
-```
-
-Rules:
-
-* Load existing settings before saving
-* Load defaults before saving
-* Sanitize only submitted fields for the active tab
-* Merge submitted fields over existing settings
-* Preserve fields that were not submitted
-* Do not set missing fields to null
-* Do not overwrite unrelated tab groups
-* Save intentional empty arrays only for fields from the active tab
-* Preserve nested settings from other tabs
-
-## 6. Active Tab Field Ownership
-
-Define which settings belong to each tab.
-
-Recommended ownership map:
-
-```php id="m9hylz"
-[
-    'general' => [
-        'mode_type',
-        'page_title',
-        'page_message',
-        'login_enabled',
-    ],
-    'template' => [
-        'template_key',
-    ],
-    'design' => [
-        'theme_mode',
-        'colors',
-    ],
-    'components' => [
-        'components',
-    ],
-    'social-links' => [
-        'social_links',
-    ],
-    'advanced' => [
-        'asset_loading',
-    ],
-]
-```
-
-When saving a tab:
-
-* Only keys owned by that tab may be updated
-* Missing keys from other tabs must be preserved
-* Unknown keys must be ignored
-* Nested arrays must be merged carefully
-* Intentional empty values are allowed only for keys owned by the active tab
-
-## 7. Merge Helper
-
-Add a merge helper that prevents data loss.
+Before rendering colors, normalize them.
 
 Expected behavior:
 
-* Preserve all existing keys by default
-* Update only allowed keys for the active tab
-* Never write null for fields that were not submitted
-* Merge nested arrays when needed
-* Allow `social_links` to become an empty array only when saving the Social Links tab
-* Allow `components` to become an empty array only when saving the Components tab
+```php id="so68zw"
+private function normalize_colors( array $settings ): array {
+    $defaults = $this->get_default_colors_for_theme_mode( $settings['theme_mode'] ?? 'system' );
+    $saved = isset( $settings['colors'] ) && is_array( $settings['colors'] ) ? $settings['colors'] : [];
 
-Suggested behavior:
+    $colors = wp_parse_args( $saved, $defaults );
 
-```php id="ibj18a"
-private function merge_settings_without_data_loss( array $existing, array $sanitized, string $active_tab ): array {
-    $allowed_keys = $this->get_settings_keys_for_tab( $active_tab );
-    $merged = $existing;
+    foreach ( $colors as $key => $value ) {
+        $color = sanitize_hex_color( $value );
 
-    foreach ( $allowed_keys as $key ) {
-        if ( array_key_exists( $key, $sanitized ) ) {
-            $merged[ $key ] = $sanitized[ $key ];
+        if ( empty( $color ) ) {
+            $colors[ $key ] = $defaults[ $key ] ?? '';
+            continue;
         }
+
+        $colors[ $key ] = $color;
     }
 
-    return $merged;
+    return $colors;
 }
 ```
 
-Use a deeper merge only where nested setting groups need it.
+Rules:
 
-Do not use a blind recursive merge if it preserves removed repeater rows incorrectly.
+* Always merge saved colors with defaults
+* Sanitize every color before rendering
+* Use fallback defaults for invalid values
+* Do not render unknown color keys as CSS variables
+* Do not render empty values
+* Do not trust saved settings directly
 
-For `social_links`, replacing the whole `social_links` array is correct only when the active tab is `social-links`.
+## 4. Generate Scoped CSS Variables
 
-For `colors`, merge color keys over existing color defaults.
+Generate CSS variables from the normalized colors and canonical map.
 
-For unrelated tabs, preserve everything.
+The CSS variables must be scoped to the maintenance page wrapper.
 
-## 8. Regression Tests
+Acceptable output:
 
-After implementing, test this exact flow:
+```php id="gsx5nx"
+private function build_color_style_attribute( array $colors ): string {
+    $map = $this->get_color_variable_map();
+    $declarations = [];
 
-```text id="y000dg"
-1. Set page title and message in General.
-2. Save General.
-3. Go to Design.
-4. Set theme mode and colors.
-5. Save Design.
-6. Confirm page title and message still exist.
-7. Go to Social Links.
-8. Add Facebook URL.
-9. Add Instagram URL.
-10. Save Social Links.
-11. Confirm General and Design values still exist.
-12. Remove Instagram.
-13. Save Social Links.
-14. Confirm only Instagram is removed.
-15. Confirm Facebook remains.
-16. Go to General.
-17. Save General again.
-18. Confirm Social Links still exist.
+    foreach ( $map as $setting_key => $css_var ) {
+        if ( empty( $colors[ $setting_key ] ) ) {
+            continue;
+        }
+
+        $color = sanitize_hex_color( $colors[ $setting_key ] );
+
+        if ( empty( $color ) ) {
+            continue;
+        }
+
+        $declarations[] = sprintf(
+            '%s: %s',
+            $css_var,
+            $color
+        );
+    }
+
+    return implode( '; ', $declarations );
+}
 ```
 
-Also test:
+When printing the style attribute, escape it safely:
 
-* Save Social Links with one empty default row
-* Confirm no social link renders publicly
-* Save Social Links with all rows removed
-* Confirm social links save as empty array
-* Confirm admin UI still allows adding another social item
-* Add custom platform with SVG icon attachment
-* Confirm icon renders fully visible
-* Confirm invalid custom icon falls back safely
-* Confirm no unrelated settings become null
+```php id="x6gt93"
+style="<?php echo esc_attr( $color_style ); ?>"
+```
+
+Alternative acceptable approach:
+
+* Use `wp_add_inline_style()` after registering/enqueuing the template stylesheet
+* Scope the variables to `.mm-public-shell`
+* Ensure inline custom values load after the default stylesheet
+
+Do not print global unscoped color CSS.
+
+## 5. Fix Light, Dark, and System Mode Overrides
+
+Review the CSS for light, dark, and system mode.
+
+Saved colors must not disappear because default theme mode rules override them later.
+
+Rules:
+
+* Defaults may define fallback variables
+* Saved custom variables must override defaults
+* Dark mode rules must not override saved inline variables unintentionally
+* System mode media queries must not override saved inline variables unintentionally
+* The wrapper class should clearly identify the selected mode
+
+Recommended wrapper classes:
+
+```text id="cdwrd1"
+mm-theme-light
+mm-theme-dark
+mm-theme-system
+```
+
+If using inline style variables on the wrapper, do not redefine the same variables later on a more specific descendant selector.
+
+## 6. Update Component CSS To Use Variables
+
+Replace hardcoded frontend colors with canonical variables.
+
+Required mappings:
+
+```css id="j3qtar"
+.mm-public-shell {
+    background: var(--mm-bg);
+    color: var(--mm-body-text);
+}
+
+.mm-public-card {
+    background: var(--mm-surface);
+    border-color: var(--mm-border);
+}
+
+.mm-hero-title {
+    color: var(--mm-heading-text);
+}
+
+.mm-hero-message,
+.mm-contact-message {
+    color: var(--mm-body-text);
+}
+
+.mm-muted,
+.mm-status-label {
+    color: var(--mm-muted-text);
+}
+
+.mm-social-link,
+.mm-login-link {
+    color: var(--mm-link-text);
+}
+
+.mm-button,
+.mm-primary-button {
+    background: var(--mm-primary);
+    color: var(--mm-button-text);
+}
+
+.mm-progress-fill {
+    background: var(--mm-primary);
+}
+```
+
+Adapt selectors to the actual project.
+
+The key requirement is that all public-facing text and UI colors use the canonical variables.
+
+## 7. Preserve Existing Settings Behavior
+
+Do not regress previous fixes.
+
+Confirm that:
+
+* Saving one tab does not erase other tab values
+* Missing fields are not saved as null
+* Social links remain saved when saving Design
+* Colors remain saved when saving General
+* Components remain saved when saving Social Links
+* Empty social link rows do not render publicly
+* Custom social icons still render safely
+
+## 8. Fix Duplicate Settings Saved Notice
+
+Find why the saved notice appears twice.
+
+Common causes:
+
+* WordPress Settings API renders one notice
+* Custom admin template renders another notice
+* `settings_errors()` is called more than once
+* A redirect query param triggers a custom notice while Settings API also triggers one
+* Both `add_settings_error()` and manual HTML notice output are used for the same success
+* The admin page callback renders notices and WordPress admin renders them again
+
+Choose one notice owner.
+
+### Option A: WordPress Settings API Notice
+
+Use the Settings API notice only.
+
+Rules:
+
+* Keep one `add_settings_error()` success notice if needed
+* Call `settings_errors()` only once
+* Remove custom duplicate success notice HTML
+* Do not render a second notice based on query params
+
+### Option B: Custom Notice Only
+
+Use one custom notice only.
+
+Rules:
+
+* Do not call `settings_errors()` for the same success notice
+* Do not add a duplicate Settings API success notice
+* Render the custom notice only after a confirmed successful save
+* Ensure the notice does not persist incorrectly across tab switches
+
+Choose the cleaner option for the current implementation.
+
+## 9. Save Notice Expected Behavior
+
+After the fix:
+
+* Initial settings page load shows no saved notice
+* Successful save shows one notice
+* Failed save does not show a success notice
+* Switching tabs does not duplicate the notice
+* Refreshing after redirect does not duplicate the notice
+* The notice uses WordPress admin styling
+* Active tab state remains preserved
+
+Recommended text:
+
+```text id="mugb6i"
+Settings saved.
+```
+
+## 10. Regression Test Flow
+
+Run this manual test flow:
+
+```text id="ofn53x"
+1. Open the settings page.
+2. Confirm no saved notice appears on first load.
+3. Go to Design.
+4. Change background color.
+5. Change heading text color.
+6. Change body text color.
+7. Save Design.
+8. Confirm exactly one saved notice appears.
+9. Open the public maintenance page.
+10. Confirm the background color applies.
+11. Confirm heading text color applies.
+12. Confirm body text color applies.
+13. Refresh the public page.
+14. Confirm colors still apply.
+15. Switch to dark mode.
+16. Save Design.
+17. Confirm exactly one saved notice appears.
+18. Confirm dark mode colors apply correctly.
+19. Switch to system mode.
+20. Save Design.
+21. Confirm exactly one saved notice appears.
+22. Confirm colors still apply consistently.
+23. Save General.
+24. Confirm Design colors were not erased.
+25. Save Social Links.
+26. Confirm Design colors were not erased.
+```
+
+Also inspect frontend CSS in the browser:
+
+* Confirm variables exist on the public wrapper
+* Confirm variables contain saved hex values
+* Confirm components reference those variables
+* Confirm no later CSS rule overrides saved values incorrectly
 
 ## Deliverables
 
 When complete, report:
 
 * Files changed
-* How social defaults now work
-* How add/remove social rows work
-* How custom SVG icons are handled safely
-* How tab save data loss was fixed
-* Any migration/backward-compatibility handling
-* Manual test results for cross-tab saving
-
-
-
-
-### Admin Settings Tabs
-
-Update the admin settings page so Phase 3 settings are grouped into simple tabs.
-
-Use these tabs:
-
-```text id="rtmcm2"
-General
-Template
-Design
-Components
-Social Links
-Advanced
-```
-
-Expected grouping:
-
-| Tab          | Settings                                         |
-| ------------ | ------------------------------------------------ |
-| General      | Mode type, page title, message, login visibility |
-| Template     | Template selection and layout basics             |
-| Design       | Theme mode, colors, text readability settings    |
-| Components   | Component enable/disable settings                |
-| Social Links | Social links repeater                            |
-| Advanced     | Asset/debug-safe settings for later phases       |
-
-Implementation rules:
-
-* Keep the settings page simple
-* Use WordPress admin UI conventions
-* Preserve the active tab after save when possible
-* Do not break settings saving
-* Do not add heavy dependencies
-* Do not hide required fields in confusing places
-* Keep tabs keyboard accessible
-
-### Social Links Repeater
-
-Replace any single social link setting or manual label setup with a repeater-style social links field.
-
-The user should be able to:
-
-* Add a new social item
-* Remove a social item
-* Choose the platform from a dropdown
-* Enter the URL or email value
-* Add a custom platform name only when platform is `custom`
-* Upload a custom icon only when platform is `custom`
-* Save all items safely
-
-Known platforms should ask only for:
-
-* Platform
-* URL or email value
-* Open in new tab setting, optional
-
-Known platforms should not ask for custom labels.
-
-The visible label should come from the selected platform.
-
-Custom platforms should ask for:
-
-* Platform set to `custom`
-* Custom platform name
-* URL
-* Optional custom icon upload
-* Open in new tab setting, optional
-
-Supported platform dropdown values:
-
-```text id="h04f7r"
-facebook
-instagram
-linkedin
-x
-youtube
-github
-tiktok
-threads
-website
-email
-custom
-```
-
-Default labels:
-
-```php id="eyvbz2"
-[
-    'facebook' => 'Facebook',
-    'instagram' => 'Instagram',
-    'linkedin' => 'LinkedIn',
-    'x' => 'X',
-    'youtube' => 'YouTube',
-    'github' => 'GitHub',
-    'tiktok' => 'TikTok',
-    'threads' => 'Threads',
-    'website' => 'Website',
-    'email' => 'Email',
-    'custom' => 'Link',
-]
-```
-
-### Social Link Saved Data Shape
-
-Use a simple array shape for saved social links.
-
-Recommended shape:
-
-```php id="2j36le"
-[
-    [
-        'platform' => 'instagram',
-        'url' => 'https://instagram.com/example',
-        'custom_name' => '',
-        'custom_icon_id' => 0,
-        'open_new_tab' => true,
-    ],
-    [
-        'platform' => 'custom',
-        'url' => 'https://example.com/community',
-        'custom_name' => 'Community',
-        'custom_icon_id' => 123,
-        'open_new_tab' => true,
-    ],
-]
-```
-
-Sanitize every item before saving.
-
-Sanitization rules:
-
-* Platform must exist in the allowlist
-* URL must be valid for normal platforms
-* Email platform must accept a valid email or safe `mailto:` URL
-* Custom name must be sanitized as text
-* Custom icon ID must be a positive integer attachment ID
-* Open in new tab must be normalized to boolean
-* Empty or invalid rows should be removed
-
-### Custom Social Icon Upload
-
-For custom social platforms, add an optional icon upload using the WordPress media library.
-
-Preferred safe file types:
-
-```text id="b8ua5b"
-png
-jpg
-jpeg
-webp
-```
-
-Do not allow raw SVG uploads unless the project already has safe SVG sanitization.
-
-If SVG support is added, it must be sanitized before rendering.
-
-Implementation rules:
-
-* Store the icon as an attachment ID
-* Resolve the attachment URL during rendering
-* Escape the resolved URL
-* Use the custom platform name as alt text
-* Fall back to `Link` as alt text when custom name is empty
-* Do not store raw image markup
-* Do not render raw user-provided SVG or HTML
-* Do not render broken image URLs
-
-### Social Icon Rendering
-
-Make sure social icons stay fully visible and aligned.
-
-Use consistent sizing for all known and custom icons.
-
-Required frontend behavior:
-
-* Icons have fixed width and height
-* Icons use `object-fit: contain`
-* Icons do not crop
-* Icons do not stretch
-* Icons do not overflow their container
-* Text remains aligned with icons
-* Social links wrap on mobile
-* Social section does not create horizontal overflow
-
-Add or adapt CSS similar to:
-
-```css id="rbr2zc"
-.mm-social-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    justify-content: center;
-}
-
-.mm-social-link {
-    max-width: 100%;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-height: 2.5rem;
-}
-
-.mm-social-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex: 0 0 1.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.mm-social-icon img,
-.mm-social-icon svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: contain;
-}
-```
-
-### Social Links Frontend Rendering Rules
-
-Update the social links component rendering rules:
-
-* Render social links from the saved repeater array
-* Use automatic labels for known platforms
-* Use custom platform name only for `custom`
-* Use internal allowlisted icons for known platforms
-* Use uploaded icon only for `custom`
-* Fall back to a generic link icon when custom icon is missing
-* Skip missing platforms
-* Skip unsupported platforms
-* Skip invalid URLs
-* Skip invalid email values
-* Escape labels
-* Escape URLs
-* Escape image URLs
-* Escape alt text
-* Add `rel="noopener noreferrer"` when opening in a new tab
-* Do not render raw custom SVG or HTML from settings
-
-### Additional Testing Checklist
-
-After implementation, verify:
-
-* Settings are divided into tabs
-* The settings save flow still works
-* The active tab remains usable after saving
-* `Add new social` adds a new item
-* Remove deletes a social item
-* Platform dropdown works
-* Known platforms ask only for platform and URL/email value
-* Custom platform shows custom name and icon upload fields
-* Custom icon uploads through the WordPress media library
-* Saved social links sanitize correctly
-* Invalid social rows are removed or skipped
-* Known platform labels render automatically
-* Custom platform names render safely
-* Known platform icons render correctly
-* Custom uploaded icons render correctly
-* Missing custom icons fall back safely
-* Icons remain fully visible
-* Icons do not stretch or crop
-* Social links wrap on mobile
-* Social links do not create horizontal overflow
+* Root cause of inconsistent color application
+* Final color key to CSS variable mapping
+* How saved colors are scoped on the frontend
+* How light, dark, and system modes now apply colors
+* Which duplicate notice source was removed
+* Manual regression test results
+* Any remaining risks
