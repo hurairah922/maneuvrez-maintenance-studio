@@ -26,7 +26,7 @@ class HeroComponent implements ComponentInterface {
 	 * {@inheritDoc}
 	 */
 	public function get_label() {
-		return __( 'Hero', MMSM_TEXT_DOMAIN );
+		return __( 'Hero', 'maintenance-mode-studio' );
 	}
 
 	/**
@@ -43,49 +43,49 @@ class HeroComponent implements ComponentInterface {
 		return array(
 			array(
 				'key'      => 'hero_eyebrow',
-				'label'    => __( 'Eyebrow', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Eyebrow', 'maintenance-mode-studio' ),
 				'type'     => 'text',
 				'default'  => '',
 				'required' => false,
 			),
 			array(
 				'key'      => 'page_title',
-				'label'    => __( 'Title', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Title', 'maintenance-mode-studio' ),
 				'type'     => 'text',
 				'default'  => "We'll be back soon",
 				'required' => true,
 			),
 			array(
 				'key'      => 'message',
-				'label'    => __( 'Message', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Message', 'maintenance-mode-studio' ),
 				'type'     => 'textarea',
 				'default'  => 'Our site is getting a quick update. Please check back shortly.',
 				'required' => true,
 			),
 			array(
 				'key'      => 'primary_action_label',
-				'label'    => __( 'Primary action label', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Primary action label', 'maintenance-mode-studio' ),
 				'type'     => 'text',
 				'default'  => '',
 				'required' => false,
 			),
 			array(
 				'key'      => 'primary_action_url',
-				'label'    => __( 'Primary action URL', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Primary action URL', 'maintenance-mode-studio' ),
 				'type'     => 'url',
 				'default'  => '',
 				'required' => false,
 			),
 			array(
 				'key'      => 'secondary_action_label',
-				'label'    => __( 'Secondary action label', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Secondary action label', 'maintenance-mode-studio' ),
 				'type'     => 'text',
 				'default'  => '',
 				'required' => false,
 			),
 			array(
 				'key'      => 'secondary_action_url',
-				'label'    => __( 'Secondary action URL', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Secondary action URL', 'maintenance-mode-studio' ),
 				'type'     => 'url',
 				'default'  => '',
 				'required' => false,
@@ -165,7 +165,7 @@ class HeroComponent implements ComponentInterface {
 		$label = trim( $label );
 
 		if ( '' === $label ) {
-			$label = __( 'Learn more', MMSM_TEXT_DOMAIN );
+			$label = __( 'Learn more', 'maintenance-mode-studio' );
 		}
 
 		return array(

@@ -43,9 +43,9 @@ class SocialLinksComponent implements ComponentInterface {
 	 */
 	public static function get_icon_source_labels() {
 		return array(
-			'platform' => __( 'Platform default', MMSM_TEXT_DOMAIN ),
-			'library'  => __( 'WordPress icon library', MMSM_TEXT_DOMAIN ),
-			'upload'   => __( 'Uploaded SVG/image', MMSM_TEXT_DOMAIN ),
+			'platform' => __( 'Platform default', 'maintenance-mode-studio' ),
+			'library'  => __( 'WordPress icon library', 'maintenance-mode-studio' ),
+			'upload'   => __( 'Uploaded SVG/image', 'maintenance-mode-studio' ),
 		);
 	}
 
@@ -57,7 +57,7 @@ class SocialLinksComponent implements ComponentInterface {
 	public static function get_icon_libraries() {
 		$libraries = array(
 			'dashicons' => array(
-				'label' => __( 'WordPress Dashicons', MMSM_TEXT_DOMAIN ),
+				'label' => __( 'WordPress Dashicons', 'maintenance-mode-studio' ),
 				'icons' => self::get_dashicon_choices(),
 			),
 		);
@@ -77,16 +77,16 @@ class SocialLinksComponent implements ComponentInterface {
 	 */
 	public static function get_dashicon_choices() {
 		return array(
-			'admin-site'   => __( 'Site', MMSM_TEXT_DOMAIN ),
-			'admin-links'  => __( 'Link', MMSM_TEXT_DOMAIN ),
-			'email-alt'    => __( 'Email', MMSM_TEXT_DOMAIN ),
-			'external'     => __( 'External', MMSM_TEXT_DOMAIN ),
-			'facebook-alt' => __( 'Facebook', MMSM_TEXT_DOMAIN ),
-			'share'        => __( 'Share', MMSM_TEXT_DOMAIN ),
-			'share-alt'    => __( 'Share Alt', MMSM_TEXT_DOMAIN ),
-			'twitter'      => __( 'Twitter / X', MMSM_TEXT_DOMAIN ),
-			'video-alt3'   => __( 'Video', MMSM_TEXT_DOMAIN ),
-			'wordpress'    => __( 'WordPress', MMSM_TEXT_DOMAIN ),
+			'admin-site'   => __( 'Site', 'maintenance-mode-studio' ),
+			'admin-links'  => __( 'Link', 'maintenance-mode-studio' ),
+			'email-alt'    => __( 'Email', 'maintenance-mode-studio' ),
+			'external'     => __( 'External', 'maintenance-mode-studio' ),
+			'facebook-alt' => __( 'Facebook', 'maintenance-mode-studio' ),
+			'share'        => __( 'Share', 'maintenance-mode-studio' ),
+			'share-alt'    => __( 'Share Alt', 'maintenance-mode-studio' ),
+			'twitter'      => __( 'Twitter / X', 'maintenance-mode-studio' ),
+			'video-alt3'   => __( 'Video', 'maintenance-mode-studio' ),
+			'wordpress'    => __( 'WordPress', 'maintenance-mode-studio' ),
 		);
 	}
 
@@ -101,7 +101,7 @@ class SocialLinksComponent implements ComponentInterface {
 	 * {@inheritDoc}
 	 */
 	public function get_label() {
-		return __( 'Social links', MMSM_TEXT_DOMAIN );
+		return __( 'Social links', 'maintenance-mode-studio' );
 	}
 
 	/**
@@ -118,7 +118,7 @@ class SocialLinksComponent implements ComponentInterface {
 		return array(
 			array(
 				'key'      => 'social_links',
-				'label'    => __( 'Social links', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Social links', 'maintenance-mode-studio' ),
 				'type'     => 'repeater',
 				'default'  => array(),
 				'required' => false,
@@ -173,7 +173,7 @@ class SocialLinksComponent implements ComponentInterface {
 
 		ob_start();
 		?>
-		<section class="mmsm-component mmsm-component-social" aria-label="<?php echo esc_attr__( 'Social links', MMSM_TEXT_DOMAIN ); ?>">
+		<section class="mmsm-component mmsm-component-social" aria-label="<?php echo esc_attr__( 'Social links', 'maintenance-mode-studio' ); ?>">
 			<ul class="mmsm-social-list">
 				<?php foreach ( $links as $link ) : ?>
 					<li>

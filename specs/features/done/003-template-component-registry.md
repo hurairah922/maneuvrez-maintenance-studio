@@ -2,7 +2,7 @@
 
 ## 1. Summary
 
-Phase 3 introduced a registry-driven frontend architecture for the public maintenance page.
+Phase 3 introduced a registry-driven frontend architecture for the public maintenance page and finished with a stabilization pass for colors, social links, footer controls, and Plugin Check compliance.
 
 The implementation includes:
 
@@ -15,6 +15,11 @@ The implementation includes:
 - responsive public template shell
 - template-specific asset files
 - expanded settings sanitization and admin controls for component content
+- reliable scoped frontend color application through canonical CSS variable mapping
+- single save notice behavior in the admin settings screen
+- social link persistence with uploaded icon and Dashicon support
+- footer section visibility control in settings
+- Phase 3 Plugin Check fixes for i18n literals, nonce verification, request sanitization, translation folder validity, and WordPress 6.4 REST compatibility
 
 ## 2. Implemented Files
 
@@ -48,6 +53,8 @@ maintenance-mode-studio/
 │   ├── Plugin.php
 │   └── Security/
 │       └── Sanitizer.php
+├── languages/
+│   └── index.php
 ├── templates/
 │   └── public/
 │       └── default.php
@@ -56,7 +63,7 @@ maintenance-mode-studio/
 
 ## 3. Acceptance Status
 
-Status: Implemented with follow-up items
+Status: Implemented
 
 Reviewed against:
 
@@ -64,15 +71,18 @@ Reviewed against:
 - `specs/prompts/codex/003-template-component-registry-execution.md`
 - `specs/prompts/review/003-template-component-registry-review.md`
 
-Review result:
+Completed result:
 
 - Phase 3 architecture is present and wired into the runtime
 - required components and registries were added
-- settings are normalized before rendering
+- settings are normalized before rendering and scoped to the maintenance shell
 - template rendering is zone-aware and safely skips unknown or incompatible components
 - public output is escaped and empty states are handled defensively
-- follow-up work is still recommended for fully registry-driven asset registration
-- follow-up work is still recommended to remove remaining hardcoded blue accents from the theme layer
+- saved design colors apply consistently in light, dark, and system modes
+- duplicate settings save notices were removed
+- social links save correctly and support platform, uploaded, and Dashicon icon sources
+- the public footer panel can be turned on or off from settings
+- Plugin Check items addressed in scope were implemented without removing the existing Phase 3 behavior
 
 ## 4. Verification Notes
 
@@ -81,6 +91,14 @@ Completed verification:
 - `php -l` passed for all PHP files in the repository
 - implementation matches the intended Phase 3 file structure closely
 - template fallback, component fallback, and settings normalization are covered in code paths
+- i18n calls in the Phase 3 files now use the literal plugin text domain string
+- `languages/` now exists for the declared `Domain Path`
+- manual `load_plugin_textdomain()` was removed
+- admin save processing now verifies nonce and capability before merging tab settings
+- `$_SERVER['REQUEST_URI']` is sanitized before REST route comparison
+- `wp_is_serving_rest_request()` now uses a WordPress 6.4-compatible fallback path
+- the duplicate `public/templates/default.php` template was removed so `templates/public/default.php` is canonical
+- `.distignore` already excludes development and packaging-only files from release archives
 
 Not yet verified in a live WordPress install:
 
@@ -88,6 +106,7 @@ Not yet verified in a live WordPress install:
 - frontend rendering in real WordPress requests
 - browser-level responsive behavior across desktop, tablet, mobile, and small mobile
 - visual confirmation that light, dark, and system modes behave as expected
+- live Plugin Check output after packaging the final production ZIP
 
 ## 5. Security Notes
 
@@ -99,24 +118,27 @@ Phase 3 includes:
 - invalid component or template keys failing safely
 - invalid email values being skipped instead of rendered
 - clamped progress values to prevent broken markup
+- admin settings save verification through nonce and capability checks
+- sanitized request URI handling in frontend routing
+- controlled social icon rendering for uploaded media and Dashicons
 
 ## 6. Commit Message
 
 Suggested commit message:
 
-`feat: add phase 3 template and component registry`
+`feat: complete phase 3 template registry and compliance pass`
 
 Suggested longer body:
 
-- add template, component, settings, and support registries/helpers
-- render maintenance pages through zone-based template components
-- add responsive default template with theme modes and component settings
-- document phase 2 and phase 3 implementation status in `specs/features/done`
+- finish the registry-driven public template architecture
+- fix frontend color application and duplicate save notices
+- preserve social links and add footer and icon source controls
+- complete the Phase 3 Plugin Check stabilization work
+- document the finished Phase 3 state in `specs/features/done`
 
 ## 7. Follow-Up Work
 
 Recommended next cleanup items:
 
-- move asset registration ownership fully into the template registry flow
-- remove remaining hardcoded blue accent values so primary color settings drive the full visual system
-- run live WordPress and browser smoke tests before treating Phase 3 as fully passed
+- run live WordPress and browser smoke tests before cutting a wider release
+- run Plugin Check against the final production ZIP as a release gate

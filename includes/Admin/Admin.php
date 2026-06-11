@@ -72,8 +72,8 @@ class Admin {
 	 */
 	public function add_settings_page() {
 		$this->page_hook = add_options_page(
-			__( 'Maintenance Mode Studio', MMSM_TEXT_DOMAIN ),
-			__( 'Maintenance Mode Studio', MMSM_TEXT_DOMAIN ),
+			__( 'Maintenance Mode Studio', 'maintenance-mode-studio' ),
+			__( 'Maintenance Mode Studio', 'maintenance-mode-studio' ),
 			'manage_options',
 			$this->page_slug,
 			array( $this, 'render_page' )
@@ -98,14 +98,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_general_section',
-			__( 'General', MMSM_TEXT_DOMAIN ),
+			__( 'General', 'maintenance-mode-studio' ),
 			array( $this, 'render_general_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_enabled',
-			__( 'Enable maintenance mode', MMSM_TEXT_DOMAIN ),
+			__( 'Enable maintenance mode', 'maintenance-mode-studio' ),
 			array( $this, 'render_enabled_field' ),
 			$this->page_slug,
 			'mmsm_general_section'
@@ -113,7 +113,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_page_title',
-			__( 'Page Title', MMSM_TEXT_DOMAIN ),
+			__( 'Page Title', 'maintenance-mode-studio' ),
 			array( $this, 'render_page_title_field' ),
 			$this->page_slug,
 			'mmsm_general_section'
@@ -121,7 +121,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_message',
-			__( 'Message', MMSM_TEXT_DOMAIN ),
+			__( 'Message', 'maintenance-mode-studio' ),
 			array( $this, 'render_message_field' ),
 			$this->page_slug,
 			'mmsm_general_section'
@@ -129,14 +129,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_template_section',
-			__( 'Template', MMSM_TEXT_DOMAIN ),
+			__( 'Template', 'maintenance-mode-studio' ),
 			array( $this, 'render_template_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_mode_type',
-			__( 'Mode Type', MMSM_TEXT_DOMAIN ),
+			__( 'Mode Type', 'maintenance-mode-studio' ),
 			array( $this, 'render_mode_type_field' ),
 			$this->page_slug,
 			'mmsm_template_section'
@@ -144,7 +144,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_template_key',
-			__( 'Template', MMSM_TEXT_DOMAIN ),
+			__( 'Template', 'maintenance-mode-studio' ),
 			array( $this, 'render_template_key_field' ),
 			$this->page_slug,
 			'mmsm_template_section'
@@ -152,14 +152,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_design_section',
-			__( 'Design', MMSM_TEXT_DOMAIN ),
+			__( 'Design', 'maintenance-mode-studio' ),
 			array( $this, 'render_design_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_theme_mode',
-			__( 'Theme Mode', MMSM_TEXT_DOMAIN ),
+			__( 'Theme Mode', 'maintenance-mode-studio' ),
 			array( $this, 'render_theme_mode_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -167,7 +167,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_primary_color',
-			__( 'Primary Color', MMSM_TEXT_DOMAIN ),
+			__( 'Primary Color', 'maintenance-mode-studio' ),
 			array( $this, 'render_primary_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -175,7 +175,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_background_color',
-			__( 'Background Color', MMSM_TEXT_DOMAIN ),
+			__( 'Background Color', 'maintenance-mode-studio' ),
 			array( $this, 'render_background_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -183,7 +183,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_surface_color',
-			__( 'Surface Color', MMSM_TEXT_DOMAIN ),
+			__( 'Surface Color', 'maintenance-mode-studio' ),
 			array( $this, 'render_surface_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -191,7 +191,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_heading_text_color',
-			__( 'Heading Text Color', MMSM_TEXT_DOMAIN ),
+			__( 'Heading Text Color', 'maintenance-mode-studio' ),
 			array( $this, 'render_heading_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -199,7 +199,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_body_text_color',
-			__( 'Body Text Color', MMSM_TEXT_DOMAIN ),
+			__( 'Body Text Color', 'maintenance-mode-studio' ),
 			array( $this, 'render_body_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -207,7 +207,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_muted_text_color',
-			__( 'Muted Text Color', MMSM_TEXT_DOMAIN ),
+			__( 'Muted Text Color', 'maintenance-mode-studio' ),
 			array( $this, 'render_muted_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -215,7 +215,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_link_text_color',
-			__( 'Link Text Color', MMSM_TEXT_DOMAIN ),
+			__( 'Link Text Color', 'maintenance-mode-studio' ),
 			array( $this, 'render_link_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -223,7 +223,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_button_text_color',
-			__( 'Button Text Color', MMSM_TEXT_DOMAIN ),
+			__( 'Button Text Color', 'maintenance-mode-studio' ),
 			array( $this, 'render_button_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -231,7 +231,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_border_color',
-			__( 'Border Color', MMSM_TEXT_DOMAIN ),
+			__( 'Border Color', 'maintenance-mode-studio' ),
 			array( $this, 'render_border_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -239,14 +239,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_components_section',
-			__( 'Components', MMSM_TEXT_DOMAIN ),
+			__( 'Components', 'maintenance-mode-studio' ),
 			array( $this, 'render_components_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_hero_eyebrow',
-			__( 'Hero Eyebrow', MMSM_TEXT_DOMAIN ),
+			__( 'Hero Eyebrow', 'maintenance-mode-studio' ),
 			array( $this, 'render_hero_eyebrow_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -254,7 +254,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_primary_action_label',
-			__( 'Primary Action Label', MMSM_TEXT_DOMAIN ),
+			__( 'Primary Action Label', 'maintenance-mode-studio' ),
 			array( $this, 'render_primary_action_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -262,7 +262,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_primary_action_url',
-			__( 'Primary Action URL', MMSM_TEXT_DOMAIN ),
+			__( 'Primary Action URL', 'maintenance-mode-studio' ),
 			array( $this, 'render_primary_action_url_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -270,7 +270,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_secondary_action_label',
-			__( 'Secondary Action Label', MMSM_TEXT_DOMAIN ),
+			__( 'Secondary Action Label', 'maintenance-mode-studio' ),
 			array( $this, 'render_secondary_action_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -278,7 +278,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_secondary_action_url',
-			__( 'Secondary Action URL', MMSM_TEXT_DOMAIN ),
+			__( 'Secondary Action URL', 'maintenance-mode-studio' ),
 			array( $this, 'render_secondary_action_url_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -286,7 +286,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_status_label',
-			__( 'Status Label', MMSM_TEXT_DOMAIN ),
+			__( 'Status Label', 'maintenance-mode-studio' ),
 			array( $this, 'render_status_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -294,7 +294,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_show_progress',
-			__( 'Show Progress', MMSM_TEXT_DOMAIN ),
+			__( 'Show Progress', 'maintenance-mode-studio' ),
 			array( $this, 'render_show_progress_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -302,7 +302,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_progress_value',
-			__( 'Progress Value', MMSM_TEXT_DOMAIN ),
+			__( 'Progress Value', 'maintenance-mode-studio' ),
 			array( $this, 'render_progress_value_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -310,7 +310,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_contact_label',
-			__( 'Contact Label', MMSM_TEXT_DOMAIN ),
+			__( 'Contact Label', 'maintenance-mode-studio' ),
 			array( $this, 'render_contact_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -318,7 +318,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_contact_message',
-			__( 'Contact Message', MMSM_TEXT_DOMAIN ),
+			__( 'Contact Message', 'maintenance-mode-studio' ),
 			array( $this, 'render_contact_message_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -326,7 +326,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_contact_email',
-			__( 'Contact Email', MMSM_TEXT_DOMAIN ),
+			__( 'Contact Email', 'maintenance-mode-studio' ),
 			array( $this, 'render_contact_email_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -334,14 +334,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_social_links_section',
-			__( 'Social Links', MMSM_TEXT_DOMAIN ),
+			__( 'Social Links', 'maintenance-mode-studio' ),
 			array( $this, 'render_social_links_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_social_links',
-			__( 'Social Items', MMSM_TEXT_DOMAIN ),
+			__( 'Social Items', 'maintenance-mode-studio' ),
 			array( $this, 'render_social_links_field' ),
 			$this->page_slug,
 			'mmsm_social_links_section'
@@ -349,14 +349,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_advanced_section',
-			__( 'Advanced', MMSM_TEXT_DOMAIN ),
+			__( 'Advanced', 'maintenance-mode-studio' ),
 			array( $this, 'render_advanced_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_show_login_button',
-			__( 'Show Login Button', MMSM_TEXT_DOMAIN ),
+			__( 'Show Login Button', 'maintenance-mode-studio' ),
 			array( $this, 'render_show_login_button_field' ),
 			$this->page_slug,
 			'mmsm_advanced_section'
@@ -364,7 +364,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_show_footer_section',
-			__( 'Show Footer Section', MMSM_TEXT_DOMAIN ),
+			__( 'Show Footer Section', 'maintenance-mode-studio' ),
 			array( $this, 'render_show_footer_section_field' ),
 			$this->page_slug,
 			'mmsm_advanced_section'
@@ -372,7 +372,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_login_label',
-			__( 'Login Label', MMSM_TEXT_DOMAIN ),
+			__( 'Login Label', 'maintenance-mode-studio' ),
 			array( $this, 'render_login_label_field' ),
 			$this->page_slug,
 			'mmsm_advanced_section'
@@ -392,13 +392,13 @@ class Admin {
 		$active_tab = $this->get_active_tab();
 		?>
 		<div class="wrap mmsm-settings-page">
-			<h1><?php echo esc_html__( 'Maintenance Mode Studio', MMSM_TEXT_DOMAIN ); ?></h1>
+			<h1><?php echo esc_html__( 'Maintenance Mode Studio', 'maintenance-mode-studio' ); ?></h1>
 			<p class="mmsm-settings-intro">
-				<?php echo esc_html__( 'Configure the maintenance page template, core copy, and a few reusable components without editing code.', MMSM_TEXT_DOMAIN ); ?>
+				<?php echo esc_html__( 'Configure the maintenance page template, core copy, and a few reusable components without editing code.', 'maintenance-mode-studio' ); ?>
 			</p>
 
 			<?php settings_errors( MMSM_SETTINGS_OPTION ); ?>
-			<nav class="nav-tab-wrapper mmsm-settings-tabs" aria-label="<?php echo esc_attr__( 'Maintenance Mode Studio settings sections', MMSM_TEXT_DOMAIN ); ?>">
+			<nav class="nav-tab-wrapper mmsm-settings-tabs" aria-label="<?php echo esc_attr__( 'Maintenance Mode Studio settings sections', 'maintenance-mode-studio' ); ?>">
 				<?php foreach ( $this->get_tabs() as $tab_key => $tab ) : ?>
 					<a
 						href="<?php echo esc_url( $this->get_tab_url( $tab_key ) ); ?>"
@@ -412,12 +412,13 @@ class Admin {
 			<form action="<?php echo esc_url( admin_url( 'options.php' ) ); ?>" method="post">
 				<?php
 					settings_fields( $this->settings_group );
+					wp_nonce_field( 'mmsm_save_settings', 'mmsm_settings_nonce' );
 					?>
 					<input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( $this->get_tab_url( $active_tab ) ); ?>" />
 					<input type="hidden" name="mmsm_active_tab" value="<?php echo esc_attr( $active_tab ); ?>" />
 					<?php
 					$this->render_active_tab();
-				submit_button( __( 'Save Settings', MMSM_TEXT_DOMAIN ) );
+				submit_button( __( 'Save Settings', 'maintenance-mode-studio' ) );
 				?>
 			</form>
 		</div>
@@ -461,9 +462,34 @@ class Admin {
 	 * @return array<string,mixed>
 	 */
 	public function sanitize_settings( $input ) {
-		$input      = is_array( $input ) ? $input : array();
+		$input    = is_array( $input ) ? $input : array();
+		$existing = $this->settings_repository->get_settings();
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			add_settings_error(
+				MMSM_SETTINGS_OPTION,
+				'mmsm_settings_capability_error',
+				esc_html__( 'You are not allowed to update these settings.', 'maintenance-mode-studio' ),
+				'error'
+			);
+
+			return $existing;
+		}
+
+		$nonce = isset( $_POST['mmsm_settings_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['mmsm_settings_nonce'] ) ) : '';
+
+		if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'mmsm_save_settings' ) ) {
+			add_settings_error(
+				MMSM_SETTINGS_OPTION,
+				'mmsm_settings_nonce_error',
+				esc_html__( 'The settings request could not be verified. Please try again.', 'maintenance-mode-studio' ),
+				'error'
+			);
+
+			return $existing;
+		}
+
 		$active_tab = isset( $_POST['mmsm_active_tab'] ) ? sanitize_key( wp_unslash( $_POST['mmsm_active_tab'] ) ) : 'general';
-		$existing   = $this->settings_repository->get_settings();
 		$tab_keys   = $this->get_tab_field_keys( $active_tab );
 
 		foreach ( $tab_keys as $tab_key ) {
@@ -483,7 +509,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_general_section() {
-		echo '<p>' . esc_html__( 'These settings control the core public experience shown to logged-out visitors.', MMSM_TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'These settings control the core public experience shown to logged-out visitors.', 'maintenance-mode-studio' ) . '</p>';
 	}
 
 	/**
@@ -492,7 +518,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_template_section() {
-		echo '<p>' . esc_html__( 'Pick the public template shell and the maintenance mode presentation style.', MMSM_TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Pick the public template shell and the maintenance mode presentation style.', 'maintenance-mode-studio' ) . '</p>';
 	}
 
 	/**
@@ -501,7 +527,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_design_section() {
-		echo '<p>' . esc_html__( 'Use WordPress color pickers for the safe theme color roles that drive light, dark, and system modes.', MMSM_TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Use WordPress color pickers for the safe theme color roles that drive light, dark, and system modes.', 'maintenance-mode-studio' ) . '</p>';
 	}
 
 	/**
@@ -510,7 +536,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_components_section() {
-		echo '<p>' . esc_html__( 'These optional settings feed the hero, status, and contact components rendered by the default template.', MMSM_TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'These optional settings feed the hero, status, and contact components rendered by the default template.', 'maintenance-mode-studio' ) . '</p>';
 	}
 
 	/**
@@ -519,7 +545,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_social_links_section() {
-		echo '<p>' . esc_html__( 'Choose up to four social or contact destinations with safe platform icons, labels, and URLs.', MMSM_TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Choose up to four social or contact destinations with safe platform icons, labels, and URLs.', 'maintenance-mode-studio' ) . '</p>';
 	}
 
 	/**
@@ -528,7 +554,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_advanced_section() {
-		echo '<p>' . esc_html__( 'Control optional access and login affordances without affecting administrator bypass behavior.', MMSM_TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Control optional access and login affordances without affecting administrator bypass behavior.', 'maintenance-mode-studio' ) . '</p>';
 	}
 
 	/**
@@ -547,9 +573,9 @@ class Admin {
 				value="1"
 				<?php checked( 1, (int) $settings['enabled'] ); ?>
 			/>
-			<?php echo esc_html__( 'Show the maintenance page to logged-out visitors.', MMSM_TEXT_DOMAIN ); ?>
+			<?php echo esc_html__( 'Show the maintenance page to logged-out visitors.', 'maintenance-mode-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Administrators keep normal site access while this is enabled.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Administrators keep normal site access while this is enabled.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -563,13 +589,13 @@ class Admin {
 		?>
 		<select id="mmsm-mode-type" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[mode_type]">
 			<option value="maintenance" <?php selected( $settings['mode_type'], 'maintenance' ); ?>>
-				<?php echo esc_html__( 'Maintenance', MMSM_TEXT_DOMAIN ); ?>
+				<?php echo esc_html__( 'Maintenance', 'maintenance-mode-studio' ); ?>
 			</option>
 			<option value="coming_soon" <?php selected( $settings['mode_type'], 'coming_soon' ); ?>>
-				<?php echo esc_html__( 'Coming Soon', MMSM_TEXT_DOMAIN ); ?>
+				<?php echo esc_html__( 'Coming Soon', 'maintenance-mode-studio' ); ?>
 			</option>
 		</select>
-		<p class="description"><?php echo esc_html__( 'Choose whether the public page should show as maintenance mode or coming soon mode.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Choose whether the public page should show as maintenance mode or coming soon mode.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -588,7 +614,7 @@ class Admin {
 			name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[page_title]"
 			value="<?php echo esc_attr( $settings['page_title'] ); ?>"
 		/>
-		<p class="description"><?php echo esc_html__( 'This title appears as the main heading on the public page.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'This title appears as the main heading on the public page.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -606,7 +632,7 @@ class Admin {
 			id="mmsm-message"
 			name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[message]"
 		><?php echo esc_textarea( $settings['message'] ); ?></textarea>
-		<p class="description"><?php echo esc_html__( 'Plain text only in this phase.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Plain text only in this phase.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -626,9 +652,9 @@ class Admin {
 				value="1"
 				<?php checked( 1, (int) $settings['show_login_button'] ); ?>
 			/>
-			<?php echo esc_html__( 'Display the default login button on the public page.', MMSM_TEXT_DOMAIN ); ?>
+			<?php echo esc_html__( 'Display the default login button on the public page.', 'maintenance-mode-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Turn this off if visitors should not see a login shortcut.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Turn this off if visitors should not see a login shortcut.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -642,16 +668,16 @@ class Admin {
 		?>
 		<select id="mmsm-theme-mode" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[theme_mode]">
 			<option value="light" <?php selected( $settings['theme_mode'], 'light' ); ?>>
-				<?php echo esc_html__( 'Light', MMSM_TEXT_DOMAIN ); ?>
+				<?php echo esc_html__( 'Light', 'maintenance-mode-studio' ); ?>
 			</option>
 			<option value="dark" <?php selected( $settings['theme_mode'], 'dark' ); ?>>
-				<?php echo esc_html__( 'Dark', MMSM_TEXT_DOMAIN ); ?>
+				<?php echo esc_html__( 'Dark', 'maintenance-mode-studio' ); ?>
 			</option>
 			<option value="system" <?php selected( $settings['theme_mode'], 'system' ); ?>>
-				<?php echo esc_html__( 'System', MMSM_TEXT_DOMAIN ); ?>
+				<?php echo esc_html__( 'System', 'maintenance-mode-studio' ); ?>
 			</option>
 		</select>
-		<p class="description"><?php echo esc_html__( 'Choose a light, dark, or system-following visual style for the active template.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Choose a light, dark, or system-following visual style for the active template.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -665,10 +691,10 @@ class Admin {
 		?>
 		<select id="mmsm-template-key" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[template_key]">
 			<option value="default" <?php selected( $settings['template_key'], 'default' ); ?>>
-				<?php echo esc_html__( 'Default', MMSM_TEXT_DOMAIN ); ?>
+				<?php echo esc_html__( 'Default', 'maintenance-mode-studio' ); ?>
 			</option>
 		</select>
-		<p class="description"><?php echo esc_html__( 'Phase 3 ships with one polished default template.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Phase 3 ships with one polished default template.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -681,7 +707,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'primary_color',
 			'mmsm-primary-color',
-			__( 'Accent color used for buttons, focus accents, and status styling.', MMSM_TEXT_DOMAIN )
+			__( 'Accent color used for buttons, focus accents, and status styling.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -694,7 +720,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'background_color',
 			'mmsm-background-color',
-			__( 'Page background color. Invalid values fall back to the theme default.', MMSM_TEXT_DOMAIN )
+			__( 'Page background color. Invalid values fall back to the theme default.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -707,7 +733,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'surface_color',
 			'mmsm-surface-color',
-			__( 'Card and panel surface color.', MMSM_TEXT_DOMAIN )
+			__( 'Card and panel surface color.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -720,7 +746,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'heading_text_color',
 			'mmsm-heading-text-color',
-			__( 'Main heading and section title color.', MMSM_TEXT_DOMAIN )
+			__( 'Main heading and section title color.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -733,7 +759,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'body_text_color',
 			'mmsm-body-text-color',
-			__( 'Primary body copy color for messages and descriptions.', MMSM_TEXT_DOMAIN )
+			__( 'Primary body copy color for messages and descriptions.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -746,7 +772,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'muted_text_color',
 			'mmsm-muted-text-color',
-			__( 'Secondary copy color for quieter supporting text.', MMSM_TEXT_DOMAIN )
+			__( 'Secondary copy color for quieter supporting text.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -759,7 +785,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'link_text_color',
 			'mmsm-link-text-color',
-			__( 'Link and social label color.', MMSM_TEXT_DOMAIN )
+			__( 'Link and social label color.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -772,7 +798,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'button_text_color',
 			'mmsm-button-text-color',
-			__( 'Text color shown on primary buttons.', MMSM_TEXT_DOMAIN )
+			__( 'Text color shown on primary buttons.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -785,7 +811,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'border_color',
 			'mmsm-border-color',
-			__( 'Border color for cards, pills, and link chips.', MMSM_TEXT_DOMAIN )
+			__( 'Border color for cards, pills, and link chips.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -798,7 +824,7 @@ class Admin {
 		$this->render_text_input(
 			'hero_eyebrow',
 			'mmsm-hero-eyebrow',
-			__( 'Optional short label above the page title.', MMSM_TEXT_DOMAIN )
+			__( 'Optional short label above the page title.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -811,7 +837,7 @@ class Admin {
 		$this->render_text_input(
 			'primary_action_label',
 			'mmsm-primary-action-label',
-			__( 'Leave blank to hide the primary action, or pair it with a valid URL.', MMSM_TEXT_DOMAIN )
+			__( 'Leave blank to hide the primary action, or pair it with a valid URL.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -824,7 +850,7 @@ class Admin {
 		$this->render_url_input(
 			'primary_action_url',
 			'mmsm-primary-action-url',
-			__( 'Use a full public URL such as https://example.com/status.', MMSM_TEXT_DOMAIN )
+			__( 'Use a full public URL such as https://example.com/status.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -837,7 +863,7 @@ class Admin {
 		$this->render_text_input(
 			'secondary_action_label',
 			'mmsm-secondary-action-label',
-			__( 'Optional secondary action label.', MMSM_TEXT_DOMAIN )
+			__( 'Optional secondary action label.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -850,7 +876,7 @@ class Admin {
 		$this->render_url_input(
 			'secondary_action_url',
 			'mmsm-secondary-action-url',
-			__( 'Use a full public URL or leave blank.', MMSM_TEXT_DOMAIN )
+			__( 'Use a full public URL or leave blank.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -863,7 +889,7 @@ class Admin {
 		$this->render_text_input(
 			'status_label',
 			'mmsm-status-label',
-			__( 'Shown above the progress bar component.', MMSM_TEXT_DOMAIN )
+			__( 'Shown above the progress bar component.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -883,9 +909,9 @@ class Admin {
 				value="1"
 				<?php checked( 1, (int) $settings['show_progress'] ); ?>
 			/>
-			<?php echo esc_html__( 'Display the status progress bar.', MMSM_TEXT_DOMAIN ); ?>
+			<?php echo esc_html__( 'Display the status progress bar.', 'maintenance-mode-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Turn this off if you only want the status text.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Turn this off if you only want the status text.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -906,7 +932,7 @@ class Admin {
 			max="100"
 			value="<?php echo esc_attr( (string) $settings['progress_value'] ); ?>"
 		/>
-		<p class="description"><?php echo esc_html__( 'A number between 0 and 100.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'A number between 0 and 100.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -919,7 +945,7 @@ class Admin {
 		$this->render_text_input(
 			'contact_label',
 			'mmsm-contact-label',
-			__( 'Short heading for the contact block.', MMSM_TEXT_DOMAIN )
+			__( 'Short heading for the contact block.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -932,7 +958,7 @@ class Admin {
 		$this->render_text_input(
 			'contact_message',
 			'mmsm-contact-message',
-			__( 'Explain when visitors should reach out.', MMSM_TEXT_DOMAIN )
+			__( 'Explain when visitors should reach out.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -952,7 +978,7 @@ class Admin {
 			value="<?php echo esc_attr( $settings['contact_email'] ); ?>"
 			placeholder="support@example.com"
 		/>
-		<p class="description"><?php echo esc_html__( 'Only valid email addresses are rendered publicly.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Only valid email addresses are rendered publicly.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -965,7 +991,7 @@ class Admin {
 		$this->render_text_input(
 			'login_label',
 			'mmsm-login-label',
-			__( 'Used when the login button is enabled.', MMSM_TEXT_DOMAIN )
+			__( 'Used when the login button is enabled.', 'maintenance-mode-studio' )
 		);
 	}
 
@@ -985,9 +1011,9 @@ class Admin {
 				value="1"
 				<?php checked( 1, (int) $settings['show_footer_section'] ); ?>
 			/>
-			<?php echo esc_html__( 'Render the footer panel under the main card.', MMSM_TEXT_DOMAIN ); ?>
+			<?php echo esc_html__( 'Render the footer panel under the main card.', 'maintenance-mode-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Turn this off to hide the footer meta, social links, and login shortcut area.', MMSM_TEXT_DOMAIN ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Turn this off to hide the footer meta, social links, and login shortcut area.', 'maintenance-mode-studio' ); ?></p>
 		<?php
 	}
 
@@ -1014,12 +1040,12 @@ class Admin {
 				<?php endforeach; ?>
 			</div>
 			<p>
-				<button type="button" class="button button-secondary mmsm-add-social-item"><?php echo esc_html__( 'Add more', MMSM_TEXT_DOMAIN ); ?></button>
+				<button type="button" class="button button-secondary mmsm-add-social-item"><?php echo esc_html__( 'Add more', 'maintenance-mode-studio' ); ?></button>
 			</p>
 			<script type="text/template" class="mmsm-social-item-template">
 				<?php $this->render_social_link_row( '__INDEX__', $default_item, $platforms ); ?>
 			</script>
-			<p class="description"><?php echo esc_html__( 'Known platforms use built-in labels. Choose Custom only when you need a custom name and media-library icon.', MMSM_TEXT_DOMAIN ); ?></p>
+			<p class="description"><?php echo esc_html__( 'Known platforms use built-in labels. Choose Custom only when you need a custom name and media-library icon.', 'maintenance-mode-studio' ); ?></p>
 		</div>
 		<?php
 	}
@@ -1128,11 +1154,11 @@ class Admin {
 		?>
 		<div class="mmsm-social-item-group" data-social-item>
 			<div class="mmsm-social-item-toolbar">
-				<strong><?php echo esc_html__( 'Social item', MMSM_TEXT_DOMAIN ); ?></strong>
-				<button type="button" class="button-link-delete mmsm-remove-social-item"><?php echo esc_html__( 'Remove', MMSM_TEXT_DOMAIN ); ?></button>
+				<strong><?php echo esc_html__( 'Social item', 'maintenance-mode-studio' ); ?></strong>
+				<button type="button" class="button-link-delete mmsm-remove-social-item"><?php echo esc_html__( 'Remove', 'maintenance-mode-studio' ); ?></button>
 			</div>
 			<p>
-				<label><?php echo esc_html__( 'Platform', MMSM_TEXT_DOMAIN ); ?></label><br />
+				<label><?php echo esc_html__( 'Platform', 'maintenance-mode-studio' ); ?></label><br />
 				<select
 					class="mmsm-social-platform-select"
 					name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][platform]"
@@ -1145,7 +1171,7 @@ class Admin {
 				</select>
 			</p>
 			<p>
-				<label><?php echo esc_html__( 'URL or Email', MMSM_TEXT_DOMAIN ); ?></label><br />
+				<label><?php echo esc_html__( 'URL or Email', 'maintenance-mode-studio' ); ?></label><br />
 				<input
 					type="text"
 					class="regular-text code"
@@ -1156,7 +1182,7 @@ class Admin {
 			</p>
 			<div class="mmsm-social-custom-fields<?php echo $is_custom ? '' : ' is-hidden'; ?>" data-custom-fields>
 				<p>
-					<label><?php echo esc_html__( 'Custom Platform Name', MMSM_TEXT_DOMAIN ); ?></label><br />
+					<label><?php echo esc_html__( 'Custom Platform Name', 'maintenance-mode-studio' ); ?></label><br />
 					<input
 						type="text"
 						class="regular-text"
@@ -1167,7 +1193,7 @@ class Admin {
 			</div>
 			<div class="mmsm-social-icon-picker">
 				<p>
-					<label><?php echo esc_html__( 'Icon Source', MMSM_TEXT_DOMAIN ); ?></label><br />
+					<label><?php echo esc_html__( 'Icon Source', 'maintenance-mode-studio' ); ?></label><br />
 					<select
 						class="mmsm-social-icon-source-select"
 						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_source]"
@@ -1181,7 +1207,7 @@ class Admin {
 				</p>
 				<div class="mmsm-social-icon-library-fields<?php echo $is_library ? '' : ' is-hidden'; ?>" data-icon-library-fields>
 					<p>
-						<label><?php echo esc_html__( 'Icon Library', MMSM_TEXT_DOMAIN ); ?></label><br />
+						<label><?php echo esc_html__( 'Icon Library', 'maintenance-mode-studio' ); ?></label><br />
 						<select
 							class="mmsm-social-icon-library-select"
 							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_library]"
@@ -1194,7 +1220,7 @@ class Admin {
 						</select>
 					</p>
 					<p>
-						<label><?php echo esc_html__( 'Library Icon', MMSM_TEXT_DOMAIN ); ?></label><br />
+						<label><?php echo esc_html__( 'Library Icon', 'maintenance-mode-studio' ); ?></label><br />
 						<select
 							class="mmsm-social-icon-value-select"
 							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_value]"
@@ -1222,10 +1248,10 @@ class Admin {
 						/>
 					</div>
 					<p>
-						<button type="button" class="button mmsm-upload-social-icon"><?php echo esc_html__( 'Choose icon', MMSM_TEXT_DOMAIN ); ?></button>
-						<button type="button" class="button-link-delete mmsm-remove-social-icon<?php echo 0 === $custom_icon_id ? ' is-hidden' : ''; ?>"><?php echo esc_html__( 'Remove icon', MMSM_TEXT_DOMAIN ); ?></button>
+						<button type="button" class="button mmsm-upload-social-icon"><?php echo esc_html__( 'Choose icon', 'maintenance-mode-studio' ); ?></button>
+						<button type="button" class="button-link-delete mmsm-remove-social-icon<?php echo 0 === $custom_icon_id ? ' is-hidden' : ''; ?>"><?php echo esc_html__( 'Remove icon', 'maintenance-mode-studio' ); ?></button>
 					</p>
-					<p class="description"><?php echo esc_html__( 'Uploaded icons use the media library. SVG, PNG, JPG, and WEBP are accepted when your site allows them.', MMSM_TEXT_DOMAIN ); ?></p>
+					<p class="description"><?php echo esc_html__( 'Uploaded icons use the media library. SVG, PNG, JPG, and WEBP are accepted when your site allows them.', 'maintenance-mode-studio' ); ?></p>
 				</div>
 			</div>
 			<p>
@@ -1236,7 +1262,7 @@ class Admin {
 						value="1"
 						<?php checked( $open_new_tab ); ?>
 					/>
-					<?php echo esc_html__( 'Open in a new tab when supported.', MMSM_TEXT_DOMAIN ); ?>
+					<?php echo esc_html__( 'Open in a new tab when supported.', 'maintenance-mode-studio' ); ?>
 				</label>
 			</p>
 		</div>
@@ -1269,27 +1295,27 @@ class Admin {
 	private function get_tabs() {
 		return array(
 			'general'      => array(
-				'label'   => __( 'General', MMSM_TEXT_DOMAIN ),
+				'label'   => __( 'General', 'maintenance-mode-studio' ),
 				'section' => 'mmsm_general_section',
 			),
 			'template'     => array(
-				'label'   => __( 'Template', MMSM_TEXT_DOMAIN ),
+				'label'   => __( 'Template', 'maintenance-mode-studio' ),
 				'section' => 'mmsm_template_section',
 			),
 			'design'       => array(
-				'label'   => __( 'Design', MMSM_TEXT_DOMAIN ),
+				'label'   => __( 'Design', 'maintenance-mode-studio' ),
 				'section' => 'mmsm_design_section',
 			),
 			'components'   => array(
-				'label'   => __( 'Components', MMSM_TEXT_DOMAIN ),
+				'label'   => __( 'Components', 'maintenance-mode-studio' ),
 				'section' => 'mmsm_components_section',
 			),
 			'social_links' => array(
-				'label'   => __( 'Social Links', MMSM_TEXT_DOMAIN ),
+				'label'   => __( 'Social Links', 'maintenance-mode-studio' ),
 				'section' => 'mmsm_social_links_section',
 			),
 			'advanced'     => array(
-				'label'   => __( 'Advanced', MMSM_TEXT_DOMAIN ),
+				'label'   => __( 'Advanced', 'maintenance-mode-studio' ),
 				'section' => 'mmsm_advanced_section',
 			),
 		);
@@ -1354,7 +1380,7 @@ class Admin {
 					<?php do_settings_fields( $this->page_slug, $section_id ); ?>
 				</table>
 			<?php else : ?>
-				<p class="description"><?php echo esc_html__( 'No extra settings are available in this tab yet.', MMSM_TEXT_DOMAIN ); ?></p>
+				<p class="description"><?php echo esc_html__( 'No extra settings are available in this tab yet.', 'maintenance-mode-studio' ); ?></p>
 			<?php endif; ?>
 		</div>
 		<?php

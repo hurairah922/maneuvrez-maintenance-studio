@@ -209,8 +209,8 @@ class TemplateRenderer {
 			'site_name'      => get_bloginfo( 'name' ),
 			'document_title' => (string) $settings['page_title'],
 			'mode_label'     => 'coming_soon' === $settings['mode_type']
-				? __( 'Coming Soon', MMSM_TEXT_DOMAIN )
-				: __( 'Maintenance Mode Active', MMSM_TEXT_DOMAIN ),
+				? __( 'Coming Soon', 'maintenance-mode-studio' )
+				: __( 'Maintenance Mode Active', 'maintenance-mode-studio' ),
 			'login_url'      => wp_login_url(),
 			'shell_class'    => Escaper::classes(
 				array(

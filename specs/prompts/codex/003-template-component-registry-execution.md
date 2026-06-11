@@ -1,358 +1,354 @@
-## Phase 3 Fix: Reliable Color Mapping and Duplicate Save Notice
+## Phase 3 Plugin Check Fix Pass
 
-Implement the remaining Phase 3 fixes.
+Run a focused Plugin Check compliance pass.
 
-Current known issues:
+The current Plugin Check report shows 156 errors and 12 warnings.
 
-* Color picker values are saving correctly
-* Saved colors are not always applied correctly on the public template
-* Color mapping appears inconsistent
-* Settings saved notice appears twice after saving
+Most errors are caused by one repeated issue:
 
-Fix these without breaking existing settings, tabs, social links, or data preservation behavior.
-
-## 1. Audit Existing Color Flow
-
-First inspect the full color flow.
-
-Trace:
-
-```text id="xbwo35"
-Admin color picker field
-Saved option key
-Sanitization logic
-Settings repository output
-Template renderer input
-Generated CSS variable
-Template/component CSS usage
-Final public frontend style
+```text id="nyia1j"
+The $domain parameter must be a single text string literal. Found: MMSM_TEXT_DOMAIN
 ```
 
-Identify mismatches between saved keys and CSS variables.
+Fix the reported issues without breaking existing Phase 3 behavior.
 
-Common problems to check:
+## 1. Replace Text Domain Constant In Translation Calls
 
-* Saved color key differs from renderer key
-* Renderer outputs a variable that CSS does not use
-* CSS uses old variable names
-* Component uses hardcoded colors instead of variables
-* Default CSS loads after custom inline CSS and overrides it
-* Dark mode CSS overrides saved custom variables unintentionally
-* System mode media query overrides saved custom variables unintentionally
-* Admin preview uses a different map than the frontend
+Inspect all translation function calls.
 
-## 2. Create Canonical Color Map
+In translation functions, replace:
 
-Create one canonical map between saved setting keys and public CSS variables.
-
-Use this target map unless the project already has equivalent keys:
-
-```php id="s2qbyq"
-private function get_color_variable_map(): array {
-    return [
-        'background_color' => '--mm-bg',
-        'surface_color' => '--mm-surface',
-        'primary_color' => '--mm-primary',
-        'heading_text_color' => '--mm-heading-text',
-        'body_text_color' => '--mm-body-text',
-        'muted_text_color' => '--mm-muted-text',
-        'link_text_color' => '--mm-link-text',
-        'button_text_color' => '--mm-button-text',
-        'border_color' => '--mm-border',
-    ];
-}
+```php id="pj1i1w"
+MMSM_TEXT_DOMAIN
 ```
 
-If current saved keys are different, either:
+with:
 
-* Adapt this map to the existing saved keys
-* Or add backward-compatible migration/fallback logic
-
-Do not break existing saved colors.
-
-Do not rename saved option keys without migration.
-
-## 3. Normalize Color Settings
-
-Before rendering colors, normalize them.
-
-Expected behavior:
-
-```php id="so68zw"
-private function normalize_colors( array $settings ): array {
-    $defaults = $this->get_default_colors_for_theme_mode( $settings['theme_mode'] ?? 'system' );
-    $saved = isset( $settings['colors'] ) && is_array( $settings['colors'] ) ? $settings['colors'] : [];
-
-    $colors = wp_parse_args( $saved, $defaults );
-
-    foreach ( $colors as $key => $value ) {
-        $color = sanitize_hex_color( $value );
-
-        if ( empty( $color ) ) {
-            $colors[ $key ] = $defaults[ $key ] ?? '';
-            continue;
-        }
-
-        $colors[ $key ] = $color;
-    }
-
-    return $colors;
-}
+```php id="bjeeqh"
+'maintenance-mode-studio'
 ```
 
-Rules:
+Correct example:
 
-* Always merge saved colors with defaults
-* Sanitize every color before rendering
-* Use fallback defaults for invalid values
-* Do not render unknown color keys as CSS variables
-* Do not render empty values
-* Do not trust saved settings directly
-
-## 4. Generate Scoped CSS Variables
-
-Generate CSS variables from the normalized colors and canonical map.
-
-The CSS variables must be scoped to the maintenance page wrapper.
-
-Acceptable output:
-
-```php id="gsx5nx"
-private function build_color_style_attribute( array $colors ): string {
-    $map = $this->get_color_variable_map();
-    $declarations = [];
-
-    foreach ( $map as $setting_key => $css_var ) {
-        if ( empty( $colors[ $setting_key ] ) ) {
-            continue;
-        }
-
-        $color = sanitize_hex_color( $colors[ $setting_key ] );
-
-        if ( empty( $color ) ) {
-            continue;
-        }
-
-        $declarations[] = sprintf(
-            '%s: %s',
-            $css_var,
-            $color
-        );
-    }
-
-    return implode( '; ', $declarations );
-}
+```php id="ikh6vn"
+esc_html__( 'Settings saved.', 'maintenance-mode-studio' )
 ```
 
-When printing the style attribute, escape it safely:
+Incorrect example:
 
-```php id="x6gt93"
-style="<?php echo esc_attr( $color_style ); ?>"
+```php id="djpk2x"
+esc_html__( 'Settings saved.', MMSM_TEXT_DOMAIN )
 ```
 
-Alternative acceptable approach:
+Files reported by Plugin Check:
 
-* Use `wp_add_inline_style()` after registering/enqueuing the template stylesheet
-* Scope the variables to `.mm-public-shell`
-* Ensure inline custom values load after the default stylesheet
-
-Do not print global unscoped color CSS.
-
-## 5. Fix Light, Dark, and System Mode Overrides
-
-Review the CSS for light, dark, and system mode.
-
-Saved colors must not disappear because default theme mode rules override them later.
-
-Rules:
-
-* Defaults may define fallback variables
-* Saved custom variables must override defaults
-* Dark mode rules must not override saved inline variables unintentionally
-* System mode media queries must not override saved inline variables unintentionally
-* The wrapper class should clearly identify the selected mode
-
-Recommended wrapper classes:
-
-```text id="cdwrd1"
-mm-theme-light
-mm-theme-dark
-mm-theme-system
+```text id="a8lx0c"
+includes/Components/StatusProgressComponent.php
+includes/Components/HeroComponent.php
+includes/Components/ContactRevealComponent.php
+includes/Components/LoginComponent.php
+includes/Components/SocialLinksComponent.php
+includes/Frontend/TemplateRenderer.php
+includes/Frontend/TemplateRegistry.php
+includes/Admin/Admin.php
+templates/public/default.php
+public/templates/default.php
 ```
 
-If using inline style variables on the wrapper, do not redefine the same variables later on a more specific descendant selector.
+Search the whole plugin for translation functions using `MMSM_TEXT_DOMAIN`.
 
-## 6. Update Component CSS To Use Variables
+Functions to check include:
 
-Replace hardcoded frontend colors with canonical variables.
+```text id="wnqjzv"
+__()
+_e()
+_x()
+_ex()
+esc_html__()
+esc_html_e()
+esc_html_x()
+esc_attr__()
+esc_attr_e()
+esc_attr_x()
+_n()
+_nx()
+_n_noop()
+_nx_noop()
+```
 
-Required mappings:
+Important:
 
-```css id="j3qtar"
-.mm-public-shell {
-    background: var(--mm-bg);
-    color: var(--mm-body-text);
-}
+* Only change the text domain argument in i18n functions.
+* Do not replace unrelated safe uses of `MMSM_TEXT_DOMAIN` unless needed.
+* Do not change the actual plugin text domain.
+* Use exactly `'maintenance-mode-studio'`.
 
-.mm-public-card {
-    background: var(--mm-surface);
-    border-color: var(--mm-border);
-}
+## 2. Fix Domain Path Warning
 
-.mm-hero-title {
-    color: var(--mm-heading-text);
-}
+Plugin Check reports that `Domain Path: /languages` points to a missing folder.
 
-.mm-hero-message,
-.mm-contact-message {
-    color: var(--mm-body-text);
-}
+Fix by creating:
 
-.mm-muted,
-.mm-status-label {
-    color: var(--mm-muted-text);
-}
+```text id="xdyiyi"
+languages/
+```
 
-.mm-social-link,
-.mm-login-link {
-    color: var(--mm-link-text);
-}
+Keep the plugin header only if this folder exists:
 
-.mm-button,
-.mm-primary-button {
-    background: var(--mm-primary);
-    color: var(--mm-button-text);
-}
+```php id="xp5d97"
+Domain Path: /languages
+```
 
-.mm-progress-fill {
-    background: var(--mm-primary);
+If the project does not plan to ship translation files yet, removing the `Domain Path` header is acceptable.
+
+Preferred fix:
+
+* Create `languages/`
+* Keep `Domain Path: /languages`
+
+## 3. Remove Or Justify Manual Textdomain Loading
+
+Plugin Check reports `load_plugin_textdomain()` as discouraged.
+
+Inspect:
+
+```text id="pb5b5a"
+includes/Plugin.php
+```
+
+Preferred fix:
+
+* Remove manual `load_plugin_textdomain()` usage
+* Let WordPress.org load translations automatically
+* Keep the plugin text domain consistent with the slug
+
+If keeping it for a specific non-WordPress.org workflow, document why in code.
+
+Do not add new textdomain loading logic.
+
+## 4. Fix Admin Nonce Warnings
+
+Plugin Check reports nonce issues in:
+
+```text id="j03qig"
+includes/Admin/Admin.php
+```
+
+Inspect the reported lines around:
+
+```text id="xttrmu"
+465
+473
+1305
+```
+
+Expected fix:
+
+* Verify nonce before processing submitted form data
+* Verify capability before saving settings
+* Sanitize submitted data after nonce/capability checks
+* Preserve the existing tab save merge behavior
+* Preserve the single save notice behavior
+
+Use the existing form nonce if present.
+
+If missing, add a nonce field to the settings form:
+
+```php id="ag5bxk"
+wp_nonce_field( 'mmsm_save_settings', 'mmsm_settings_nonce' );
+```
+
+Then verify it before processing:
+
+```php id="liy6b1"
+if (
+    ! isset( $_POST['mmsm_settings_nonce'] )
+    || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['mmsm_settings_nonce'] ) ), 'mmsm_save_settings' )
+) {
+    return;
 }
 ```
 
-Adapt selectors to the actual project.
+Do not process submitted settings before nonce verification.
 
-The key requirement is that all public-facing text and UI colors use the canonical variables.
+## 5. Fix Request URI Sanitization
 
-## 7. Preserve Existing Settings Behavior
+Plugin Check reports this file:
 
-Do not regress previous fixes.
-
-Confirm that:
-
-* Saving one tab does not erase other tab values
-* Missing fields are not saved as null
-* Social links remain saved when saving Design
-* Colors remain saved when saving General
-* Components remain saved when saving Social Links
-* Empty social link rows do not render publicly
-* Custom social icons still render safely
-
-## 8. Fix Duplicate Settings Saved Notice
-
-Find why the saved notice appears twice.
-
-Common causes:
-
-* WordPress Settings API renders one notice
-* Custom admin template renders another notice
-* `settings_errors()` is called more than once
-* A redirect query param triggers a custom notice while Settings API also triggers one
-* Both `add_settings_error()` and manual HTML notice output are used for the same success
-* The admin page callback renders notices and WordPress admin renders them again
-
-Choose one notice owner.
-
-### Option A: WordPress Settings API Notice
-
-Use the Settings API notice only.
-
-Rules:
-
-* Keep one `add_settings_error()` success notice if needed
-* Call `settings_errors()` only once
-* Remove custom duplicate success notice HTML
-* Do not render a second notice based on query params
-
-### Option B: Custom Notice Only
-
-Use one custom notice only.
-
-Rules:
-
-* Do not call `settings_errors()` for the same success notice
-* Do not add a duplicate Settings API success notice
-* Render the custom notice only after a confirmed successful save
-* Ensure the notice does not persist incorrectly across tab switches
-
-Choose the cleaner option for the current implementation.
-
-## 9. Save Notice Expected Behavior
-
-After the fix:
-
-* Initial settings page load shows no saved notice
-* Successful save shows one notice
-* Failed save does not show a success notice
-* Switching tabs does not duplicate the notice
-* Refreshing after redirect does not duplicate the notice
-* The notice uses WordPress admin styling
-* Active tab state remains preserved
-
-Recommended text:
-
-```text id="mugb6i"
-Settings saved.
+```text id="snziip"
+includes/Frontend/MaintenanceRouter.php
 ```
 
-## 10. Regression Test Flow
+Reported issues:
 
-Run this manual test flow:
+* Processing form data without nonce verification
+* Unsanitized `$_SERVER['REQUEST_URI']`
 
-```text id="ofn53x"
-1. Open the settings page.
-2. Confirm no saved notice appears on first load.
-3. Go to Design.
-4. Change background color.
-5. Change heading text color.
-6. Change body text color.
-7. Save Design.
-8. Confirm exactly one saved notice appears.
-9. Open the public maintenance page.
-10. Confirm the background color applies.
-11. Confirm heading text color applies.
-12. Confirm body text color applies.
-13. Refresh the public page.
-14. Confirm colors still apply.
-15. Switch to dark mode.
-16. Save Design.
-17. Confirm exactly one saved notice appears.
-18. Confirm dark mode colors apply correctly.
-19. Switch to system mode.
-20. Save Design.
-21. Confirm exactly one saved notice appears.
-22. Confirm colors still apply consistently.
-23. Save General.
-24. Confirm Design colors were not erased.
-25. Save Social Links.
-26. Confirm Design colors were not erased.
+Inspect the relevant routing logic.
+
+For `$_SERVER['REQUEST_URI']`, use a sanitized value before comparison or output.
+
+Recommended pattern:
+
+```php id="bmio08"
+$request_uri = isset( $_SERVER['REQUEST_URI'] )
+    ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+    : '';
 ```
 
-Also inspect frontend CSS in the browser:
+If a URL is built from it, escape later at output time.
 
-* Confirm variables exist on the public wrapper
-* Confirm variables contain saved hex values
-* Confirm components reference those variables
-* Confirm no later CSS rule overrides saved values incorrectly
+If this code only reads routing data and does not process a submitted form, add a targeted phpcs ignore only if appropriate and documented.
+
+Do not silence warnings if proper sanitization is possible.
+
+## 6. Fix WordPress Version Compatibility
+
+Plugin Check reports:
+
+```text id="fih9al"
+wp_is_serving_rest_request() requires WordPress 6.5.0, but plugin minimum is WordPress 6.4.0.
+```
+
+File:
+
+```text id="kdz4bh"
+includes/Frontend/MaintenanceRouter.php
+```
+
+Preferred fix:
+
+```php id="c8nzcj"
+$is_rest_request = function_exists( 'wp_is_serving_rest_request' )
+    ? wp_is_serving_rest_request()
+    : defined( 'REST_REQUEST' ) && REST_REQUEST;
+```
+
+Use the fallback result instead of calling `wp_is_serving_rest_request()` directly.
+
+Do not raise the minimum WordPress version unless the project intentionally drops WordPress 6.4 support.
+
+## 7. Update Readme Tested Up To
+
+Plugin Check reports:
+
+```text id="jjww6b"
+Tested up to: 6.5 < 7.0
+```
+
+Update `readme.txt`:
+
+```text id="lbe6hy"
+Tested up to: 7.0
+```
+
+Confirm the readme remains valid WordPress.org format.
+
+Do not change unrelated readme content unless required.
+
+## 8. Fix Production Package Exclusions
+
+Plugin Check reports production package warnings/errors for:
+
+```text id="vjbpug"
+phpcs.xml.dist
+.distignore
+.gitignore
+.github
+```
+
+These files may remain in the development repository, but they should not be included in the production plugin ZIP.
+
+Update packaging rules so production builds exclude:
+
+```text id="d7nxew"
+.git
+.github
+.gitignore
+.distignore
+phpcs.xml
+phpcs.xml.dist
+composer.json
+composer.lock
+package.json
+package-lock.json
+node_modules
+vendor/bin
+tests
+specs
+```
+
+Important:
+
+* Do not delete useful development files from the repo unless the project wants that.
+* Make sure the production ZIP excludes them.
+* If Plugin Check is being run against the repo folder instead of the production ZIP, document that these packaging warnings should be checked against the final ZIP.
+
+## 9. Resolve Duplicate Default Template Path
+
+Plugin Check reports both:
+
+```text id="rd2bzy"
+templates/public/default.php
+public/templates/default.php
+```
+
+Inspect whether both are used.
+
+Preferred Phase 3 canonical path:
+
+```text id="bfqr6f"
+templates/public/default.php
+```
+
+Fix options:
+
+### Option A: Remove Legacy Duplicate
+
+If `public/templates/default.php` is unused, remove it.
+
+### Option B: Keep Compatibility File
+
+If it is still referenced, make it compliant and keep it as a thin compatibility layer.
+
+Do not maintain two separate default templates with duplicate logic.
+
+## 10. Regression Safety
+
+After fixes, verify that these still work:
+
+```text id="t7u0dv"
+Maintenance mode renders
+Admin settings page loads
+Tabs still save correctly
+Saving one tab preserves other tab values
+Color picker values save
+Colors apply on frontend
+Social links add/remove works
+Empty social rows do not render publicly
+Custom social icons still render safely
+Only one save notice appears
+```
+
+## 11. Run Plugin Check Again
+
+After applying fixes:
+
+* Run Plugin Check again
+* Export or review the new results
+* Confirm the repeated i18n literal-domain errors are gone
+* Confirm no new fatal or security issues were introduced
 
 ## Deliverables
 
-When complete, report:
+Report:
 
 * Files changed
-* Root cause of inconsistent color application
-* Final color key to CSS variable mapping
-* How saved colors are scoped on the frontend
-* How light, dark, and system modes now apply colors
-* Which duplicate notice source was removed
-* Manual regression test results
-* Any remaining risks
+* Number of Plugin Check errors before and after
+* Whether all `MMSM_TEXT_DOMAIN` i18n errors were removed
+* How nonce warnings were fixed
+* How request URI sanitization was fixed
+* Whether `load_plugin_textdomain()` was removed
+* How production package exclusions were handled
+* Whether duplicate template path was removed or kept
+* Any remaining Plugin Check warnings and why they remain

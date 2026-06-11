@@ -1,259 +1,262 @@
-## Phase 3 Color Mapping and Save Notice Review
+## Phase 3 Plugin Check Review
 
-Review the fixes for inconsistent color application and duplicate save notices.
+Review the Plugin Check compliance fix pass.
 
-Focus on:
+The original Plugin Check report showed:
 
-* Saved color values applying reliably
-* Correct mapping between saved settings and CSS variables
-* Light, dark, and system mode behavior
-* Component usage of theme variables
-* Scoped frontend color output
-* Duplicate admin save notice removal
-* No regression to tab save data preservation
-
-## Color Flow Review
-
-Trace the complete color flow:
-
-```text id="k7uoei"
-Admin color picker field
-Saved option key
-Sanitized saved value
-Settings repository output
-Renderer color normalization
-CSS variable output
-Template/component CSS usage
-Final public frontend result
+```text id="sy4x3w"
+156 errors and 12 warnings
 ```
 
-Check for mismatches at every step.
+Most errors came from translation functions using a text domain constant.
 
-Flag any point where:
+## Text Domain Literal Review
 
-* A saved key does not map to the expected CSS variable
-* A CSS variable is generated but not used
-* A component uses an old or wrong variable
-* A saved value is overwritten by default CSS
-* A dark mode or system mode rule overrides saved custom values
-* Invalid color values can reach public CSS
+Check all translation function calls.
 
-## Canonical Color Map Review
+The text domain argument must be a literal string:
 
-Confirm there is one clear map between saved color keys and frontend CSS variables.
-
-Expected target map:
-
-```php id="isc62y"
-[
-    'background_color' => '--mm-bg',
-    'surface_color' => '--mm-surface',
-    'primary_color' => '--mm-primary',
-    'heading_text_color' => '--mm-heading-text',
-    'body_text_color' => '--mm-body-text',
-    'muted_text_color' => '--mm-muted-text',
-    'link_text_color' => '--mm-link-text',
-    'button_text_color' => '--mm-button-text',
-    'border_color' => '--mm-border',
-]
+```php id="iibp1v"
+'maintenance-mode-studio'
 ```
 
-If the implementation uses different saved keys, confirm that:
+This is correct:
 
-* The mapping is explicit
-* Backward compatibility is preserved
-* Existing saved colors still work
-* The public CSS variables are still the canonical output
+```php id="b7ywas"
+esc_html__( 'Settings saved.', 'maintenance-mode-studio' );
+```
 
-Flag as high priority if color mapping is scattered across multiple inconsistent files.
+This is incorrect:
 
-## Color Normalization Review
+```php id="osgsxf"
+esc_html__( 'Settings saved.', MMSM_TEXT_DOMAIN );
+```
 
-Check that colors are normalized before rendering.
+Review these files:
 
-Review that:
+```text id="umem86"
+includes/Components/StatusProgressComponent.php
+includes/Components/HeroComponent.php
+includes/Components/ContactRevealComponent.php
+includes/Components/LoginComponent.php
+includes/Components/SocialLinksComponent.php
+includes/Frontend/TemplateRenderer.php
+includes/Frontend/TemplateRegistry.php
+includes/Admin/Admin.php
+templates/public/default.php
+public/templates/default.php
+```
 
-* Saved colors are merged with defaults
-* Every rendered color is sanitized with `sanitize_hex_color()`
-* Invalid colors fall back safely
-* Empty colors are not rendered as empty CSS variables
-* Unknown color keys are ignored
-* Raw saved values are not printed into public CSS
-* Defaults are theme-aware where needed
+Also search the whole plugin for:
 
-Flag as high priority if raw option values are printed into a `style` attribute or inline CSS.
+```text id="udpec0"
+MMSM_TEXT_DOMAIN
+```
 
-## Frontend CSS Variable Scope Review
+Flag as high priority if it is still used as the text domain argument in any i18n function.
 
-Check where CSS variables are printed.
+## Domain Path Review
 
-Acceptable locations:
+Check the main plugin header.
 
-* Scoped style attribute on the public maintenance wrapper
-* Scoped inline CSS using `wp_add_inline_style()`
+If it contains:
 
-Review that:
+```php id="r9xf37"
+Domain Path: /languages
+```
 
-* Variables are scoped to the maintenance template
-* Variables are not printed globally across the whole site
-* Variables load after default stylesheet if using inline CSS
-* Variables are not redefined later by a more specific selector
-* Saved custom values override defaults reliably
+then this folder must exist:
 
-Flag as high priority if saved colors can be overridden by later default CSS.
-
-## Light, Dark, and System Mode Review
-
-Check all theme modes:
-
-```text id="ytf0xc"
-light
-dark
-system
+```text id="s02ldn"
+languages/
 ```
 
 Review that:
 
-* Light mode applies expected colors
-* Dark mode applies expected colors
-* System mode applies expected colors
-* Saved custom values remain applied after refresh
-* Switching theme modes does not erase saved colors
-* Dark mode does not accidentally reuse unreadable light text colors
-* System mode media queries do not override saved custom variables incorrectly
+* The folder exists if the header remains
+* The header is removed if the folder does not exist
+* No fake translation files are added only to satisfy the check
 
-Flag as high priority if colors appear only sometimes or disappear after refresh.
+## Textdomain Loading Review
 
-## Component Color Usage Review
+Check:
 
-Check all public template/component CSS.
-
-Required components:
-
-* Hero component
-* Status/progress component
-* Contact reveal component
-* Social links component
-* Login component
-* Public shell/template wrapper
-
-Review that each component uses canonical variables:
-
-```css id="a3upf5"
---mm-bg
---mm-surface
---mm-primary
---mm-heading-text
---mm-body-text
---mm-muted-text
---mm-link-text
---mm-button-text
---mm-border
+```text id="xle3mr"
+includes/Plugin.php
 ```
 
-Flag hardcoded color values that override user settings.
+Review whether `load_plugin_textdomain()` was removed.
 
-Flag old variables that no longer map to saved settings.
+Preferred outcome:
 
-Flag component-specific colors that bypass the theme system.
+* No manual `load_plugin_textdomain()` call
+* WordPress.org loads translations automatically
+* Text domain matches the plugin slug
 
-## Duplicate Save Notice Review
+Flag as low priority if it remains with a valid documented reason.
 
-Check the duplicate save notice issue.
+## Nonce Review
 
-Current bug:
+Review admin form processing in:
 
-```text id="jxz1dt"
-The settings saved notice appears twice after saving.
+```text id="y73mha"
+includes/Admin/Admin.php
 ```
 
-Expected behavior:
+Confirm:
 
-* Initial page load shows no saved notice
-* Successful save shows one saved notice
-* Failed save does not show success
-* Tab switching does not duplicate notice
-* Page refresh does not duplicate notice unexpectedly
-* Notice uses WordPress admin styling
-* Active tab state remains preserved
+* Settings save requests include a nonce field
+* Save handlers verify the nonce before processing data
+* Save handlers verify user capability
+* Submitted values are sanitized after nonce and capability checks
+* Existing cross-tab save preservation still works
 
-Check likely duplicate sources:
+Flag as high priority if settings can be saved without nonce verification.
 
-* `settings_errors()` called more than once
-* Custom HTML notice plus Settings API notice
-* `add_settings_error()` plus manual success query param notice
-* Redirect notice plus admin page callback notice
-* Notice rendered in both parent layout and tab partial
+## Request URI Sanitization Review
 
-Flag as high priority if more than one success notice appears.
+Review:
+
+```text id="arkkr9"
+includes/Frontend/MaintenanceRouter.php
+```
+
+Confirm that `$_SERVER['REQUEST_URI']` is not used raw.
+
+Expected pattern:
+
+```php id="zkrgsn"
+$request_uri = isset( $_SERVER['REQUEST_URI'] )
+    ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+    : '';
+```
+
+Flag as medium priority if request URI is still unsanitized.
+
+Flag as high priority if it is echoed or used in output without escaping.
+
+## WordPress Compatibility Review
+
+Check this reported issue:
+
+```text id="qrrqu8"
+wp_is_serving_rest_request() requires WordPress 6.5.0, but plugin minimum is WordPress 6.4.0.
+```
+
+Preferred fix:
+
+```php id="numv3k"
+$is_rest_request = function_exists( 'wp_is_serving_rest_request' )
+    ? wp_is_serving_rest_request()
+    : defined( 'REST_REQUEST' ) && REST_REQUEST;
+```
+
+Review that the plugin either:
+
+* Uses a compatibility fallback
+* Or intentionally raises the minimum supported WordPress version
+
+Flag as high priority if the plugin still calls `wp_is_serving_rest_request()` directly while claiming WordPress 6.4 support.
+
+## Readme Review
+
+Check `readme.txt`.
+
+Required for the current Plugin Check result:
+
+```text id="ggd0e6"
+Tested up to: 7.0
+```
+
+Also confirm:
+
+* Readme format remains valid
+* Stable tag still makes sense
+* Requires at least still matches the plugin header
+
+## Production Package Review
+
+Check whether the Plugin Check was run on the repo or the final production ZIP.
+
+Development files reported:
+
+```text id="qfxwhj"
+phpcs.xml.dist
+.distignore
+.gitignore
+.github
+```
+
+Expected production ZIP behavior:
+
+* `.github` is excluded
+* `.gitignore` is excluded
+* `.distignore` is excluded
+* `phpcs.xml.dist` is excluded
+* Development/test/spec files are excluded
+* Runtime plugin files remain included
+
+Flag as medium priority if the production ZIP still includes development files.
+
+Do not require deleting development files from the repository.
+
+## Duplicate Template Path Review
+
+Review:
+
+```text id="vkj7ku"
+templates/public/default.php
+public/templates/default.php
+```
+
+Confirm one of these outcomes:
+
+* `templates/public/default.php` is the canonical template and the duplicate is removed
+* The duplicate remains only as a thin compatibility file
+* Both files are compliant if both are shipped
+
+Flag as medium priority if two separate default templates contain duplicated rendering logic.
 
 ## Regression Review
 
-Confirm this fix did not break previous Phase 3 fixes.
+After Plugin Check fixes, verify:
 
-Review that:
-
-* Saving one tab preserves other tab settings
-* Missing submitted fields are not saved as null
-* Social links still use add/remove repeater rows
-* One default social item still appears in admin when needed
-* Empty default social rows do not render publicly
-* Custom social icons still render safely
-* Settings tabs still work
-* Color picker values still save correctly
-
-## Required Manual Test
-
-Verify this flow:
-
-```text id="dv16mx"
-1. Open settings page.
-2. Confirm no saved notice appears on initial load.
-3. Open Design tab.
-4. Set custom background color.
-5. Set custom heading text color.
-6. Set custom body text color.
-7. Save Design.
-8. Confirm exactly one saved notice appears.
-9. Open public maintenance page.
-10. Confirm saved colors appear.
-11. Refresh public page.
-12. Confirm saved colors remain.
-13. Switch to dark mode.
-14. Save Design.
-15. Confirm exactly one saved notice appears.
-16. Confirm dark mode colors apply correctly.
-17. Save General tab.
-18. Confirm Design colors remain saved and applied.
-19. Save Social Links tab.
-20. Confirm Design colors remain saved and applied.
+```text id="ry3qx3"
+Maintenance mode renders
+Admin settings page loads
+Tabs save correctly
+Saving one tab preserves other tab values
+Color picker values save
+Colors apply on frontend
+Social links add/remove works
+Empty social rows do not render publicly
+Custom social icons render safely
+Only one save notice appears
 ```
 
 ## Updated Scope Check Rows
 
 Add these rows to the scope check table:
 
-```markdown id="nmzy93"
-| Canonical color mapping | Pass/Fail/Partial | Notes |
-| Saved color frontend application | Pass/Fail/Partial | Notes |
-| Scoped CSS variable output | Pass/Fail/Partial | Notes |
-| Light mode color reliability | Pass/Fail/Partial | Notes |
-| Dark mode color reliability | Pass/Fail/Partial | Notes |
-| System mode color reliability | Pass/Fail/Partial | Notes |
-| Component color variable usage | Pass/Fail/Partial | Notes |
-| Single save notice | Pass/Fail/Partial | Notes |
+```markdown id="j6rzls"
+| I18n literal text domain | Pass/Fail/Partial | Notes |
+| Domain Path validity | Pass/Fail/Partial | Notes |
+| Textdomain loading warning | Pass/Fail/Partial | Notes |
+| Admin nonce verification | Pass/Fail/Partial | Notes |
+| Request URI sanitization | Pass/Fail/Partial | Notes |
+| WordPress version compatibility | Pass/Fail/Partial | Notes |
+| Readme tested up to | Pass/Fail/Partial | Notes |
+| Production package exclusions | Pass/Fail/Partial | Notes |
+| Duplicate template path | Pass/Fail/Partial | Notes |
 ```
 
 ## Additional High-Priority Issues To Flag
 
 Flag as high priority if:
 
-* Saved colors do not reliably apply on the frontend
-* Saved color keys do not map clearly to CSS variables
-* Components bypass saved colors with hardcoded values
-* Dark mode overrides saved custom colors incorrectly
-* System mode overrides saved custom colors incorrectly
-* Raw unsanitized color values reach public CSS
-* Color CSS is printed globally outside the maintenance template
-* The saved notice appears more than once
-* Fixing colors regresses tab save preservation
+* Any i18n function still uses `MMSM_TEXT_DOMAIN` as the domain argument
+* Settings save requests lack nonce verification
+* Raw request input is printed publicly
+* WordPress 6.5-only functions are used while minimum support says 6.4
+* Plugin Check errors increase after the fix
+* The Plugin Check pass breaks existing Phase 3 behavior

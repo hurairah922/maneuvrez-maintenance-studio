@@ -56,8 +56,6 @@ class Plugin {
 	public function run() {
 		$this->maybe_seed_settings();
 
-		add_action( 'init', array( $this, 'load_textdomain' ) );
-
 		$this->admin->register();
 		$this->router->register();
 	}
@@ -78,16 +76,4 @@ class Plugin {
 		add_option( MMSM_SETTINGS_OPTION, Sanitizer::get_settings( $legacy_settings ) );
 	}
 
-	/**
-	 * Load translation files.
-	 *
-	 * @return void
-	 */
-	public function load_textdomain() {
-		load_plugin_textdomain(
-			MMSM_TEXT_DOMAIN,
-			false,
-			dirname( MMSM_PLUGIN_BASENAME ) . '/languages'
-		);
-	}
 }

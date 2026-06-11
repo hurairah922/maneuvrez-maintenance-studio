@@ -24,7 +24,7 @@ class LoginComponent implements ComponentInterface {
 	 * {@inheritDoc}
 	 */
 	public function get_label() {
-		return __( 'Login', MMSM_TEXT_DOMAIN );
+		return __( 'Login', 'maintenance-mode-studio' );
 	}
 
 	/**
@@ -41,14 +41,14 @@ class LoginComponent implements ComponentInterface {
 		return array(
 			array(
 				'key'      => 'show_login_button',
-				'label'    => __( 'Show login button', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Show login button', 'maintenance-mode-studio' ),
 				'type'     => 'checkbox',
 				'default'  => 1,
 				'required' => false,
 			),
 			array(
 				'key'      => 'login_label',
-				'label'    => __( 'Login label', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Login label', 'maintenance-mode-studio' ),
 				'type'     => 'text',
 				'default'  => 'Admin login',
 				'required' => false,

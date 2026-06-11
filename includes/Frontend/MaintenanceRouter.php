@@ -115,11 +115,11 @@ class MaintenanceRouter {
 	 * @return bool
 	 */
 	private function is_rest_request() {
-		if ( function_exists( 'wp_is_serving_rest_request' ) && wp_is_serving_rest_request() ) {
-			return true;
-		}
+		$is_rest_request = function_exists( 'wp_is_serving_rest_request' )
+			? wp_is_serving_rest_request()
+			: ( defined( 'REST_REQUEST' ) && REST_REQUEST );
 
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		if ( $is_rest_request ) {
 			return true;
 		}
 
@@ -127,7 +127,9 @@ class MaintenanceRouter {
 			return true;
 		}
 
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		$request_uri = isset( $_SERVER['REQUEST_URI'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+			: '';
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
 		return '' !== $request_uri && false !== strpos( $request_uri, '/' . $rest_prefix );

@@ -24,7 +24,7 @@ class StatusProgressComponent implements ComponentInterface {
 	 * {@inheritDoc}
 	 */
 	public function get_label() {
-		return __( 'Status and progress', MMSM_TEXT_DOMAIN );
+		return __( 'Status and progress', 'maintenance-mode-studio' );
 	}
 
 	/**
@@ -41,21 +41,21 @@ class StatusProgressComponent implements ComponentInterface {
 		return array(
 			array(
 				'key'      => 'status_label',
-				'label'    => __( 'Status label', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Status label', 'maintenance-mode-studio' ),
 				'type'     => 'text',
 				'default'  => 'Maintenance in progress',
 				'required' => false,
 			),
 			array(
 				'key'      => 'show_progress',
-				'label'    => __( 'Show progress', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Show progress', 'maintenance-mode-studio' ),
 				'type'     => 'checkbox',
 				'default'  => 1,
 				'required' => false,
 			),
 			array(
 				'key'      => 'progress_value',
-				'label'    => __( 'Progress value', MMSM_TEXT_DOMAIN ),
+				'label'    => __( 'Progress value', 'maintenance-mode-studio' ),
 				'type'     => 'number',
 				'default'  => 65,
 				'required' => false,
@@ -78,7 +78,7 @@ class StatusProgressComponent implements ComponentInterface {
 
 		ob_start();
 		?>
-		<section class="mmsm-component mmsm-component-status" aria-label="<?php echo esc_attr__( 'Status update', MMSM_TEXT_DOMAIN ); ?>">
+		<section class="mmsm-component mmsm-component-status" aria-label="<?php echo esc_attr__( 'Status update', 'maintenance-mode-studio' ); ?>">
 			<div class="mmsm-status-chip">
 				<span class="mmsm-status-dot" aria-hidden="true"></span>
 				<span><?php echo esc_html( $label ); ?></span>
@@ -86,7 +86,7 @@ class StatusProgressComponent implements ComponentInterface {
 			<?php if ( ! empty( $settings['show_progress'] ) ) : ?>
 				<div class="mmsm-progress-wrap">
 					<div class="mmsm-progress-meta">
-						<span><?php echo esc_html__( 'Update progress', MMSM_TEXT_DOMAIN ); ?></span>
+						<span><?php echo esc_html__( 'Update progress', 'maintenance-mode-studio' ); ?></span>
 						<span><?php echo esc_html( $progress ); ?>%</span>
 					</div>
 					<progress class="mmsm-progress" max="100" value="<?php echo esc_attr( (string) $progress ); ?>">
