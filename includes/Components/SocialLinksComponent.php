@@ -153,6 +153,10 @@ class SocialLinksComponent implements ComponentInterface {
 						'type' => 'text',
 					),
 					array(
+						'key' => 'icon_color',
+						'type' => 'color',
+					),
+					array(
 						'key' => 'open_new_tab',
 						'type' => 'boolean',
 					),
@@ -184,7 +188,13 @@ class SocialLinksComponent implements ComponentInterface {
 								target="_blank" rel="noreferrer noopener"
 							<?php endif; ?>
 						>
-							<span class="mmsm-social-icon" aria-hidden="true">
+							<span
+								class="mmsm-social-icon"
+								aria-hidden="true"
+								<?php if ( ! empty( $link['icon_color'] ) ) : ?>
+									style="<?php echo esc_attr( 'color: ' . $link['icon_color'] . ';' ); ?>"
+								<?php endif; ?>
+							>
 								<?php echo $link['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</span>
 							<span class="mmsm-social-label"><?php echo esc_html( $link['label'] ); ?></span>
@@ -221,6 +231,7 @@ class SocialLinksComponent implements ComponentInterface {
 			$icon_source    = isset( $item['icon_source'] ) ? sanitize_key( $item['icon_source'] ) : '';
 			$icon_library   = isset( $item['icon_library'] ) ? sanitize_key( $item['icon_library'] ) : '';
 			$icon_value     = isset( $item['icon_value'] ) ? sanitize_key( $item['icon_value'] ) : '';
+			$icon_color     = isset( $item['icon_color'] ) ? sanitize_hex_color( (string) $item['icon_color'] ) : '';
 			$new_tab        = ! empty( $item['open_new_tab'] );
 
 			if ( '' === $platform || ! isset( $defaults[ $platform ] ) ) {
@@ -237,6 +248,7 @@ class SocialLinksComponent implements ComponentInterface {
 
 			$links[] = array(
 				'icon'    => $this->get_icon_markup( $platform, $label, $custom_icon_id, $icon_source, $icon_library, $icon_value ),
+				'icon_color' => $icon_color,
 				'label'   => $label,
 				'new_tab' => $new_tab && 'email' !== $platform,
 				'url'     => $url,

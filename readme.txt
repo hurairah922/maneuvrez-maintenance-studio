@@ -48,8 +48,12 @@ Yes. The plugin keeps `wp-login.php`, REST, AJAX, cron, and WP-CLI requests acce
 * add configurable page title, message, hero eyebrow, and action button fields
 * add customizable colors for background, surface, text, links, borders, and buttons
 * add contact details, status/progress, login button, and footer visibility controls
-* add social links with platform defaults, WordPress Dashicon choices, and uploaded image icons
+* add social links with platform defaults, WordPress Dashicon choices, uploaded image icons, and per-icon color controls
 * preserve administrator access and keep login, REST, AJAX, cron, and WP-CLI requests available
+* add an optional plugins-screen feedback prompt for deactivate and delete actions
+* add a direct Settings link in the Installed Plugins list for faster access to plugin settings
 * improve settings sanitization, request validation, and Plugin Check compatibility
 * add an uninstall preference so site owners can choose whether settings are removed on plugin deletion
+* store uninstall feedback locally in WordPress and keep deactivation and deletion flows non-blocking
+* fix the uninstall preference sync so saving settings does not trigger recursive option updates
 * clean the release package for WordPress.org submission by excluding development-only files and unused assets

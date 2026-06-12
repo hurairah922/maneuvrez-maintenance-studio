@@ -63,6 +63,9 @@ class Admin {
 		add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'admin_footer-plugins.php', array( $this, 'render_uninstall_feedback_modal' ) );
+		add_action( 'wp_ajax_mmsm_capture_uninstall_feedback', array( $this, 'handle_uninstall_feedback_request' ) );
+		add_filter( 'plugin_action_links_' . MMSM_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
 	}
 
 	/**
@@ -440,7 +443,34 @@ class Admin {
 	 * @return void
 	 */
 	public function enqueue_assets( $hook_suffix ) {
-		if ( $hook_suffix !== $this->page_hook ) {
+		if ( $hook_suffix === $this->page_hook ) {
+			wp_enqueue_style(
+				'mmsm-admin-settings',
+				MMSM_PLUGIN_URL . 'admin/assets/admin.css',
+				array(),
+				$this->get_asset_version( 'admin/assets/admin.css' )
+			);
+
+			wp_enqueue_style( 'wp-color-picker' );
+			wp_enqueue_media();
+
+			wp_enqueue_script(
+				'mmsm-admin-settings-script',
+				MMSM_PLUGIN_URL . 'admin/assets/admin.js',
+				array( 'jquery', 'wp-color-picker', 'wp-i18n' ),
+				$this->get_asset_version( 'admin/assets/admin.js' ),
+				true
+			);
+
+			wp_set_script_translations(
+				'mmsm-admin-settings-script',
+				'maintenance-mode-studio'
+			);
+
+			return;
+		}
+
+		if ( 'plugins.php' !== $hook_suffix || ! current_user_can( 'activate_plugins' ) ) {
 			return;
 		}
 
@@ -451,20 +481,22 @@ class Admin {
 			$this->get_asset_version( 'admin/assets/admin.css' )
 		);
 
-		wp_enqueue_style( 'wp-color-picker' );
-		wp_enqueue_media();
-
 		wp_enqueue_script(
-			'mmsm-admin-settings-script',
-			MMSM_PLUGIN_URL . 'admin/assets/admin.js',
-			array( 'jquery', 'wp-color-picker', 'wp-i18n' ),
-			$this->get_asset_version( 'admin/assets/admin.js' ),
+			'mmsm-plugin-feedback-script',
+			MMSM_PLUGIN_URL . 'admin/assets/plugin-feedback.js',
+			array( 'jquery' ),
+			$this->get_asset_version( 'admin/assets/plugin-feedback.js' ),
 			true
 		);
 
-		wp_set_script_translations(
-			'mmsm-admin-settings-script',
-			'maintenance-mode-studio'
+		wp_localize_script(
+			'mmsm-plugin-feedback-script',
+			'mmsmPluginFeedback',
+			array(
+				'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
+				'nonce'             => wp_create_nonce( 'mmsm_capture_uninstall_feedback' ),
+				'removeDataDefault' => $this->is_remove_data_enabled() ? '1' : '0',
+			)
 		);
 	}
 
@@ -513,7 +545,155 @@ class Admin {
 			$input['social_links'] = array();
 		}
 
-		return Sanitizer::sanitize_settings( array_merge( $existing, $input ) );
+		$mmsm_sanitized_settings = Sanitizer::sanitize_settings( array_merge( $existing, $input ) );
+		update_option( MMSM_REMOVE_DATA_OPTION, ! empty( $mmsm_sanitized_settings['delete_data_on_uninstall'] ) ? 1 : 0, false );
+
+		return $mmsm_sanitized_settings;
+	}
+
+	/**
+	 * Add uninstall feedback triggers to this plugin row actions.
+	 *
+	 * @param array<string,string> $actions Plugin action links.
+	 * @return array<string,string>
+	 */
+	public function filter_plugin_action_links( array $actions ) {
+		if ( current_user_can( 'manage_options' ) ) {
+			$mmsm_settings_link = sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( admin_url( 'options-general.php?page=' . $this->page_slug ) ),
+				esc_html__( 'Settings', 'maintenance-mode-studio' )
+			);
+
+			$actions = array_merge(
+				array(
+					'settings' => $mmsm_settings_link,
+				),
+				$actions
+			);
+		}
+
+		if ( isset( $actions['deactivate'] ) ) {
+			$actions['deactivate'] = $this->decorate_plugin_action_link( $actions['deactivate'], 'deactivate' );
+		}
+
+		if ( isset( $actions['delete'] ) ) {
+			$actions['delete'] = $this->decorate_plugin_action_link( $actions['delete'], 'delete' );
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Render the plugins screen uninstall feedback modal.
+	 *
+	 * @return void
+	 */
+	public function render_uninstall_feedback_modal() {
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			return;
+		}
+
+		$reasons = $this->get_uninstall_feedback_reasons();
+		?>
+		<div id="mmsm-uninstall-feedback-modal" class="mmsm-uninstall-feedback-modal is-hidden" aria-hidden="true">
+			<div class="mmsm-uninstall-feedback-backdrop"></div>
+			<div class="mmsm-uninstall-feedback-dialog" role="dialog" aria-modal="true" aria-labelledby="mmsm-uninstall-feedback-title">
+				<button type="button" class="mmsm-uninstall-feedback-close" aria-label="<?php echo esc_attr__( 'Close uninstall feedback prompt', 'maintenance-mode-studio' ); ?>">
+					<span aria-hidden="true">&times;</span>
+				</button>
+
+				<h2 id="mmsm-uninstall-feedback-title"><?php echo esc_html__( 'Before you go, would you like to share quick feedback?', 'maintenance-mode-studio' ); ?></h2>
+				<p><?php echo esc_html__( 'This step is optional and will not block deactivation or deletion.', 'maintenance-mode-studio' ); ?></p>
+
+				<div class="mmsm-uninstall-feedback-section">
+					<p class="mmsm-uninstall-feedback-label"><?php echo esc_html__( 'Why are you removing this plugin?', 'maintenance-mode-studio' ); ?></p>
+					<div class="mmsm-uninstall-feedback-reasons">
+						<?php foreach ( $reasons as $reason_key => $reason_label ) : ?>
+							<label class="mmsm-uninstall-feedback-choice">
+								<input type="radio" name="mmsm_uninstall_reason" value="<?php echo esc_attr( $reason_key ); ?>" />
+								<span><?php echo esc_html( $reason_label ); ?></span>
+							</label>
+						<?php endforeach; ?>
+					</div>
+				</div>
+
+				<div class="mmsm-uninstall-feedback-section mmsm-uninstall-feedback-other is-hidden">
+					<label for="mmsm-uninstall-feedback-details" class="mmsm-uninstall-feedback-label"><?php echo esc_html__( 'Anything else you want to share?', 'maintenance-mode-studio' ); ?></label>
+					<textarea id="mmsm-uninstall-feedback-details" rows="4" class="widefat"></textarea>
+				</div>
+
+				<div class="mmsm-uninstall-feedback-section">
+					<p class="mmsm-uninstall-feedback-label"><?php echo esc_html__( 'Do you also want to remove plugin data when uninstalling?', 'maintenance-mode-studio' ); ?></p>
+					<label class="mmsm-uninstall-feedback-choice">
+						<input type="radio" name="mmsm_remove_data" value="0" <?php checked( ! $this->is_remove_data_enabled() ); ?> />
+						<span><?php echo esc_html__( 'Keep plugin data', 'maintenance-mode-studio' ); ?></span>
+					</label>
+					<label class="mmsm-uninstall-feedback-choice">
+						<input type="radio" name="mmsm_remove_data" value="1" <?php checked( $this->is_remove_data_enabled() ); ?> />
+						<span><?php echo esc_html__( 'Remove plugin data on uninstall', 'maintenance-mode-studio' ); ?></span>
+					</label>
+				</div>
+
+				<p class="mmsm-uninstall-feedback-note"><?php echo esc_html__( 'Feedback is stored locally on this site only when you choose to submit it. Nothing is sent externally by default.', 'maintenance-mode-studio' ); ?></p>
+
+				<div class="mmsm-uninstall-feedback-actions">
+					<button type="button" class="button-link mmsm-uninstall-feedback-cancel"><?php echo esc_html__( 'Cancel', 'maintenance-mode-studio' ); ?></button>
+					<button type="button" class="button mmsm-uninstall-feedback-skip"><?php echo esc_html__( 'Skip and continue', 'maintenance-mode-studio' ); ?></button>
+					<button type="button" class="button button-primary mmsm-uninstall-feedback-submit"><?php echo esc_html__( 'Submit feedback and continue', 'maintenance-mode-studio' ); ?></button>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Store uninstall feedback and the remove-data preference.
+	 *
+	 * @return void
+	 */
+	public function handle_uninstall_feedback_request() {
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You are not allowed to manage plugins.', 'maintenance-mode-studio' ) ), 403 );
+		}
+
+		check_ajax_referer( 'mmsm_capture_uninstall_feedback', 'nonce' );
+
+		$mmsm_remove_data = isset( $_POST['remove_data'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['remove_data'] ) );
+		$mmsm_skip_feedback = isset( $_POST['skip_feedback'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['skip_feedback'] ) );
+		$mmsm_reason = isset( $_POST['reason'] ) ? sanitize_key( wp_unslash( $_POST['reason'] ) ) : '';
+		$mmsm_details = isset( $_POST['details'] ) ? sanitize_textarea_field( wp_unslash( $_POST['details'] ) ) : '';
+		$mmsm_plugin_action = isset( $_POST['plugin_action'] ) ? sanitize_key( wp_unslash( $_POST['plugin_action'] ) ) : 'deactivate';
+
+		$this->sync_remove_data_preference( $mmsm_remove_data );
+
+		if ( $mmsm_skip_feedback ) {
+			wp_send_json_success();
+		}
+
+		$mmsm_allowed_reasons = array_keys( $this->get_uninstall_feedback_reasons() );
+		$mmsm_feedback_reason = in_array( $mmsm_reason, $mmsm_allowed_reasons, true ) ? $mmsm_reason : '';
+
+		if ( '' === $mmsm_feedback_reason && '' === $mmsm_details ) {
+			wp_send_json_success();
+		}
+
+		$mmsm_feedback_log = get_option( MMSM_UNINSTALL_FEEDBACK_OPTION, array() );
+		$mmsm_feedback_log = is_array( $mmsm_feedback_log ) ? $mmsm_feedback_log : array();
+		$mmsm_feedback_log[] = array(
+			'reason'        => $mmsm_feedback_reason,
+			'details'       => $mmsm_details,
+			'plugin_action' => in_array( $mmsm_plugin_action, array( 'deactivate', 'delete' ), true ) ? $mmsm_plugin_action : 'deactivate',
+			'created_at'    => current_time( 'mysql' ),
+		);
+
+		if ( count( $mmsm_feedback_log ) > 20 ) {
+			$mmsm_feedback_log = array_slice( $mmsm_feedback_log, -20 );
+		}
+
+		update_option( MMSM_UNINSTALL_FEEDBACK_OPTION, $mmsm_feedback_log, false );
+
+		wp_send_json_success();
 	}
 
 	/**
@@ -1036,7 +1216,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_delete_data_on_uninstall_field() {
-		$settings = $this->get_settings();
+		$mmsm_remove_data_enabled = $this->is_remove_data_enabled();
 		?>
 		<label for="mmsm-delete-data-on-uninstall">
 			<input
@@ -1044,7 +1224,7 @@ class Admin {
 				id="mmsm-delete-data-on-uninstall"
 				name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[delete_data_on_uninstall]"
 				value="1"
-				<?php checked( 1, (int) $settings['delete_data_on_uninstall'] ); ?>
+				<?php checked( true, $mmsm_remove_data_enabled ); ?>
 			/>
 			<?php echo esc_html__( 'Delete plugin settings when the plugin is removed.', 'maintenance-mode-studio' ); ?>
 		</label>
@@ -1178,6 +1358,7 @@ class Admin {
 		$icon_source     = isset( $item['icon_source'] ) ? (string) $item['icon_source'] : 'platform';
 		$icon_library    = isset( $item['icon_library'] ) ? (string) $item['icon_library'] : 'dashicons';
 		$icon_value      = isset( $item['icon_value'] ) ? (string) $item['icon_value'] : 'share';
+		$icon_color      = isset( $item['icon_color'] ) ? (string) $item['icon_color'] : '';
 		$open_new_tab    = ! empty( $item['open_new_tab'] );
 		$custom_icon_url = $custom_icon_id > 0 ? wp_get_attachment_url( $custom_icon_id ) : '';
 		$is_custom       = 'custom' === $platform;
@@ -1288,6 +1469,17 @@ class Admin {
 					</p>
 					<p class="description"><?php echo esc_html__( 'Uploaded icons use the media library. PNG, JPG, and WEBP are accepted.', 'maintenance-mode-studio' ); ?></p>
 				</div>
+				<p>
+					<label><?php echo esc_html__( 'Icon Color', 'maintenance-mode-studio' ); ?></label><br />
+					<input
+						type="text"
+						class="mmsm-color-picker mmsm-social-icon-color-picker"
+						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_color]"
+						value="<?php echo esc_attr( $icon_color ); ?>"
+						data-default-color=""
+					/>
+				</p>
+				<p class="description"><?php echo esc_html__( 'Applies to built-in and library icons. Uploaded image icons keep their original colors.', 'maintenance-mode-studio' ); ?></p>
 			</div>
 			<p>
 				<label>
@@ -1318,6 +1510,7 @@ class Admin {
 			'icon_source'    => 'platform',
 			'icon_library'   => 'dashicons',
 			'icon_value'     => 'share',
+			'icon_color'     => '',
 			'open_new_tab'   => 1,
 		);
 	}
@@ -1451,6 +1644,88 @@ class Admin {
 		}
 
 		return MMSM_VERSION;
+	}
+
+	/**
+	 * Add modal trigger attributes to a plugin action link.
+	 *
+	 * @param string $markup Existing action link markup.
+	 * @param string $action Plugin action key.
+	 * @return string
+	 */
+	private function decorate_plugin_action_link( $markup, $action ) {
+		$action = in_array( $action, array( 'deactivate', 'delete' ), true ) ? $action : 'deactivate';
+
+		if ( false !== strpos( $markup, 'mmsm-uninstall-feedback-trigger' ) ) {
+			return $markup;
+		}
+
+		if ( false !== strpos( $markup, 'class=' ) ) {
+			$decorated = preg_replace(
+				'/class=(["\'])(.*?)\1/',
+				'class=$1$2 mmsm-uninstall-feedback-trigger$1 data-mmsm-plugin-action="' . esc_attr( $action ) . '"',
+				$markup,
+				1
+			);
+
+			return is_string( $decorated ) ? $decorated : $markup;
+		}
+
+		$decorated = preg_replace(
+			'/<a\s/',
+			'<a class="mmsm-uninstall-feedback-trigger" data-mmsm-plugin-action="' . esc_attr( $action ) . '" ',
+			$markup,
+			1
+		);
+
+		return is_string( $decorated ) ? $decorated : $markup;
+	}
+
+	/**
+	 * Return uninstall feedback reason labels.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_uninstall_feedback_reasons() {
+		return array(
+			'no_longer_needed'      => __( 'I no longer need the plugin', 'maintenance-mode-studio' ),
+			'did_not_work'          => __( 'The plugin did not work as expected', 'maintenance-mode-studio' ),
+			'caused_issue'          => __( 'The plugin caused an issue on my site', 'maintenance-mode-studio' ),
+			'missing_features'      => __( 'The plugin is missing features I need', 'maintenance-mode-studio' ),
+			'too_difficult'         => __( 'The plugin is too difficult to use', 'maintenance-mode-studio' ),
+			'found_alternative'     => __( 'I found a better alternative', 'maintenance-mode-studio' ),
+			'troubleshooting'       => __( 'I am troubleshooting temporarily', 'maintenance-mode-studio' ),
+			'other'                 => __( 'Other', 'maintenance-mode-studio' ),
+		);
+	}
+
+	/**
+	 * Determine whether data removal is currently enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_remove_data_enabled() {
+		$mmsm_remove_data = get_option( MMSM_REMOVE_DATA_OPTION, null );
+
+		if ( null !== $mmsm_remove_data ) {
+			return ! empty( $mmsm_remove_data );
+		}
+
+		$mmsm_settings = get_option( MMSM_SETTINGS_OPTION, array() );
+
+		return is_array( $mmsm_settings ) && ! empty( $mmsm_settings['delete_data_on_uninstall'] );
+	}
+
+	/**
+	 * Save the uninstall data-removal preference in both supported locations.
+	 *
+	 * @param bool $enabled Whether plugin data should be removed on uninstall.
+	 * @return void
+	 */
+	private function sync_remove_data_preference( $enabled ) {
+		$mmsm_enabled = $enabled ? 1 : 0;
+
+		update_option( MMSM_REMOVE_DATA_OPTION, $mmsm_enabled, false );
 	}
 
 	/**

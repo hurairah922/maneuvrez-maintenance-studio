@@ -79,3 +79,95 @@
 	border-radius: 10px;
 	background: #f6f7f7;
 }
+
+.mmsm-uninstall-feedback-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+
+.mmsm-uninstall-feedback-modal.is-hidden {
+	display: none;
+}
+
+.mmsm-uninstall-feedback-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.55);
+}
+
+.mmsm-uninstall-feedback-dialog {
+	position: relative;
+	width: min(680px, 100%);
+	max-height: calc(100vh - 40px);
+	overflow: auto;
+	padding: 24px;
+	border-radius: 16px;
+	background: #fff;
+	box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+}
+
+.mmsm-uninstall-feedback-close {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	border: 0;
+	background: transparent;
+	font-size: 28px;
+	line-height: 1;
+	cursor: pointer;
+	color: #50575e;
+}
+
+.mmsm-uninstall-feedback-section {
+	margin-top: 18px;
+}
+
+.mmsm-uninstall-feedback-label {
+	margin: 0 0 10px;
+	font-weight: 600;
+}
+
+.mmsm-uninstall-feedback-reasons {
+	display: grid;
+	gap: 10px;
+}
+
+.mmsm-uninstall-feedback-choice {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.mmsm-uninstall-feedback-other.is-hidden {
+	display: none;
+}
+
+.mmsm-uninstall-feedback-note {
+	margin-top: 18px;
+	color: #50575e;
+}
+
+.mmsm-uninstall-feedback-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 12px;
+	margin-top: 24px;
+}
+
+@media (max-width: 600px) {
+	.mmsm-uninstall-feedback-dialog {
+		padding: 20px;
+	}
+
+	.mmsm-uninstall-feedback-actions {
+		flex-direction: column-reverse;
+		align-items: stretch;
+	}
+}
