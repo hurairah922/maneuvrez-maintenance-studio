@@ -49,6 +49,14 @@ if ( ! defined( 'MMSM_VERSION_OPTION' ) ) {
 	define( 'MMSM_VERSION_OPTION', 'mmsm_version' );
 }
 
+if ( ! defined( 'MMSM_REMOVE_DATA_OPTION' ) ) {
+	define( 'MMSM_REMOVE_DATA_OPTION', 'mmsm_remove_data_on_uninstall' );
+}
+
+if ( ! defined( 'MMSM_UNINSTALL_FEEDBACK_OPTION' ) ) {
+	define( 'MMSM_UNINSTALL_FEEDBACK_OPTION', 'mmsm_uninstall_feedback_log' );
+}
+
 require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsSchema.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsRepository.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Support/Escaper.php';

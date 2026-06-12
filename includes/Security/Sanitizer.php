@@ -224,6 +224,7 @@ class Sanitizer {
 				$icon_source    = isset( $item['icon_source'] ) ? sanitize_key( $item['icon_source'] ) : '';
 				$icon_library   = isset( $item['icon_library'] ) ? sanitize_key( $item['icon_library'] ) : '';
 				$icon_value     = isset( $item['icon_value'] ) ? sanitize_key( $item['icon_value'] ) : '';
+				$icon_color     = isset( $item['icon_color'] ) ? sanitize_hex_color( $item['icon_color'] ) : '';
 				$open_new_tab   = ! empty( $item['open_new_tab'] ) ? 1 : 0;
 
 				if ( ! in_array( $platform, $supported_platforms, true ) ) {
@@ -288,6 +289,7 @@ class Sanitizer {
 					'icon_source'    => $icon_source,
 					'icon_library'   => $icon_library,
 					'icon_value'     => $icon_value,
+					'icon_color'     => $icon_color ? $icon_color : '',
 					'open_new_tab'   => $open_new_tab,
 				);
 			}
@@ -333,6 +335,7 @@ class Sanitizer {
 					'icon_source'    => 'platform',
 					'icon_library'   => '',
 					'icon_value'     => '',
+					'icon_color'     => '',
 					'open_new_tab'   => $settings[ $new_tab_key ],
 				);
 			}
@@ -369,6 +372,7 @@ class Sanitizer {
 				'icon_source'    => 'platform',
 				'icon_library'   => '',
 				'icon_value'     => '',
+				'icon_color'     => '',
 				'open_new_tab'   => 0,
 			);
 		}

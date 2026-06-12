@@ -1,6 +1,19 @@
 jQuery(document).ready(($) => {
 	const { __ } = wp.i18n;
-	$('.mmsm-color-picker').wpColorPicker();
+
+	const initializeColorPickers = (scope) => {
+		scope.find('.mmsm-color-picker').each(function initColorPicker() {
+			const input = $(this);
+
+			if (input.hasClass('wp-color-picker')) {
+				return;
+			}
+
+			input.wpColorPicker();
+		});
+	};
+
+	initializeColorPickers($(document.body));
 
 	const builder = $('.mmsm-social-links-builder');
 
@@ -101,6 +114,7 @@ jQuery(document).ready(($) => {
 
 		builder.attr('data-next-index', String(nextIndex + 1));
 		list.append(row);
+		initializeColorPickers(row);
 		bindRow(row);
 	};
 
