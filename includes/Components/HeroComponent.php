@@ -26,7 +26,7 @@ class HeroComponent implements ComponentInterface {
 	 * {@inheritDoc}
 	 */
 	public function get_label() {
-		return __( 'Hero', 'maintenance-mode-studio' );
+		return __( 'Hero', 'maneuvrez-maintenance-studio' );
 	}
 
 	/**
@@ -43,49 +43,49 @@ class HeroComponent implements ComponentInterface {
 		return array(
 			array(
 				'key'      => 'hero_eyebrow',
-				'label'    => __( 'Eyebrow', 'maintenance-mode-studio' ),
+				'label'    => __( 'Eyebrow', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'text',
 				'default'  => '',
 				'required' => false,
 			),
 			array(
 				'key'      => 'page_title',
-				'label'    => __( 'Title', 'maintenance-mode-studio' ),
+				'label'    => __( 'Title', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'text',
 				'default'  => "We'll be back soon",
 				'required' => true,
 			),
 			array(
 				'key'      => 'message',
-				'label'    => __( 'Message', 'maintenance-mode-studio' ),
+				'label'    => __( 'Message', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'textarea',
 				'default'  => 'Our site is getting a quick update. Please check back shortly.',
 				'required' => true,
 			),
 			array(
 				'key'      => 'primary_action_label',
-				'label'    => __( 'Primary action label', 'maintenance-mode-studio' ),
+				'label'    => __( 'Primary action label', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'text',
 				'default'  => '',
 				'required' => false,
 			),
 			array(
 				'key'      => 'primary_action_url',
-				'label'    => __( 'Primary action URL', 'maintenance-mode-studio' ),
+				'label'    => __( 'Primary action URL', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'url',
 				'default'  => '',
 				'required' => false,
 			),
 			array(
 				'key'      => 'secondary_action_label',
-				'label'    => __( 'Secondary action label', 'maintenance-mode-studio' ),
+				'label'    => __( 'Secondary action label', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'text',
 				'default'  => '',
 				'required' => false,
 			),
 			array(
 				'key'      => 'secondary_action_url',
-				'label'    => __( 'Secondary action URL', 'maintenance-mode-studio' ),
+				'label'    => __( 'Secondary action URL', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'url',
 				'default'  => '',
 				'required' => false,
@@ -165,7 +165,7 @@ class HeroComponent implements ComponentInterface {
 		$label = trim( $label );
 
 		if ( '' === $label ) {
-			$label = __( 'Learn more', 'maintenance-mode-studio' );
+			$label = __( 'Learn more', 'maneuvrez-maintenance-studio' );
 		}
 
 		return array(

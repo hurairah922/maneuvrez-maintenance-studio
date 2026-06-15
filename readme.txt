@@ -1,4 +1,4 @@
-=== Maintenance Mode Studio ===
+=== Maneuvrez Maintenance Studio ===
 Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page, admin bypass, social links
 Requires at least: 6.4
@@ -12,7 +12,7 @@ Create a responsive maintenance or coming soon page with custom copy, colors, co
 
 == Description ==
 
-Maintenance Mode Studio helps WordPress site owners replace the default downtime screen with a polished maintenance or coming soon page.
+Maneuvrez Maintenance Studio helps WordPress site owners replace the default downtime screen with a polished maintenance or coming soon page.
 
 This release includes:
 
@@ -25,9 +25,9 @@ This release includes:
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/maintenance-mode-studio` directory, or install the plugin through the WordPress plugins screen.
+1. Upload the plugin files to the `/wp-content/plugins/maneuvrez-maintenance-studio` directory, or install the plugin through the WordPress plugins screen.
 2. Activate the plugin through the `Plugins` screen in WordPress.
-3. Open `Settings > Maintenance Mode Studio` to enable maintenance mode.
+3. Open `Settings > Maneuvrez Maintenance Studio` to enable maintenance mode.
 
 == Frequently Asked Questions ==
 
@@ -57,3 +57,5 @@ Yes. The plugin keeps `wp-login.php`, REST, AJAX, cron, and WP-CLI requests acce
 * store uninstall feedback locally in WordPress and keep deactivation and deletion flows non-blocking
 * fix the uninstall preference sync so saving settings does not trigger recursive option updates
 * clean the release package for WordPress.org submission by excluding development-only files and unused assets
+* rename the plugin to Maneuvrez Maintenance Studio across the public branding and project docs
+* refresh the completed spec archive to reflect the current project shape

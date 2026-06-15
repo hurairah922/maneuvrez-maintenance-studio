@@ -26,7 +26,7 @@ Build:
 
 Required behavior:
 
-- Use one WordPress option array named maintenance_mode_settings.
+- Use one WordPress option array named mmsm_maintenance_mode_settings.
 - Add safe default values for every setting.
 - Merge saved settings with defaults before use.
 - Sanitize all saved settings.

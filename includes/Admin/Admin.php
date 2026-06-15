@@ -36,7 +36,7 @@ class Admin {
 	 *
 	 * @var string
 	 */
-	private $page_slug = 'maintenance-mode-studio';
+	private $page_slug = 'maneuvrez-maintenance-studio';
 
 	/**
 	 * Settings page hook suffix.
@@ -75,8 +75,8 @@ class Admin {
 	 */
 	public function add_settings_page() {
 		$this->page_hook = add_options_page(
-			__( 'Maintenance Mode Studio', 'maintenance-mode-studio' ),
-			__( 'Maintenance Mode Studio', 'maintenance-mode-studio' ),
+			__( 'Maneuvrez Maintenance Studio', 'maneuvrez-maintenance-studio' ),
+			__( 'Maneuvrez Maintenance Studio', 'maneuvrez-maintenance-studio' ),
 			'manage_options',
 			$this->page_slug,
 			array( $this, 'render_page' )
@@ -101,14 +101,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_general_section',
-			__( 'General', 'maintenance-mode-studio' ),
+			__( 'General', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_general_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_enabled',
-			__( 'Enable maintenance mode', 'maintenance-mode-studio' ),
+			__( 'Enable maintenance mode', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_enabled_field' ),
 			$this->page_slug,
 			'mmsm_general_section'
@@ -116,7 +116,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_page_title',
-			__( 'Page Title', 'maintenance-mode-studio' ),
+			__( 'Page Title', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_page_title_field' ),
 			$this->page_slug,
 			'mmsm_general_section'
@@ -124,7 +124,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_message',
-			__( 'Message', 'maintenance-mode-studio' ),
+			__( 'Message', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_message_field' ),
 			$this->page_slug,
 			'mmsm_general_section'
@@ -132,14 +132,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_template_section',
-			__( 'Template', 'maintenance-mode-studio' ),
+			__( 'Template', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_template_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_mode_type',
-			__( 'Mode Type', 'maintenance-mode-studio' ),
+			__( 'Mode Type', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_mode_type_field' ),
 			$this->page_slug,
 			'mmsm_template_section'
@@ -147,7 +147,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_template_key',
-			__( 'Template', 'maintenance-mode-studio' ),
+			__( 'Template', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_template_key_field' ),
 			$this->page_slug,
 			'mmsm_template_section'
@@ -155,14 +155,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_design_section',
-			__( 'Design', 'maintenance-mode-studio' ),
+			__( 'Design', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_design_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_theme_mode',
-			__( 'Theme Mode', 'maintenance-mode-studio' ),
+			__( 'Theme Mode', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_theme_mode_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -170,7 +170,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_primary_color',
-			__( 'Primary Color', 'maintenance-mode-studio' ),
+			__( 'Primary Color', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_primary_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -178,7 +178,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_background_color',
-			__( 'Background Color', 'maintenance-mode-studio' ),
+			__( 'Background Color', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_background_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -186,7 +186,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_surface_color',
-			__( 'Surface Color', 'maintenance-mode-studio' ),
+			__( 'Surface Color', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_surface_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -194,7 +194,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_heading_text_color',
-			__( 'Heading Text Color', 'maintenance-mode-studio' ),
+			__( 'Heading Text Color', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_heading_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -202,7 +202,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_body_text_color',
-			__( 'Body Text Color', 'maintenance-mode-studio' ),
+			__( 'Body Text Color', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_body_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -210,7 +210,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_muted_text_color',
-			__( 'Muted Text Color', 'maintenance-mode-studio' ),
+			__( 'Muted Text Color', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_muted_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -218,7 +218,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_link_text_color',
-			__( 'Link Text Color', 'maintenance-mode-studio' ),
+			__( 'Link Text Color', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_link_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -226,7 +226,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_button_text_color',
-			__( 'Button Text Color', 'maintenance-mode-studio' ),
+			__( 'Button Text Color', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_button_text_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -234,7 +234,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_border_color',
-			__( 'Border Color', 'maintenance-mode-studio' ),
+			__( 'Border Color', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_border_color_field' ),
 			$this->page_slug,
 			'mmsm_design_section'
@@ -242,14 +242,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_components_section',
-			__( 'Components', 'maintenance-mode-studio' ),
+			__( 'Components', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_components_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_hero_eyebrow',
-			__( 'Hero Eyebrow', 'maintenance-mode-studio' ),
+			__( 'Hero Eyebrow', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_hero_eyebrow_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -257,7 +257,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_primary_action_label',
-			__( 'Primary Action Label', 'maintenance-mode-studio' ),
+			__( 'Primary Action Label', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_primary_action_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -265,7 +265,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_primary_action_url',
-			__( 'Primary Action URL', 'maintenance-mode-studio' ),
+			__( 'Primary Action URL', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_primary_action_url_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -273,7 +273,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_secondary_action_label',
-			__( 'Secondary Action Label', 'maintenance-mode-studio' ),
+			__( 'Secondary Action Label', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_secondary_action_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -281,7 +281,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_secondary_action_url',
-			__( 'Secondary Action URL', 'maintenance-mode-studio' ),
+			__( 'Secondary Action URL', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_secondary_action_url_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -289,7 +289,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_status_label',
-			__( 'Status Label', 'maintenance-mode-studio' ),
+			__( 'Status Label', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_status_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -297,7 +297,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_show_progress',
-			__( 'Show Progress', 'maintenance-mode-studio' ),
+			__( 'Show Progress', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_show_progress_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -305,7 +305,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_progress_value',
-			__( 'Progress Value', 'maintenance-mode-studio' ),
+			__( 'Progress Value', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_progress_value_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -313,7 +313,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_contact_label',
-			__( 'Contact Label', 'maintenance-mode-studio' ),
+			__( 'Contact Label', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_contact_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -321,7 +321,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_contact_message',
-			__( 'Contact Message', 'maintenance-mode-studio' ),
+			__( 'Contact Message', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_contact_message_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -329,7 +329,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_contact_email',
-			__( 'Contact Email', 'maintenance-mode-studio' ),
+			__( 'Contact Email', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_contact_email_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -337,14 +337,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_social_links_section',
-			__( 'Social Links', 'maintenance-mode-studio' ),
+			__( 'Social Links', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_social_links_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_social_links',
-			__( 'Social Items', 'maintenance-mode-studio' ),
+			__( 'Social Items', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_social_links_field' ),
 			$this->page_slug,
 			'mmsm_social_links_section'
@@ -352,14 +352,14 @@ class Admin {
 
 		add_settings_section(
 			'mmsm_advanced_section',
-			__( 'Advanced', 'maintenance-mode-studio' ),
+			__( 'Advanced', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_advanced_section' ),
 			$this->page_slug
 		);
 
 		add_settings_field(
 			'mmsm_show_login_button',
-			__( 'Show Login Button', 'maintenance-mode-studio' ),
+			__( 'Show Login Button', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_show_login_button_field' ),
 			$this->page_slug,
 			'mmsm_advanced_section'
@@ -367,7 +367,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_show_footer_section',
-			__( 'Show Footer Section', 'maintenance-mode-studio' ),
+			__( 'Show Footer Section', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_show_footer_section_field' ),
 			$this->page_slug,
 			'mmsm_advanced_section'
@@ -375,7 +375,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_delete_data_on_uninstall',
-			__( 'Data Removal on Uninstall', 'maintenance-mode-studio' ),
+			__( 'Data Removal on Uninstall', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_delete_data_on_uninstall_field' ),
 			$this->page_slug,
 			'mmsm_advanced_section'
@@ -383,7 +383,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_login_label',
-			__( 'Login Label', 'maintenance-mode-studio' ),
+			__( 'Login Label', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_login_label_field' ),
 			$this->page_slug,
 			'mmsm_advanced_section'
@@ -403,13 +403,13 @@ class Admin {
 		$active_tab = $this->get_active_tab();
 		?>
 		<div class="wrap mmsm-settings-page">
-			<h1><?php echo esc_html__( 'Maintenance Mode Studio', 'maintenance-mode-studio' ); ?></h1>
+			<h1><?php echo esc_html__( 'Maneuvrez Maintenance Studio', 'maneuvrez-maintenance-studio' ); ?></h1>
 			<p class="mmsm-settings-intro">
-				<?php echo esc_html__( 'Configure the maintenance page template, core copy, and a few reusable components without editing code.', 'maintenance-mode-studio' ); ?>
+				<?php echo esc_html__( 'Configure the maintenance page template, core copy, and a few reusable components without editing code.', 'maneuvrez-maintenance-studio' ); ?>
 			</p>
 
 			<?php settings_errors( MMSM_SETTINGS_OPTION ); ?>
-			<nav class="nav-tab-wrapper mmsm-settings-tabs" aria-label="<?php echo esc_attr__( 'Maintenance Mode Studio settings sections', 'maintenance-mode-studio' ); ?>">
+			<nav class="nav-tab-wrapper mmsm-settings-tabs" aria-label="<?php echo esc_attr__( 'Maneuvrez Maintenance Studio settings sections', 'maneuvrez-maintenance-studio' ); ?>">
 				<?php foreach ( $this->get_tabs() as $tab_key => $tab ) : ?>
 					<a
 						href="<?php echo esc_url( $this->get_tab_url( $tab_key ) ); ?>"
@@ -429,7 +429,7 @@ class Admin {
 					<input type="hidden" name="mmsm_active_tab" value="<?php echo esc_attr( $active_tab ); ?>" />
 					<?php
 					$this->render_active_tab();
-				submit_button( __( 'Save Settings', 'maintenance-mode-studio' ) );
+				submit_button( __( 'Save Settings', 'maneuvrez-maintenance-studio' ) );
 				?>
 			</form>
 		</div>
@@ -464,7 +464,7 @@ class Admin {
 
 			wp_set_script_translations(
 				'mmsm-admin-settings-script',
-				'maintenance-mode-studio'
+				'maneuvrez-maintenance-studio'
 			);
 
 			return;
@@ -514,7 +514,7 @@ class Admin {
 			add_settings_error(
 				MMSM_SETTINGS_OPTION,
 				'mmsm_settings_capability_error',
-				esc_html__( 'You are not allowed to update these settings.', 'maintenance-mode-studio' ),
+				esc_html__( 'You are not allowed to update these settings.', 'maneuvrez-maintenance-studio' ),
 				'error'
 			);
 
@@ -527,7 +527,7 @@ class Admin {
 			add_settings_error(
 				MMSM_SETTINGS_OPTION,
 				'mmsm_settings_nonce_error',
-				esc_html__( 'The settings request could not be verified. Please try again.', 'maintenance-mode-studio' ),
+				esc_html__( 'The settings request could not be verified. Please try again.', 'maneuvrez-maintenance-studio' ),
 				'error'
 			);
 
@@ -562,7 +562,7 @@ class Admin {
 			$mmsm_settings_link = sprintf(
 				'<a href="%1$s">%2$s</a>',
 				esc_url( admin_url( 'options-general.php?page=' . $this->page_slug ) ),
-				esc_html__( 'Settings', 'maintenance-mode-studio' )
+				esc_html__( 'Settings', 'maneuvrez-maintenance-studio' )
 			);
 
 			$actions = array_merge(
@@ -599,15 +599,15 @@ class Admin {
 		<div id="mmsm-uninstall-feedback-modal" class="mmsm-uninstall-feedback-modal is-hidden" aria-hidden="true">
 			<div class="mmsm-uninstall-feedback-backdrop"></div>
 			<div class="mmsm-uninstall-feedback-dialog" role="dialog" aria-modal="true" aria-labelledby="mmsm-uninstall-feedback-title">
-				<button type="button" class="mmsm-uninstall-feedback-close" aria-label="<?php echo esc_attr__( 'Close uninstall feedback prompt', 'maintenance-mode-studio' ); ?>">
+				<button type="button" class="mmsm-uninstall-feedback-close" aria-label="<?php echo esc_attr__( 'Close uninstall feedback prompt', 'maneuvrez-maintenance-studio' ); ?>">
 					<span aria-hidden="true">&times;</span>
 				</button>
 
-				<h2 id="mmsm-uninstall-feedback-title"><?php echo esc_html__( 'Before you go, would you like to share quick feedback?', 'maintenance-mode-studio' ); ?></h2>
-				<p><?php echo esc_html__( 'This step is optional and will not block deactivation or deletion.', 'maintenance-mode-studio' ); ?></p>
+				<h2 id="mmsm-uninstall-feedback-title"><?php echo esc_html__( 'Before you go, would you like to share quick feedback?', 'maneuvrez-maintenance-studio' ); ?></h2>
+				<p><?php echo esc_html__( 'This step is optional and will not block deactivation or deletion.', 'maneuvrez-maintenance-studio' ); ?></p>
 
 				<div class="mmsm-uninstall-feedback-section">
-					<p class="mmsm-uninstall-feedback-label"><?php echo esc_html__( 'Why are you removing this plugin?', 'maintenance-mode-studio' ); ?></p>
+					<p class="mmsm-uninstall-feedback-label"><?php echo esc_html__( 'Why are you removing this plugin?', 'maneuvrez-maintenance-studio' ); ?></p>
 					<div class="mmsm-uninstall-feedback-reasons">
 						<?php foreach ( $reasons as $reason_key => $reason_label ) : ?>
 							<label class="mmsm-uninstall-feedback-choice">
@@ -619,28 +619,28 @@ class Admin {
 				</div>
 
 				<div class="mmsm-uninstall-feedback-section mmsm-uninstall-feedback-other is-hidden">
-					<label for="mmsm-uninstall-feedback-details" class="mmsm-uninstall-feedback-label"><?php echo esc_html__( 'Anything else you want to share?', 'maintenance-mode-studio' ); ?></label>
+					<label for="mmsm-uninstall-feedback-details" class="mmsm-uninstall-feedback-label"><?php echo esc_html__( 'Anything else you want to share?', 'maneuvrez-maintenance-studio' ); ?></label>
 					<textarea id="mmsm-uninstall-feedback-details" rows="4" class="widefat"></textarea>
 				</div>
 
 				<div class="mmsm-uninstall-feedback-section">
-					<p class="mmsm-uninstall-feedback-label"><?php echo esc_html__( 'Do you also want to remove plugin data when uninstalling?', 'maintenance-mode-studio' ); ?></p>
+					<p class="mmsm-uninstall-feedback-label"><?php echo esc_html__( 'Do you also want to remove plugin data when uninstalling?', 'maneuvrez-maintenance-studio' ); ?></p>
 					<label class="mmsm-uninstall-feedback-choice">
 						<input type="radio" name="mmsm_remove_data" value="0" <?php checked( ! $this->is_remove_data_enabled() ); ?> />
-						<span><?php echo esc_html__( 'Keep plugin data', 'maintenance-mode-studio' ); ?></span>
+						<span><?php echo esc_html__( 'Keep plugin data', 'maneuvrez-maintenance-studio' ); ?></span>
 					</label>
 					<label class="mmsm-uninstall-feedback-choice">
 						<input type="radio" name="mmsm_remove_data" value="1" <?php checked( $this->is_remove_data_enabled() ); ?> />
-						<span><?php echo esc_html__( 'Remove plugin data on uninstall', 'maintenance-mode-studio' ); ?></span>
+						<span><?php echo esc_html__( 'Remove plugin data on uninstall', 'maneuvrez-maintenance-studio' ); ?></span>
 					</label>
 				</div>
 
-				<p class="mmsm-uninstall-feedback-note"><?php echo esc_html__( 'Feedback is stored locally on this site only when you choose to submit it. Nothing is sent externally by default.', 'maintenance-mode-studio' ); ?></p>
+				<p class="mmsm-uninstall-feedback-note"><?php echo esc_html__( 'Feedback is stored locally on this site only when you choose to submit it. Nothing is sent externally by default.', 'maneuvrez-maintenance-studio' ); ?></p>
 
 				<div class="mmsm-uninstall-feedback-actions">
-					<button type="button" class="button-link mmsm-uninstall-feedback-cancel"><?php echo esc_html__( 'Cancel', 'maintenance-mode-studio' ); ?></button>
-					<button type="button" class="button mmsm-uninstall-feedback-skip"><?php echo esc_html__( 'Skip and continue', 'maintenance-mode-studio' ); ?></button>
-					<button type="button" class="button button-primary mmsm-uninstall-feedback-submit"><?php echo esc_html__( 'Submit feedback and continue', 'maintenance-mode-studio' ); ?></button>
+					<button type="button" class="button-link mmsm-uninstall-feedback-cancel"><?php echo esc_html__( 'Cancel', 'maneuvrez-maintenance-studio' ); ?></button>
+					<button type="button" class="button mmsm-uninstall-feedback-skip"><?php echo esc_html__( 'Skip and continue', 'maneuvrez-maintenance-studio' ); ?></button>
+					<button type="button" class="button button-primary mmsm-uninstall-feedback-submit"><?php echo esc_html__( 'Submit feedback and continue', 'maneuvrez-maintenance-studio' ); ?></button>
 				</div>
 			</div>
 		</div>
@@ -654,7 +654,7 @@ class Admin {
 	 */
 	public function handle_uninstall_feedback_request() {
 		if ( ! current_user_can( 'activate_plugins' ) ) {
-			wp_send_json_error( array( 'message' => __( 'You are not allowed to manage plugins.', 'maintenance-mode-studio' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'You are not allowed to manage plugins.', 'maneuvrez-maintenance-studio' ) ), 403 );
 		}
 
 		check_ajax_referer( 'mmsm_capture_uninstall_feedback', 'nonce' );
@@ -702,7 +702,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_general_section() {
-		echo '<p>' . esc_html__( 'These settings control the core public experience shown to logged-out visitors.', 'maintenance-mode-studio' ) . '</p>';
+		echo '<p>' . esc_html__( 'These settings control the core public experience shown to logged-out visitors.', 'maneuvrez-maintenance-studio' ) . '</p>';
 	}
 
 	/**
@@ -711,7 +711,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_template_section() {
-		echo '<p>' . esc_html__( 'Pick the public template shell and the maintenance mode presentation style.', 'maintenance-mode-studio' ) . '</p>';
+		echo '<p>' . esc_html__( 'Pick the public template shell and the maintenance mode presentation style.', 'maneuvrez-maintenance-studio' ) . '</p>';
 	}
 
 	/**
@@ -720,7 +720,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_design_section() {
-		echo '<p>' . esc_html__( 'Use WordPress color pickers for the safe theme color roles that drive light, dark, and system modes.', 'maintenance-mode-studio' ) . '</p>';
+		echo '<p>' . esc_html__( 'Use WordPress color pickers for the safe theme color roles that drive light, dark, and system modes.', 'maneuvrez-maintenance-studio' ) . '</p>';
 	}
 
 	/**
@@ -729,7 +729,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_components_section() {
-		echo '<p>' . esc_html__( 'These optional settings feed the hero, status, and contact components rendered by the default template.', 'maintenance-mode-studio' ) . '</p>';
+		echo '<p>' . esc_html__( 'These optional settings feed the hero, status, and contact components rendered by the default template.', 'maneuvrez-maintenance-studio' ) . '</p>';
 	}
 
 	/**
@@ -738,7 +738,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_social_links_section() {
-		echo '<p>' . esc_html__( 'Choose up to four social or contact destinations with safe platform icons, labels, and URLs.', 'maintenance-mode-studio' ) . '</p>';
+		echo '<p>' . esc_html__( 'Choose up to four social or contact destinations with safe platform icons, labels, and URLs.', 'maneuvrez-maintenance-studio' ) . '</p>';
 	}
 
 	/**
@@ -747,7 +747,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_advanced_section() {
-		echo '<p>' . esc_html__( 'Control optional access, login affordances, and uninstall cleanup without affecting administrator bypass behavior.', 'maintenance-mode-studio' ) . '</p>';
+		echo '<p>' . esc_html__( 'Control optional access, login affordances, and uninstall cleanup without affecting administrator bypass behavior.', 'maneuvrez-maintenance-studio' ) . '</p>';
 	}
 
 	/**
@@ -766,9 +766,9 @@ class Admin {
 				value="1"
 				<?php checked( 1, (int) $settings['enabled'] ); ?>
 			/>
-			<?php echo esc_html__( 'Show the maintenance page to logged-out visitors.', 'maintenance-mode-studio' ); ?>
+			<?php echo esc_html__( 'Show the maintenance page to logged-out visitors.', 'maneuvrez-maintenance-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Administrators keep normal site access while this is enabled.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Administrators keep normal site access while this is enabled.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -782,13 +782,13 @@ class Admin {
 		?>
 		<select id="mmsm-mode-type" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[mode_type]">
 			<option value="maintenance" <?php selected( $settings['mode_type'], 'maintenance' ); ?>>
-				<?php echo esc_html__( 'Maintenance', 'maintenance-mode-studio' ); ?>
+				<?php echo esc_html__( 'Maintenance', 'maneuvrez-maintenance-studio' ); ?>
 			</option>
 			<option value="coming_soon" <?php selected( $settings['mode_type'], 'coming_soon' ); ?>>
-				<?php echo esc_html__( 'Coming Soon', 'maintenance-mode-studio' ); ?>
+				<?php echo esc_html__( 'Coming Soon', 'maneuvrez-maintenance-studio' ); ?>
 			</option>
 		</select>
-		<p class="description"><?php echo esc_html__( 'Choose whether the public page should show as maintenance mode or coming soon mode.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Choose whether the public page should show as maintenance mode or coming soon mode.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -807,7 +807,7 @@ class Admin {
 			name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[page_title]"
 			value="<?php echo esc_attr( $settings['page_title'] ); ?>"
 		/>
-		<p class="description"><?php echo esc_html__( 'This title appears as the main heading on the public page.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'This title appears as the main heading on the public page.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -825,7 +825,7 @@ class Admin {
 			id="mmsm-message"
 			name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[message]"
 		><?php echo esc_textarea( $settings['message'] ); ?></textarea>
-		<p class="description"><?php echo esc_html__( 'Plain text only in this phase.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Plain text only in this phase.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -845,9 +845,9 @@ class Admin {
 				value="1"
 				<?php checked( 1, (int) $settings['show_login_button'] ); ?>
 			/>
-			<?php echo esc_html__( 'Display the default login button on the public page.', 'maintenance-mode-studio' ); ?>
+			<?php echo esc_html__( 'Display the default login button on the public page.', 'maneuvrez-maintenance-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Turn this off if visitors should not see a login shortcut.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Turn this off if visitors should not see a login shortcut.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -861,16 +861,16 @@ class Admin {
 		?>
 		<select id="mmsm-theme-mode" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[theme_mode]">
 			<option value="light" <?php selected( $settings['theme_mode'], 'light' ); ?>>
-				<?php echo esc_html__( 'Light', 'maintenance-mode-studio' ); ?>
+				<?php echo esc_html__( 'Light', 'maneuvrez-maintenance-studio' ); ?>
 			</option>
 			<option value="dark" <?php selected( $settings['theme_mode'], 'dark' ); ?>>
-				<?php echo esc_html__( 'Dark', 'maintenance-mode-studio' ); ?>
+				<?php echo esc_html__( 'Dark', 'maneuvrez-maintenance-studio' ); ?>
 			</option>
 			<option value="system" <?php selected( $settings['theme_mode'], 'system' ); ?>>
-				<?php echo esc_html__( 'System', 'maintenance-mode-studio' ); ?>
+				<?php echo esc_html__( 'System', 'maneuvrez-maintenance-studio' ); ?>
 			</option>
 		</select>
-		<p class="description"><?php echo esc_html__( 'Choose a light, dark, or system-following visual style for the active template.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Choose a light, dark, or system-following visual style for the active template.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -884,10 +884,10 @@ class Admin {
 		?>
 		<select id="mmsm-template-key" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[template_key]">
 			<option value="default" <?php selected( $settings['template_key'], 'default' ); ?>>
-				<?php echo esc_html__( 'Default', 'maintenance-mode-studio' ); ?>
+				<?php echo esc_html__( 'Default', 'maneuvrez-maintenance-studio' ); ?>
 			</option>
 		</select>
-		<p class="description"><?php echo esc_html__( 'This release includes one polished default template.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'This release includes one polished default template.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -900,7 +900,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'primary_color',
 			'mmsm-primary-color',
-			__( 'Accent color used for buttons, focus accents, and status styling.', 'maintenance-mode-studio' )
+			__( 'Accent color used for buttons, focus accents, and status styling.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -913,7 +913,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'background_color',
 			'mmsm-background-color',
-			__( 'Page background color. Invalid values fall back to the theme default.', 'maintenance-mode-studio' )
+			__( 'Page background color. Invalid values fall back to the theme default.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -926,7 +926,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'surface_color',
 			'mmsm-surface-color',
-			__( 'Card and panel surface color.', 'maintenance-mode-studio' )
+			__( 'Card and panel surface color.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -939,7 +939,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'heading_text_color',
 			'mmsm-heading-text-color',
-			__( 'Main heading and section title color.', 'maintenance-mode-studio' )
+			__( 'Main heading and section title color.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -952,7 +952,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'body_text_color',
 			'mmsm-body-text-color',
-			__( 'Primary body copy color for messages and descriptions.', 'maintenance-mode-studio' )
+			__( 'Primary body copy color for messages and descriptions.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -965,7 +965,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'muted_text_color',
 			'mmsm-muted-text-color',
-			__( 'Secondary copy color for quieter supporting text.', 'maintenance-mode-studio' )
+			__( 'Secondary copy color for quieter supporting text.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -978,7 +978,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'link_text_color',
 			'mmsm-link-text-color',
-			__( 'Link and social label color.', 'maintenance-mode-studio' )
+			__( 'Link and social label color.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -991,7 +991,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'button_text_color',
 			'mmsm-button-text-color',
-			__( 'Text color shown on primary buttons.', 'maintenance-mode-studio' )
+			__( 'Text color shown on primary buttons.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1004,7 +1004,7 @@ class Admin {
 		$this->render_color_picker_input(
 			'border_color',
 			'mmsm-border-color',
-			__( 'Border color for cards, pills, and link chips.', 'maintenance-mode-studio' )
+			__( 'Border color for cards, pills, and link chips.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1017,7 +1017,7 @@ class Admin {
 		$this->render_text_input(
 			'hero_eyebrow',
 			'mmsm-hero-eyebrow',
-			__( 'Optional short label above the page title.', 'maintenance-mode-studio' )
+			__( 'Optional short label above the page title.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1030,7 +1030,7 @@ class Admin {
 		$this->render_text_input(
 			'primary_action_label',
 			'mmsm-primary-action-label',
-			__( 'Leave blank to hide the primary action, or pair it with a valid URL.', 'maintenance-mode-studio' )
+			__( 'Leave blank to hide the primary action, or pair it with a valid URL.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1043,7 +1043,7 @@ class Admin {
 		$this->render_url_input(
 			'primary_action_url',
 			'mmsm-primary-action-url',
-			__( 'Use a full public URL such as https://example.com/status.', 'maintenance-mode-studio' )
+			__( 'Use a full public URL such as https://example.com/status.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1056,7 +1056,7 @@ class Admin {
 		$this->render_text_input(
 			'secondary_action_label',
 			'mmsm-secondary-action-label',
-			__( 'Optional secondary action label.', 'maintenance-mode-studio' )
+			__( 'Optional secondary action label.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1069,7 +1069,7 @@ class Admin {
 		$this->render_url_input(
 			'secondary_action_url',
 			'mmsm-secondary-action-url',
-			__( 'Use a full public URL or leave blank.', 'maintenance-mode-studio' )
+			__( 'Use a full public URL or leave blank.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1082,7 +1082,7 @@ class Admin {
 		$this->render_text_input(
 			'status_label',
 			'mmsm-status-label',
-			__( 'Shown above the progress bar component.', 'maintenance-mode-studio' )
+			__( 'Shown above the progress bar component.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1102,9 +1102,9 @@ class Admin {
 				value="1"
 				<?php checked( 1, (int) $settings['show_progress'] ); ?>
 			/>
-			<?php echo esc_html__( 'Display the status progress bar.', 'maintenance-mode-studio' ); ?>
+			<?php echo esc_html__( 'Display the status progress bar.', 'maneuvrez-maintenance-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Turn this off if you only want the status text.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Turn this off if you only want the status text.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -1125,7 +1125,7 @@ class Admin {
 			max="100"
 			value="<?php echo esc_attr( (string) $settings['progress_value'] ); ?>"
 		/>
-		<p class="description"><?php echo esc_html__( 'A number between 0 and 100.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'A number between 0 and 100.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -1138,7 +1138,7 @@ class Admin {
 		$this->render_text_input(
 			'contact_label',
 			'mmsm-contact-label',
-			__( 'Short heading for the contact block.', 'maintenance-mode-studio' )
+			__( 'Short heading for the contact block.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1151,7 +1151,7 @@ class Admin {
 		$this->render_text_input(
 			'contact_message',
 			'mmsm-contact-message',
-			__( 'Explain when visitors should reach out.', 'maintenance-mode-studio' )
+			__( 'Explain when visitors should reach out.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1171,7 +1171,7 @@ class Admin {
 			value="<?php echo esc_attr( $settings['contact_email'] ); ?>"
 			placeholder="support@example.com"
 		/>
-		<p class="description"><?php echo esc_html__( 'Only valid email addresses are rendered publicly.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Only valid email addresses are rendered publicly.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -1184,7 +1184,7 @@ class Admin {
 		$this->render_text_input(
 			'login_label',
 			'mmsm-login-label',
-			__( 'Used when the login button is enabled.', 'maintenance-mode-studio' )
+			__( 'Used when the login button is enabled.', 'maneuvrez-maintenance-studio' )
 		);
 	}
 
@@ -1204,9 +1204,9 @@ class Admin {
 				value="1"
 				<?php checked( 1, (int) $settings['show_footer_section'] ); ?>
 			/>
-			<?php echo esc_html__( 'Render the footer panel under the main card.', 'maintenance-mode-studio' ); ?>
+			<?php echo esc_html__( 'Render the footer panel under the main card.', 'maneuvrez-maintenance-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Turn this off to hide the footer meta, social links, and login shortcut area.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Turn this off to hide the footer meta, social links, and login shortcut area.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -1226,9 +1226,9 @@ class Admin {
 				value="1"
 				<?php checked( true, $mmsm_remove_data_enabled ); ?>
 			/>
-			<?php echo esc_html__( 'Delete plugin settings when the plugin is removed.', 'maintenance-mode-studio' ); ?>
+			<?php echo esc_html__( 'Delete plugin settings when the plugin is removed.', 'maneuvrez-maintenance-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Leave this unchecked to keep your settings for a future reinstall. Check it only if you want uninstall to permanently remove plugin data.', 'maintenance-mode-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Leave this unchecked to keep your settings for a future reinstall. Check it only if you want uninstall to permanently remove plugin data.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -1255,12 +1255,12 @@ class Admin {
 				<?php endforeach; ?>
 			</div>
 			<p>
-				<button type="button" class="button button-secondary mmsm-add-social-item"><?php echo esc_html__( 'Add more', 'maintenance-mode-studio' ); ?></button>
+				<button type="button" class="button button-secondary mmsm-add-social-item"><?php echo esc_html__( 'Add more', 'maneuvrez-maintenance-studio' ); ?></button>
 			</p>
 			<script type="text/template" class="mmsm-social-item-template">
 				<?php $this->render_social_link_row( '__INDEX__', $default_item, $platforms ); ?>
 			</script>
-			<p class="description"><?php echo esc_html__( 'Known platforms use built-in labels. Choose Custom only when you need a custom name and uploaded image icon.', 'maintenance-mode-studio' ); ?></p>
+			<p class="description"><?php echo esc_html__( 'Known platforms use built-in labels. Choose Custom only when you need a custom name and uploaded image icon.', 'maneuvrez-maintenance-studio' ); ?></p>
 		</div>
 		<?php
 	}
@@ -1370,11 +1370,11 @@ class Admin {
 		?>
 		<div class="mmsm-social-item-group" data-social-item>
 			<div class="mmsm-social-item-toolbar">
-				<strong><?php echo esc_html__( 'Social item', 'maintenance-mode-studio' ); ?></strong>
-				<button type="button" class="button-link-delete mmsm-remove-social-item"><?php echo esc_html__( 'Remove', 'maintenance-mode-studio' ); ?></button>
+				<strong><?php echo esc_html__( 'Social item', 'maneuvrez-maintenance-studio' ); ?></strong>
+				<button type="button" class="button-link-delete mmsm-remove-social-item"><?php echo esc_html__( 'Remove', 'maneuvrez-maintenance-studio' ); ?></button>
 			</div>
 			<p>
-				<label><?php echo esc_html__( 'Platform', 'maintenance-mode-studio' ); ?></label><br />
+				<label><?php echo esc_html__( 'Platform', 'maneuvrez-maintenance-studio' ); ?></label><br />
 				<select
 					class="mmsm-social-platform-select"
 					name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][platform]"
@@ -1387,7 +1387,7 @@ class Admin {
 				</select>
 			</p>
 			<p>
-				<label><?php echo esc_html__( 'URL or Email', 'maintenance-mode-studio' ); ?></label><br />
+				<label><?php echo esc_html__( 'URL or Email', 'maneuvrez-maintenance-studio' ); ?></label><br />
 				<input
 					type="text"
 					class="regular-text code"
@@ -1398,7 +1398,7 @@ class Admin {
 			</p>
 			<div class="mmsm-social-custom-fields<?php echo $is_custom ? '' : ' is-hidden'; ?>" data-custom-fields>
 				<p>
-					<label><?php echo esc_html__( 'Custom Platform Name', 'maintenance-mode-studio' ); ?></label><br />
+					<label><?php echo esc_html__( 'Custom Platform Name', 'maneuvrez-maintenance-studio' ); ?></label><br />
 					<input
 						type="text"
 						class="regular-text"
@@ -1409,7 +1409,7 @@ class Admin {
 			</div>
 			<div class="mmsm-social-icon-picker">
 				<p>
-					<label><?php echo esc_html__( 'Icon Source', 'maintenance-mode-studio' ); ?></label><br />
+					<label><?php echo esc_html__( 'Icon Source', 'maneuvrez-maintenance-studio' ); ?></label><br />
 					<select
 						class="mmsm-social-icon-source-select"
 						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_source]"
@@ -1423,7 +1423,7 @@ class Admin {
 				</p>
 				<div class="mmsm-social-icon-library-fields<?php echo $is_library ? '' : ' is-hidden'; ?>" data-icon-library-fields>
 					<p>
-						<label><?php echo esc_html__( 'Icon Library', 'maintenance-mode-studio' ); ?></label><br />
+						<label><?php echo esc_html__( 'Icon Library', 'maneuvrez-maintenance-studio' ); ?></label><br />
 						<select
 							class="mmsm-social-icon-library-select"
 							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_library]"
@@ -1436,7 +1436,7 @@ class Admin {
 						</select>
 					</p>
 					<p>
-						<label><?php echo esc_html__( 'Library Icon', 'maintenance-mode-studio' ); ?></label><br />
+						<label><?php echo esc_html__( 'Library Icon', 'maneuvrez-maintenance-studio' ); ?></label><br />
 						<select
 							class="mmsm-social-icon-value-select"
 							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_value]"
@@ -1464,13 +1464,13 @@ class Admin {
 						/>
 					</div>
 					<p>
-						<button type="button" class="button mmsm-upload-social-icon"><?php echo esc_html__( 'Choose icon', 'maintenance-mode-studio' ); ?></button>
-						<button type="button" class="button-link-delete mmsm-remove-social-icon<?php echo 0 === $custom_icon_id ? ' is-hidden' : ''; ?>"><?php echo esc_html__( 'Remove icon', 'maintenance-mode-studio' ); ?></button>
+						<button type="button" class="button mmsm-upload-social-icon"><?php echo esc_html__( 'Choose icon', 'maneuvrez-maintenance-studio' ); ?></button>
+						<button type="button" class="button-link-delete mmsm-remove-social-icon<?php echo 0 === $custom_icon_id ? ' is-hidden' : ''; ?>"><?php echo esc_html__( 'Remove icon', 'maneuvrez-maintenance-studio' ); ?></button>
 					</p>
-					<p class="description"><?php echo esc_html__( 'Uploaded icons use the media library. PNG, JPG, and WEBP are accepted.', 'maintenance-mode-studio' ); ?></p>
+					<p class="description"><?php echo esc_html__( 'Uploaded icons use the media library. PNG, JPG, and WEBP are accepted.', 'maneuvrez-maintenance-studio' ); ?></p>
 				</div>
 				<p>
-					<label><?php echo esc_html__( 'Icon Color', 'maintenance-mode-studio' ); ?></label><br />
+					<label><?php echo esc_html__( 'Icon Color', 'maneuvrez-maintenance-studio' ); ?></label><br />
 					<input
 						type="text"
 						class="mmsm-color-picker mmsm-social-icon-color-picker"
@@ -1479,7 +1479,7 @@ class Admin {
 						data-default-color=""
 					/>
 				</p>
-				<p class="description"><?php echo esc_html__( 'Applies to built-in and library icons. Uploaded image icons keep their original colors.', 'maintenance-mode-studio' ); ?></p>
+				<p class="description"><?php echo esc_html__( 'Applies to built-in and library icons. Uploaded image icons keep their original colors.', 'maneuvrez-maintenance-studio' ); ?></p>
 			</div>
 			<p>
 				<label>
@@ -1489,7 +1489,7 @@ class Admin {
 						value="1"
 						<?php checked( $open_new_tab ); ?>
 					/>
-					<?php echo esc_html__( 'Open in a new tab when supported.', 'maintenance-mode-studio' ); ?>
+					<?php echo esc_html__( 'Open in a new tab when supported.', 'maneuvrez-maintenance-studio' ); ?>
 				</label>
 			</p>
 		</div>
@@ -1523,27 +1523,27 @@ class Admin {
 	private function get_tabs() {
 		return array(
 			'general'      => array(
-				'label'   => __( 'General', 'maintenance-mode-studio' ),
+				'label'   => __( 'General', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_general_section',
 			),
 			'template'     => array(
-				'label'   => __( 'Template', 'maintenance-mode-studio' ),
+				'label'   => __( 'Template', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_template_section',
 			),
 			'design'       => array(
-				'label'   => __( 'Design', 'maintenance-mode-studio' ),
+				'label'   => __( 'Design', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_design_section',
 			),
 			'components'   => array(
-				'label'   => __( 'Components', 'maintenance-mode-studio' ),
+				'label'   => __( 'Components', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_components_section',
 			),
 			'social_links' => array(
-				'label'   => __( 'Social Links', 'maintenance-mode-studio' ),
+				'label'   => __( 'Social Links', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_social_links_section',
 			),
 			'advanced'     => array(
-				'label'   => __( 'Advanced', 'maintenance-mode-studio' ),
+				'label'   => __( 'Advanced', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_advanced_section',
 			),
 		);
@@ -1608,7 +1608,7 @@ class Admin {
 					<?php do_settings_fields( $this->page_slug, $section_id ); ?>
 				</table>
 			<?php else : ?>
-				<p class="description"><?php echo esc_html__( 'No extra settings are available in this tab yet.', 'maintenance-mode-studio' ); ?></p>
+				<p class="description"><?php echo esc_html__( 'No extra settings are available in this tab yet.', 'maneuvrez-maintenance-studio' ); ?></p>
 			<?php endif; ?>
 		</div>
 		<?php
@@ -1688,14 +1688,14 @@ class Admin {
 	 */
 	private function get_uninstall_feedback_reasons() {
 		return array(
-			'no_longer_needed'      => __( 'I no longer need the plugin', 'maintenance-mode-studio' ),
-			'did_not_work'          => __( 'The plugin did not work as expected', 'maintenance-mode-studio' ),
-			'caused_issue'          => __( 'The plugin caused an issue on my site', 'maintenance-mode-studio' ),
-			'missing_features'      => __( 'The plugin is missing features I need', 'maintenance-mode-studio' ),
-			'too_difficult'         => __( 'The plugin is too difficult to use', 'maintenance-mode-studio' ),
-			'found_alternative'     => __( 'I found a better alternative', 'maintenance-mode-studio' ),
-			'troubleshooting'       => __( 'I am troubleshooting temporarily', 'maintenance-mode-studio' ),
-			'other'                 => __( 'Other', 'maintenance-mode-studio' ),
+			'no_longer_needed'      => __( 'I no longer need the plugin', 'maneuvrez-maintenance-studio' ),
+			'did_not_work'          => __( 'The plugin did not work as expected', 'maneuvrez-maintenance-studio' ),
+			'caused_issue'          => __( 'The plugin caused an issue on my site', 'maneuvrez-maintenance-studio' ),
+			'missing_features'      => __( 'The plugin is missing features I need', 'maneuvrez-maintenance-studio' ),
+			'too_difficult'         => __( 'The plugin is too difficult to use', 'maneuvrez-maintenance-studio' ),
+			'found_alternative'     => __( 'I found a better alternative', 'maneuvrez-maintenance-studio' ),
+			'troubleshooting'       => __( 'I am troubleshooting temporarily', 'maneuvrez-maintenance-studio' ),
+			'other'                 => __( 'Other', 'maneuvrez-maintenance-studio' ),
 		);
 	}
 

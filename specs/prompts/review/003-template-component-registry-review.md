@@ -17,13 +17,13 @@ Check all translation function calls.
 The text domain argument must be a literal string:
 
 ```php id="iibp1v"
-'maintenance-mode-studio'
+'maneuvrez-maintenance-studio'
 ```
 
 This is correct:
 
 ```php id="b7ywas"
-esc_html__( 'Settings saved.', 'maintenance-mode-studio' );
+esc_html__( 'Settings saved.', 'maneuvrez-maintenance-studio' );
 ```
 
 This is incorrect:

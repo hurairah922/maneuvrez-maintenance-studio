@@ -69,13 +69,13 @@ jQuery(document).ready(($) => {
 			if (!mediaFrame) {
 				mediaFrame = wp.media({
 					button: {
-						text: __('Use icon', 'maintenance-mode-studio'),
+						text: __('Use icon', 'maneuvrez-maintenance-studio'),
 					},
 					library: {
 						type: ['image'],
 					},
 					multiple: false,
-					title: __('Choose social icon', 'maintenance-mode-studio'),
+					title: __('Choose social icon', 'maneuvrez-maintenance-studio'),
 				});
 			}
 
@@ -85,7 +85,7 @@ jQuery(document).ready(($) => {
 				const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/webp'];
 
 				if (!allowedMimeTypes.includes(attachment.mime)) {
-					window.alert(__('Choose a PNG, JPG, or WEBP image.', 'maintenance-mode-studio'));
+					window.alert(__('Choose a PNG, JPG, or WEBP image.', 'maneuvrez-maintenance-studio'));
 					return;
 				}
 

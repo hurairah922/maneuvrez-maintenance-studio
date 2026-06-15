@@ -30,7 +30,7 @@ Verify that the plugin includes settings for:
 
 Confirm that:
 
-- settings use one option array named maintenance_mode_settings
+- settings use one option array named mmsm_maintenance_mode_settings
 - defaults exist for every setting
 - saved settings merge with defaults before use
 - missing keys do not break rendering

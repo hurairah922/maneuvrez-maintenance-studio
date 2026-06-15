@@ -2,7 +2,7 @@
 
 ## 1. Summary
 
-Phase 1 delivered the first working plugin shell for Maintenance Mode Studio.
+Phase 1 delivered the first working plugin shell for Maneuvrez Maintenance Studio.
 
 The completed implementation includes:
 
@@ -19,8 +19,8 @@ The completed implementation includes:
 ## 2. Implemented Files
 
 ```text
-maintenance-mode-studio/
-├── maintenance-mode-studio.php
+maneuvrez-maintenance-studio/
+├── maneuvrez-maintenance-studio.php
 ├── readme.txt
 ├── uninstall.php
 ├── composer.json

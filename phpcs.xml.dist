@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<ruleset name="Maintenance Mode Studio">
-	<description>WordPress Coding Standards for Maintenance Mode Studio.</description>
+<ruleset name="Maneuvrez Maintenance Studio">
+	<description>WordPress Coding Standards for Maneuvrez Maintenance Studio.</description>
 
-	<file>maintenance-mode-studio.php</file>
+	<file>maneuvrez-maintenance-studio.php</file>
 	<file>includes</file>
 	<file>public/templates</file>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>

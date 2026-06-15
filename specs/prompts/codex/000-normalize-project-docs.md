@@ -2,23 +2,23 @@
 
 ## Goal
 
-Normalize the Maintenance Mode Studio planning docs so all docs, specs, and prompts agree on one canonical project identity, Phase 1 scope, and folder structure before implementation starts.
+Normalize the Maneuvrez Maintenance Studio planning docs so all docs, specs, and prompts agree on one canonical project identity, Phase 1 scope, and folder structure before implementation starts.
 
 ## Project Constants
 
 Use these values everywhere:
 
-    Plugin name: Maintenance Mode Studio
-    Extended title: Maintenance Mode Studio - Coming Soon, Games, Forms and Interactive Pages
+    Plugin name: Maneuvrez Maintenance Studio
+    Extended title: Maneuvrez Maintenance Studio - Coming Soon, Games, Forms and Interactive Pages
     Publisher: Abu Hurarrah
     Publisher domain: https://abuhurarrah.com
     Creator credit: Abu Hurarrah
     Creator domain: https://abuhurarrah.com
     Contact email: hello@abuhurarrah.com
-    Slug: maintenance-mode-studio
+    Slug: maneuvrez-maintenance-studio
     Prefix: mmsm_
     PHP namespace: Maneuvrez\MaintenanceModeStudio
-    Text domain: maintenance-mode-studio
+    Text domain: maneuvrez-maintenance-studio
     REST namespace: mmsm/v1
     License: GPL-2.0-or-later
 
@@ -40,7 +40,7 @@ Update these files if needed:
 
 All docs and specs must agree that Phase 1 creates this structure:
 
-    maintenance-mode-studio.php
+    maneuvrez-maintenance-studio.php
     readme.txt
     uninstall.php
     composer.json

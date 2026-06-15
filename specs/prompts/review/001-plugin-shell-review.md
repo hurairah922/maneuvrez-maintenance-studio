@@ -2,13 +2,13 @@
 
 ## Goal
 
-Review the Phase 1 plugin shell implementation for Maintenance Mode Studio.
+Review the Phase 1 plugin shell implementation for Maneuvrez Maintenance Studio.
 
 ## Required Files To Review
 
 Review these files:
 
-    maintenance-mode-studio.php
+    maneuvrez-maintenance-studio.php
     readme.txt
     uninstall.php
     includes/Plugin.php
@@ -45,7 +45,7 @@ Check that:
 - The plugin deactivates without fatal errors.
 - The plugin uses namespace `Maneuvrez\MaintenanceModeStudio`.
 - The plugin uses prefix `mmsm_`.
-- The plugin uses text domain `maintenance-mode-studio`.
+- The plugin uses text domain `maneuvrez-maintenance-studio`.
 - Plugin constants are defined safely.
 - Activation and deactivation hooks are registered correctly.
 - The admin page loads only for users with the right capability.
