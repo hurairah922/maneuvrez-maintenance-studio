@@ -1,18 +1,6 @@
 <?php
 /**
  * Plugin Name: Maneuvrez Maintenance Studio
- * Description: Create a responsive maintenance or coming soon page with custom copy, colors, contact details, social links, login access, and administrator bypass.
- * Version: 1.0.0
- * Author: Abu Hurarrah
- * Author URI: https://abuhurarrah.maneuvrez.com
- * Text Domain: maneuvrez-maintenance-studio
- * Domain Path: /languages
- * License: GPL-2.0-or-later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- */
-
-/**
- * Plugin Name: Maneuvrez Maintenance Studio
  * Description: Create responsive maintenance pages, coming soon pages, launch screens, progress updates, and visitor access controls for WordPress.
  * Version: 1.0.0
  * Author: Maneuvrez

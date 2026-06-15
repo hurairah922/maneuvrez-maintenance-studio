@@ -57,3 +57,5 @@ Yes. The plugin keeps `wp-login.php`, REST, AJAX, cron, and WP-CLI requests acce
 * store uninstall feedback locally in WordPress and keep deactivation and deletion flows non-blocking
 * fix the uninstall preference sync so saving settings does not trigger recursive option updates
 * clean the release package for WordPress.org submission by excluding development-only files and unused assets
+* rename the plugin to Maneuvrez Maintenance Studio across the public branding and project docs
+* refresh the completed spec archive to reflect the current project shape
