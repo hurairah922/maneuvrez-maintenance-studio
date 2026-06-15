@@ -2,7 +2,7 @@
 
 ## Background
 
-Maintenance Mode Studio is close to WordPress.org submission, but it still needs a final cleanup pass to remove review risks and tighten the release package.
+Maneuvrez Maintenance Studio is close to WordPress.org submission, but it still needs a final cleanup pass to remove review risks and tighten the release package.
 
 This prompt exists to guide a safe submission-readiness pass without adding new features.
 
@@ -23,7 +23,7 @@ Do not introduce new product features or roadmap items.
 ## Files To Inspect
 
 ```text
-maintenance-mode-studio.php
+maneuvrez-maintenance-studio.php
 readme.txt
 README.md
 uninstall.php
@@ -41,7 +41,7 @@ specs/prompts/codex/003-wordpress-org-submission-readiness.md
 ## Files Likely To Change
 
 ```text
-maintenance-mode-studio.php
+maneuvrez-maintenance-studio.php
 readme.txt
 uninstall.php
 includes/Admin/Admin.php
@@ -116,7 +116,7 @@ future feature
 
 This applies to shipped files such as:
 
-* `maintenance-mode-studio.php`
+* `maneuvrez-maintenance-studio.php`
 * `readme.txt`
 * admin UI copy
 * frontend UI copy
@@ -138,7 +138,7 @@ Register script translations:
 ```php
 wp_set_script_translations(
 	'mmsm-admin-settings-script',
-	'maintenance-mode-studio'
+	'maneuvrez-maintenance-studio'
 );
 ```
 
@@ -151,9 +151,9 @@ const { __ } = wp.i18n;
 Localize strings such as:
 
 ```js
-__( 'Use icon', 'maintenance-mode-studio' )
-__( 'Choose social icon', 'maintenance-mode-studio' )
-__( 'Choose a PNG, JPG, or WEBP image.', 'maintenance-mode-studio' )
+__( 'Use icon', 'maneuvrez-maintenance-studio' )
+__( 'Choose social icon', 'maneuvrez-maintenance-studio' )
+__( 'Choose a PNG, JPG, or WEBP image.', 'maneuvrez-maintenance-studio' )
 ```
 
 ### 5. Remove SVG upload support for this release
@@ -236,7 +236,7 @@ find . -name '*.php' -print0 | xargs -0 -n1 php -l
 
 ```bash
 rg -n "image/svg\\+xml|Choose an SVG|Phase 1|Phase 2|Phase 3|games|surveys|feedback forms|private site|Plugin URI" \
-  maintenance-mode-studio.php readme.txt README.md includes admin build-zip.sh composer.json package.json
+  maneuvrez-maintenance-studio.php readme.txt README.md includes admin build-zip.sh composer.json package.json
 ```
 
 ```bash
@@ -244,7 +244,7 @@ bash build-zip.sh
 ```
 
 ```bash
-unzip -l ../maintenance-mode-studio.zip
+unzip -l ../maneuvrez-maintenance-studio.zip
 ```
 
 If a local WordPress install is available, also test the generated ZIP through the WordPress admin plugin upload screen before submission.

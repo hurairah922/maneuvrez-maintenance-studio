@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Maintenance Mode Studio
- * Description: Create a responsive maintenance or coming soon page with custom copy, colors, contact details, social links, login access, and administrator bypass.
+ * Plugin Name: Maneuvrez Maintenance Studio
+ * Description: Create responsive maintenance pages, coming soon pages, launch screens, progress updates, and visitor access controls for WordPress.
  * Version: 1.0.0
- * Author: Abu Hurarrah
- * Author URI: https://abuhurarrah.com
- * Text Domain: maintenance-mode-studio
+ * Author: Maneuvrez
+ * Author URI: https://maneuvrez.com
+ * Text Domain: maneuvrez-maintenance-studio
  * Domain Path: /languages
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -34,7 +34,7 @@ if ( ! defined( 'MMSM_PLUGIN_URL' ) ) {
 }
 
 if ( ! defined( 'MMSM_TEXT_DOMAIN' ) ) {
-	define( 'MMSM_TEXT_DOMAIN', 'maintenance-mode-studio' );
+	define( 'MMSM_TEXT_DOMAIN', 'maneuvrez-maintenance-studio' );
 }
 
 if ( ! defined( 'MMSM_SETTINGS_OPTION' ) ) {

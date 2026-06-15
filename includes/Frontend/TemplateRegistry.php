@@ -22,8 +22,8 @@ class TemplateRegistry {
 		return array(
 			'default' => array(
 				'key'         => 'default',
-				'name'        => __( 'Default', 'maintenance-mode-studio' ),
-				'description' => __( 'A polished maintenance page with reusable status, contact, social, and login sections.', 'maintenance-mode-studio' ),
+				'name'        => __( 'Default', 'maneuvrez-maintenance-studio' ),
+				'description' => __( 'A polished maintenance page with reusable status, contact, social, and login sections.', 'maneuvrez-maintenance-studio' ),
 				'file'        => MMSM_PLUGIN_PATH . 'templates/public/default.php',
 				'zones'       => array( 'main', 'footer' ),
 					'assets'      => array(

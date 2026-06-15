@@ -1,6 +1,6 @@
 <?php
 /**
- * Uninstall Maintenance Mode Studio.
+ * Uninstall Maneuvrez Maintenance Studio.
  *
  * @package MaintenanceModeStudio
  */

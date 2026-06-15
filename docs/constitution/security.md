@@ -1,4 +1,4 @@
-# Maintenance Mode Studio — Security Constitution
+# Maneuvrez Maintenance Studio — Security Constitution
 
 ## 1. Security Principle
 

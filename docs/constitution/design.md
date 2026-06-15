@@ -1,4 +1,4 @@
-# Maintenance Mode Studio — Design Constitution
+# Maneuvrez Maintenance Studio — Design Constitution
 
 ## 1. Design Direction
 

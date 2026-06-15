@@ -38,7 +38,7 @@ defined( 'ABSPATH' ) || exit;
 				<footer class="mmsm-panel mmsm-panel-footer">
 					<div class="mmsm-footer-meta">
 						<p class="mmsm-site-name"><?php echo esc_html( $context['site_name'] ); ?></p>
-						<p class="mmsm-site-copy"><?php echo esc_html__( 'Thanks for your patience while we fine-tune a few things.', 'maintenance-mode-studio' ); ?></p>
+						<p class="mmsm-site-copy"><?php echo esc_html__( 'Thanks for your patience while we fine-tune a few things.', 'maneuvrez-maintenance-studio' ); ?></p>
 					</div>
 					<?php echo $renderer->render_zone( 'footer', $settings, $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</footer>

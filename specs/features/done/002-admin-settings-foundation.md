@@ -17,7 +17,7 @@ The completed implementation includes:
 ## 2. Implemented Files
 
 ```text
-maintenance-mode-studio/
+maneuvrez-maintenance-studio/
 ├── admin/
 │   └── assets/
 │       └── admin.css
@@ -36,7 +36,7 @@ maintenance-mode-studio/
 │   │   └── public.js
 │   └── templates/
 │       └── default.php
-└── maintenance-mode-studio.php
+└── maneuvrez-maintenance-studio.php
 ```
 
 ## 3. Acceptance Status
