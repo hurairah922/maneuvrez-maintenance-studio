@@ -1,10 +1,10 @@
-# Maintenance Mode Studio — Product Constitution
+# Maneuvrez Maintenance Studio — Product Constitution
 
 ## 1. Product Identity
 
-**Product name:** Maintenance Mode Studio
+**Product name:** Maneuvrez Maintenance Studio
 
-**Extended listing title:** Maintenance Mode Studio — Coming Soon, Games, Forms & Interactive Pages
+**Extended listing title:** Maneuvrez Maintenance Studio — Coming Soon, Games, Forms & Interactive Pages
 
 **Publisher:** Abu Hurarrah
 
@@ -16,13 +16,13 @@
 
 **Primary contact email:** hello@abuhurarrah.com
 
-**WordPress.org slug target:** maintenance-mode-studio
+**WordPress.org slug target:** maneuvrez-maintenance-studio
 
 **Product category:** WordPress maintenance mode, coming soon, private site, interactive landing page, feedback collection, lead capture.
 
 ## 2. Product Promise
 
-Maintenance Mode Studio turns a closed, hidden, or unfinished WordPress site into a modern interactive landing page.
+Maneuvrez Maintenance Studio turns a closed, hidden, or unfinished WordPress site into a modern interactive landing page.
 
 Instead of showing a static maintenance message, the plugin lets visitors:
 

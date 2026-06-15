@@ -1,10 +1,10 @@
-# Maintenance Mode Studio
+# Maneuvrez Maintenance Studio
 
-Development notes for the Maintenance Mode Studio WordPress plugin.
+Development notes for the Maneuvrez Maintenance Studio WordPress plugin.
 
 ## Product Summary
 
-Maintenance Mode Studio helps WordPress site owners replace the default downtime screen with a polished maintenance or coming soon page.
+Maneuvrez Maintenance Studio helps WordPress site owners replace the default downtime screen with a polished maintenance or coming soon page.
 
 The current shipped plugin includes:
 
@@ -37,7 +37,7 @@ Email:
 
 Plugin slug:
 
-    maintenance-mode-studio
+    maneuvrez-maintenance-studio
 
 Prefix:
 
@@ -49,7 +49,7 @@ PHP namespace:
 
 Text domain:
 
-    maintenance-mode-studio
+    maneuvrez-maintenance-studio
 
 REST namespace:
 

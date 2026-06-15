@@ -1,4 +1,4 @@
-# Maintenance Mode Studio — Phase Roadmap
+# Maneuvrez Maintenance Studio — Phase Roadmap
 
 ## Phase 0 — Constitution and Active Spec
 

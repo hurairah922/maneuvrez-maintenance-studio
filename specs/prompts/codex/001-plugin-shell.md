@@ -8,17 +8,17 @@ Create or work on this branch:
 
 ## Goal
 
-Create the first working WordPress plugin shell for Maintenance Mode Studio.
+Create the first working WordPress plugin shell for Maneuvrez Maintenance Studio.
 
 ## Project Context
 
 Plugin:
 
-    Maintenance Mode Studio
+    Maneuvrez Maintenance Studio
 
 Extended title:
 
-    Maintenance Mode Studio - Coming Soon, Games, Forms and Interactive Pages
+    Maneuvrez Maintenance Studio - Coming Soon, Games, Forms and Interactive Pages
 
 Publisher:
 
@@ -42,7 +42,7 @@ Contact email:
 
 Plugin slug:
 
-    maintenance-mode-studio
+    maneuvrez-maintenance-studio
 
 Prefix:
 
@@ -54,7 +54,7 @@ PHP namespace:
 
 Text domain:
 
-    maintenance-mode-studio
+    maneuvrez-maintenance-studio
 
 REST namespace:
 
@@ -83,7 +83,7 @@ Create the first working plugin skeleton from scratch.
 
 Create these files:
 
-    maintenance-mode-studio.php
+    maneuvrez-maintenance-studio.php
     readme.txt
     uninstall.php
     includes/Plugin.php
@@ -108,7 +108,7 @@ The plugin must:
 - Deactivate without fatal errors.
 - Use namespace `Maneuvrez\MaintenanceModeStudio`.
 - Use prefix `mmsm_`.
-- Use text domain `maintenance-mode-studio`.
+- Use text domain `maneuvrez-maintenance-studio`.
 - Define constants for version, file, basename, path, URL, and text domain.
 - Register activation and deactivation hooks.
 - Load the text domain.
@@ -128,15 +128,15 @@ The plugin must:
 
 ## Plugin Header
 
-Use this header in `maintenance-mode-studio.php`:
+Use this header in `maneuvrez-maintenance-studio.php`:
 
-    Plugin Name: Maintenance Mode Studio
-    Plugin URI: https://abuhurarrah.com/plugins/maintenance-mode-studio
+    Plugin Name: Maneuvrez Maintenance Studio
+    Plugin URI: https://abuhurarrah.com/plugins/maneuvrez-maintenance-studio
     Description: Create interactive maintenance, coming soon, launch, and private site pages with games, forms, contact options, social links, login access, and modern responsive animations.
     Version: 0.1.0
     Author: Abu Hurarrah
     Author URI: https://abuhurarrah.com
-    Text Domain: maintenance-mode-studio
+    Text Domain: maneuvrez-maintenance-studio
     Domain Path: /languages
     License: GPL-2.0-or-later
     License URI: https://www.gnu.org/licenses/gpl-2.0.html

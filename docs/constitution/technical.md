@@ -1,18 +1,18 @@
-# Maintenance Mode Studio — Technical Constitution
+# Maneuvrez Maintenance Studio — Technical Constitution
 
 ## 1. Technical Identity
 
-**Plugin name:** Maintenance Mode Studio
+**Plugin name:** Maneuvrez Maintenance Studio
 
-**Slug:** maintenance-mode-studio
+**Slug:** maneuvrez-maintenance-studio
 
-**Text domain:** maintenance-mode-studio
+**Text domain:** maneuvrez-maintenance-studio
 
 **PHP namespace:** Maneuvrez\MaintenanceModeStudio
 
 **Primary prefix:** mmsm_
 
-**Reason for prefix:** Maneuvrez Maintenance Mode Studio.
+**Reason for prefix:** Maneuvrez Maneuvrez Maintenance Studio.
 
 The prefix must be used for:
 
@@ -81,8 +81,8 @@ Reason:
 Phase 1 must use one canonical plugin shell layout. Additional feature folders can be introduced later, but the first implementation milestone should start with this structure:
 
 ```text
-maintenance-mode-studio/
-├── maintenance-mode-studio.php
+maneuvrez-maintenance-studio/
+├── maneuvrez-maintenance-studio.php
 ├── readme.txt
 ├── uninstall.php
 ├── composer.json

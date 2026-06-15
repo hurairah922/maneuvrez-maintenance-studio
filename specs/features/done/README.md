@@ -1,6 +1,6 @@
 # Done Feature Specs
 
-This directory stores completed implementation specs for Maintenance Mode Studio.
+This directory stores completed implementation specs for Maneuvrez Maintenance Studio.
 
 ## Rules
 

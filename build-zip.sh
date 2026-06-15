@@ -50,7 +50,7 @@ echo "${ZIP_PATH}"
 
 echo ""
 echo "Checking excluded files..."
-unzip -l "${ZIP_PATH}" | grep -E "(README\.md|\.git|\.github|phpcs\.xml|phpunit\.xml|specs/|tests/|docs/|tools/|src/|node_modules|vendor/|package\.json|composer\.json|build-zip\.sh|maintenance-mode-studio/public/)" && {
+unzip -l "${ZIP_PATH}" | grep -E "(README\.md|\.git|\.github|phpcs\.xml|phpunit\.xml|specs/|tests/|docs/|tools/|src/|node_modules|vendor/|package\.json|composer\.json|build-zip\.sh|maneuvrez-maintenance-studio/public/)" && {
   echo ""
   echo "Warning: excluded files still found in ZIP."
   exit 1

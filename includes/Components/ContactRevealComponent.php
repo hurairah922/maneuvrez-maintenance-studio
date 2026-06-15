@@ -24,7 +24,7 @@ class ContactRevealComponent implements ComponentInterface {
 	 * {@inheritDoc}
 	 */
 	public function get_label() {
-		return __( 'Contact reveal', 'maintenance-mode-studio' );
+		return __( 'Contact reveal', 'maneuvrez-maintenance-studio' );
 	}
 
 	/**
@@ -41,21 +41,21 @@ class ContactRevealComponent implements ComponentInterface {
 		return array(
 			array(
 				'key'      => 'contact_label',
-				'label'    => __( 'Contact label', 'maintenance-mode-studio' ),
+				'label'    => __( 'Contact label', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'text',
 				'default'  => 'Need help?',
 				'required' => false,
 			),
 			array(
 				'key'      => 'contact_message',
-				'label'    => __( 'Contact message', 'maintenance-mode-studio' ),
+				'label'    => __( 'Contact message', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'text',
 				'default'  => 'Contact us for urgent requests.',
 				'required' => false,
 			),
 			array(
 				'key'      => 'contact_email',
-				'label'    => __( 'Contact email', 'maintenance-mode-studio' ),
+				'label'    => __( 'Contact email', 'maneuvrez-maintenance-studio' ),
 				'type'     => 'email',
 				'default'  => '',
 				'required' => false,

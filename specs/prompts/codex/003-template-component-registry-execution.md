@@ -25,13 +25,13 @@ MMSM_TEXT_DOMAIN
 with:
 
 ```php id="bjeeqh"
-'maintenance-mode-studio'
+'maneuvrez-maintenance-studio'
 ```
 
 Correct example:
 
 ```php id="ikh6vn"
-esc_html__( 'Settings saved.', 'maintenance-mode-studio' )
+esc_html__( 'Settings saved.', 'maneuvrez-maintenance-studio' )
 ```
 
 Incorrect example:
@@ -81,7 +81,7 @@ Important:
 * Only change the text domain argument in i18n functions.
 * Do not replace unrelated safe uses of `MMSM_TEXT_DOMAIN` unless needed.
 * Do not change the actual plugin text domain.
-* Use exactly `'maintenance-mode-studio'`.
+* Use exactly `'maneuvrez-maintenance-studio'`.
 
 ## 2. Fix Domain Path Warning
 
