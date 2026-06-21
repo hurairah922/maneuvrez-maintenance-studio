@@ -15,7 +15,7 @@ The completed update includes:
 
 ```text
 maneuvrez-maintenance-studio/
-├── maintenance-mode-studio.php
+├── maneuvrez-maintenance-studio.php
 ├── README.md
 ├── readme.txt
 ├── composer.json
@@ -41,7 +41,7 @@ Reviewed against:
 - current branch tip `update/plugin-display-name`
 - `README.md`
 - `readme.txt`
-- `maintenance-mode-studio.php`
+- `maneuvrez-maintenance-studio.php`
 - `specs/features/done/README.md`
 
 Completed result:

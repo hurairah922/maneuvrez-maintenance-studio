@@ -36,6 +36,7 @@ zip -r "${ZIP_NAME}" "${PLUGIN_DIR}" \
   -x "${PLUGIN_DIR}/specs/*" \
   -x "${PLUGIN_DIR}/docs/*" \
   -x "${PLUGIN_DIR}/tools/*" \
+  -x "${PLUGIN_DIR}/media/*" \
   -x "${PLUGIN_DIR}/src/*" \
   -x "${PLUGIN_DIR}/public/*" \
   -x "${PLUGIN_DIR}/README.md" \
