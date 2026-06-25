@@ -3,8 +3,8 @@ Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page, admin bypass, social links
 Requires at least: 6.4
 Tested up to: 7.0
-Requires PHP: 8.0
 Stable tag: 1.0.0
+Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
