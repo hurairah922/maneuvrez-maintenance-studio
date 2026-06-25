@@ -7,6 +7,7 @@
 
 namespace Maneuvrez\MaintenanceModeStudio\Frontend;
 
+use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 
 defined( 'ABSPATH' ) || exit;
@@ -56,7 +57,7 @@ class MaintenanceRouter {
 	public function maybe_render_maintenance_page() {
 		$settings = $this->get_settings();
 
-		if ( ! $this->is_enabled( $settings ) || $this->should_bypass() ) {
+		if ( ! $this->is_enabled( $settings ) || $this->should_bypass( $settings ) ) {
 			return;
 		}
 
@@ -87,7 +88,7 @@ class MaintenanceRouter {
 	 *
 	 * @return bool
 	 */
-	private function should_bypass() {
+	private function should_bypass( array $settings ) {
 		if ( is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
 			return true;
 		}
@@ -106,7 +107,66 @@ class MaintenanceRouter {
 
 		global $pagenow;
 
-		return 'wp-login.php' === $pagenow;
+		if ( 'wp-login.php' === $pagenow ) {
+			return true;
+		}
+
+		if ( $this->matches_query_bypass( $settings ) ) {
+			return true;
+		}
+
+		return $this->matches_public_bypass_url( $settings );
+	}
+
+	/**
+	 * Determine whether the current request matches the configured preview query.
+	 *
+	 * @param array<string,mixed> $settings Sanitized settings.
+	 * @return bool
+	 */
+	private function matches_query_bypass( array $settings ) {
+		if ( empty( $settings['bypass_query_enabled'] ) ) {
+			return false;
+		}
+
+		$key   = isset( $settings['bypass_query_key'] ) ? (string) $settings['bypass_query_key'] : '';
+		$value = isset( $settings['bypass_query_value'] ) ? (string) $settings['bypass_query_value'] : '';
+
+		if ( '' === $key || '' === $value || ! isset( $_GET[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query bypass check for request routing.
+			return false;
+		}
+
+		if ( ! is_scalar( $_GET[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query bypass check for request routing.
+			return false;
+		}
+
+		return (string) wp_unslash( $_GET[ $key ] ) === $value; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query bypass check for request routing.
+	}
+
+	/**
+	 * Determine whether the current request path is publicly allowlisted.
+	 *
+	 * @param array<string,mixed> $settings Sanitized settings.
+	 * @return bool
+	 */
+	private function matches_public_bypass_url( array $settings ) {
+		if ( empty( $settings['bypass_urls_enabled'] ) ) {
+			return false;
+		}
+
+		$allowlist = isset( $settings['bypass_urls'] ) && is_array( $settings['bypass_urls'] ) ? $settings['bypass_urls'] : array();
+
+		if ( empty( $allowlist ) ) {
+			return false;
+		}
+
+		$current_path = $this->get_current_request_path();
+
+		if ( '' === $current_path ) {
+			return false;
+		}
+
+		return in_array( $current_path, $allowlist, true );
 	}
 
 	/**
@@ -129,6 +189,29 @@ class MaintenanceRouter {
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
 		return '' !== $request_uri && false !== strpos( $request_uri, '/' . $rest_prefix );
+	}
+
+	/**
+	 * Normalize the current request path for allowlist comparison.
+	 *
+	 * @return string
+	 */
+	private function get_current_request_path() {
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only path inspection for allowlist routing.
+			? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+			: '';
+
+		if ( '' === $request_uri ) {
+			return '';
+		}
+
+		$request_path = wp_parse_url( $request_uri, PHP_URL_PATH );
+
+		if ( ! is_string( $request_path ) || '' === $request_path ) {
+			$request_path = '/';
+		}
+
+		return Sanitizer::normalize_bypass_path( $request_path );
 	}
 
 	/**

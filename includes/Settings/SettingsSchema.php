@@ -158,6 +158,26 @@ class SettingsSchema {
 				'type'    => 'checkbox',
 				'default' => 1,
 			),
+			'bypass_query_enabled'   => array(
+				'type'    => 'checkbox',
+				'default' => 0,
+			),
+			'bypass_query_key'       => array(
+				'type'    => 'text',
+				'default' => 'mmsm_preview',
+			),
+			'bypass_query_value'     => array(
+				'type'    => 'text',
+				'default' => '',
+			),
+			'bypass_urls_enabled'    => array(
+				'type'    => 'checkbox',
+				'default' => 0,
+			),
+			'bypass_urls'            => array(
+				'type'    => 'array',
+				'default' => array(),
+			),
 			'delete_data_on_uninstall' => array(
 				'type'    => 'checkbox',
 				'default' => 0,

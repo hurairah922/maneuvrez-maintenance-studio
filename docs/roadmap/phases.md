@@ -120,27 +120,7 @@ Exit criteria:
 - admin can export CSV
 - spam basics are active
 
-## Phase 5 — Games and Leaderboard
-
-Goal: add the first interactive game.
-
-Build:
-
-- Reaction Challenge game module
-- progressive difficulty
-- scoring rules
-- local leaderboard
-- admin leaderboard toggle
-- admin score view/clear controls
-- optional user info capture after game
-
-Exit criteria:
-
-- game works on desktop and mobile
-- leaderboard can be enabled/disabled
-- score submissions are rate-limited
-
-## Phase 6 — Visual Preview and Drag Zones
+## Phase 5 — Visual Preview and Drag Zones
 
 Goal: make admin page configuration visual.
 
@@ -159,7 +139,7 @@ Exit criteria:
 - preview reflects settings
 - saved layout renders on frontend
 
-## Phase 7 — Access Rules and Bypass Links
+## Phase 6 — Access Rules and Bypass Links
 
 Goal: expand access controls and visitor bypass behavior safely.
 
@@ -176,7 +156,7 @@ Exit criteria:
 - bypass flows remain safe and revocable
 - admins can manage access rules without confusion
 
-## Phase 8 — Polish, QA, and WordPress.org Release
+## Phase 7 — Polish, QA, and WordPress.org Release
 
 Goal: polish the product and prepare the public release package.
 

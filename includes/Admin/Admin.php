@@ -374,6 +374,38 @@ class Admin {
 		);
 
 		add_settings_field(
+			'mmsm_bypass_query_enabled',
+			__( 'Testing Bypass', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_bypass_query_enabled_field' ),
+			$this->page_slug,
+			'mmsm_advanced_section'
+		);
+
+		add_settings_field(
+			'mmsm_bypass_query_settings',
+			__( 'Query Parameter', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_bypass_query_settings_field' ),
+			$this->page_slug,
+			'mmsm_advanced_section'
+		);
+
+		add_settings_field(
+			'mmsm_bypass_urls_enabled',
+			__( 'Public URL Allowlist', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_bypass_urls_enabled_field' ),
+			$this->page_slug,
+			'mmsm_advanced_section'
+		);
+
+		add_settings_field(
+			'mmsm_bypass_urls',
+			__( 'Allowlist URLs', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_bypass_urls_field' ),
+			$this->page_slug,
+			'mmsm_advanced_section'
+		);
+
+		add_settings_field(
 			'mmsm_delete_data_on_uninstall',
 			__( 'Data Removal on Uninstall', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_delete_data_on_uninstall_field' ),
@@ -747,7 +779,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_advanced_section() {
-		echo '<p>' . esc_html__( 'Control optional access, login affordances, and uninstall cleanup without affecting administrator bypass behavior.', 'maneuvrez-maintenance-studio' ) . '</p>';
+		echo '<p>' . esc_html__( 'Control optional testing bypasses, login affordances, and uninstall cleanup without affecting administrator bypass behavior.', 'maneuvrez-maintenance-studio' ) . '</p>';
 	}
 
 	/**
@@ -1211,6 +1243,119 @@ class Admin {
 	}
 
 	/**
+	 * Render the query-parameter bypass toggle.
+	 *
+	 * @return void
+	 */
+	public function render_bypass_query_enabled_field() {
+		$settings = $this->get_settings();
+		?>
+		<label for="mmsm-bypass-query-enabled">
+			<input
+				type="checkbox"
+				id="mmsm-bypass-query-enabled"
+				name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[bypass_query_enabled]"
+				value="1"
+				<?php checked( 1, (int) $settings['bypass_query_enabled'] ); ?>
+			/>
+			<?php echo esc_html__( 'Allow one-request frontend previews with an exact query key and value.', 'maneuvrez-maintenance-studio' ); ?>
+		</label>
+		<p class="description"><?php echo esc_html__( 'This is a lightweight testing bypass only. It does not create sessions or persistent visitor access.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render the query-parameter bypass settings row and preview.
+	 *
+	 * @return void
+	 */
+	public function render_bypass_query_settings_field() {
+		$settings    = $this->get_settings();
+		$home_url    = home_url( '/' );
+		$key         = isset( $settings['bypass_query_key'] ) ? (string) $settings['bypass_query_key'] : '';
+		$value       = isset( $settings['bypass_query_value'] ) ? (string) $settings['bypass_query_value'] : '';
+		$preview_url = $this->get_bypass_query_preview_url( $key, $value );
+		?>
+		<div class="mmsm-bypass-query-builder" data-home-url="<?php echo esc_url( $home_url ); ?>">
+			<div class="mmsm-bypass-query-row">
+				<input
+					type="text"
+					class="regular-text code mmsm-bypass-query-base"
+					value="<?php echo esc_attr( $home_url ); ?>"
+					readonly
+				/>
+				<input
+					type="text"
+					class="small-text code mmsm-bypass-query-key"
+					id="mmsm-bypass-query-key"
+					name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[bypass_query_key]"
+					value="<?php echo esc_attr( $key ); ?>"
+					placeholder="mmsm_preview"
+					spellcheck="false"
+				/>
+				<input
+					type="text"
+					class="regular-text code mmsm-bypass-query-value"
+					id="mmsm-bypass-query-value"
+					name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[bypass_query_value]"
+					value="<?php echo esc_attr( $value ); ?>"
+					placeholder="abc123"
+					spellcheck="false"
+				/>
+				<button type="button" class="button button-secondary mmsm-generate-bypass-query"><?php echo esc_html__( 'Generate', 'maneuvrez-maintenance-studio' ); ?></button>
+			</div>
+			<p class="description"><?php echo esc_html__( 'Use letters, numbers, underscores, and hyphens only. Append this query string to any frontend URL to preview the real page while maintenance mode is active.', 'maneuvrez-maintenance-studio' ); ?></p>
+			<p class="mmsm-bypass-query-preview-wrap">
+				<strong><?php echo esc_html__( 'Homepage preview:', 'maneuvrez-maintenance-studio' ); ?></strong>
+				<code class="mmsm-bypass-query-preview"><?php echo esc_html( $preview_url ); ?></code>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the public allowlist toggle.
+	 *
+	 * @return void
+	 */
+	public function render_bypass_urls_enabled_field() {
+		$settings = $this->get_settings();
+		?>
+		<label for="mmsm-bypass-urls-enabled">
+			<input
+				type="checkbox"
+				id="mmsm-bypass-urls-enabled"
+				name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[bypass_urls_enabled]"
+				value="1"
+				<?php checked( 1, (int) $settings['bypass_urls_enabled'] ); ?>
+			/>
+			<?php echo esc_html__( 'Allow selected public frontend URLs to bypass maintenance mode for everyone.', 'maneuvrez-maintenance-studio' ); ?>
+		</label>
+		<p class="description"><?php echo esc_html__( 'Use this only for exact public pages that should remain visible while the rest of the site stays in maintenance mode.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render the public allowlist textarea.
+	 *
+	 * @return void
+	 */
+	public function render_bypass_urls_field() {
+		$settings    = $this->get_settings();
+		$bypass_urls = isset( $settings['bypass_urls'] ) && is_array( $settings['bypass_urls'] ) ? $settings['bypass_urls'] : array();
+		?>
+		<textarea
+			class="large-text code"
+			rows="6"
+			id="mmsm-bypass-urls"
+			name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[bypass_urls]"
+			placeholder="/about/&#10;/contact/&#10;<?php echo esc_attr( home_url( '/status/' ) ); ?>"
+		><?php echo esc_textarea( implode( "\n", $bypass_urls ) ); ?></textarea>
+		<p class="description"><?php echo esc_html__( 'Enter one same-site URL or site-relative path per line. These URLs are public and will bypass maintenance mode for everyone. Use exact frontend paths only.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
 	 * Render the uninstall cleanup preference field.
 	 *
 	 * @return void
@@ -1516,6 +1661,28 @@ class Admin {
 	}
 
 	/**
+	 * Build the homepage preview URL for the bypass query UI.
+	 *
+	 * @param string $key Sanitized query key.
+	 * @param string $value Sanitized query value.
+	 * @return string
+	 */
+	private function get_bypass_query_preview_url( $key, $value ) {
+		$home_url = home_url( '/' );
+
+		if ( '' === $key ) {
+			return $home_url;
+		}
+
+		return (string) add_query_arg(
+			array(
+				$key => $value,
+			),
+			$home_url
+		);
+	}
+
+	/**
 	 * Return available settings tabs.
 	 *
 	 * @return array<string,array<string,string>>
@@ -1796,6 +1963,11 @@ class Admin {
 			'advanced'     => array(
 				'show_login_button',
 				'show_footer_section',
+				'bypass_query_enabled',
+				'bypass_query_key',
+				'bypass_query_value',
+				'bypass_urls_enabled',
+				'bypass_urls',
 				'delete_data_on_uninstall',
 				'login_label',
 			),
