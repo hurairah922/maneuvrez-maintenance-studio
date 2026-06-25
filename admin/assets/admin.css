@@ -32,6 +32,52 @@
 	max-width: 120px;
 }
 
+.mmsm-settings-page .mmsm-bypass-query-builder {
+	max-width: 860px;
+}
+
+.mmsm-settings-page .mmsm-bypass-query-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 8px;
+}
+
+.mmsm-settings-page .mmsm-bypass-query-base,
+.mmsm-settings-page .mmsm-bypass-query-key,
+.mmsm-settings-page .mmsm-bypass-query-value {
+	font-family: Consolas, Monaco, monospace;
+}
+
+.mmsm-settings-page .mmsm-bypass-query-base {
+	flex: 1 1 240px;
+	background: #f6f7f7;
+}
+
+.mmsm-settings-page .mmsm-bypass-query-key {
+	flex: 0 1 150px;
+	min-width: 130px;
+}
+
+.mmsm-settings-page .mmsm-bypass-query-value {
+	flex: 1 1 220px;
+	min-width: 180px;
+}
+
+.mmsm-settings-page .mmsm-bypass-query-preview-wrap {
+	margin-top: 10px;
+}
+
+.mmsm-settings-page .mmsm-bypass-query-preview {
+	display: inline-block;
+	margin-top: 4px;
+	padding: 6px 8px;
+	border-radius: 6px;
+	background: #f6f7f7;
+	word-break: break-all;
+}
+
 .mmsm-settings-page .mmsm-social-item-group {
 	max-width: 520px;
 	margin-bottom: 16px;
@@ -162,6 +208,17 @@
 }
 
 @media (max-width: 600px) {
+	.mmsm-settings-page .mmsm-bypass-query-row {
+		align-items: stretch;
+	}
+
+	.mmsm-settings-page .mmsm-bypass-query-base,
+	.mmsm-settings-page .mmsm-bypass-query-key,
+	.mmsm-settings-page .mmsm-bypass-query-value,
+	.mmsm-settings-page .mmsm-generate-bypass-query {
+		flex: 1 1 100%;
+	}
+
 	.mmsm-uninstall-feedback-dialog {
 		padding: 20px;
 	}

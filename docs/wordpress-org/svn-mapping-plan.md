@@ -15,7 +15,7 @@ svn-root/
 ├── trunk/
 │   └── plugin files
 └── tags/
-    └── 1.0.0/
+    └── 1.0.1/
         └── plugin files
 ```
 
@@ -51,9 +51,9 @@ These are the releasable plugin files confirmed by the packaging pass.
 | `languages/` | `trunk/languages/` |
 | `templates/` | `trunk/templates/` |
 
-### SVN `/tags/1.0.0`
+### SVN `/tags/1.0.1`
 
-`tags/1.0.0/` should match the contents of `trunk/` for the 1.0.0 release snapshot.
+`tags/1.0.1/` should match the contents of `trunk/` for the 1.0.1 release snapshot.
 
 ## Files That Must Stay Out Of The Plugin Package
 
@@ -89,7 +89,7 @@ These should not go into SVN `trunk/` or the release ZIP.
 
 - Plugin slug and text domain: `maneuvrez-maintenance-studio`
 - Main plugin file: `maneuvrez-maintenance-studio.php`
-- Stable tag: `1.0.0`
+- Stable tag: `1.0.1`
 - Author branding kept as `Maneuvrez` for now
 
 ## Pre-SVN Checklist
@@ -100,7 +100,7 @@ These should not go into SVN `trunk/` or the release ZIP.
 - Build and inspect a clean release ZIP before copying files into SVN `trunk/`.
 - Copy plugin runtime files into `trunk/`, not the whole repo root.
 - Copy only the five required listing assets into SVN `/assets`.
-- Create `tags/1.0.0/` only after `trunk/` is final for that release.
+- Create `tags/1.0.1/` only after `trunk/` is final for that release.
 
 ## Safe Local Commands
 

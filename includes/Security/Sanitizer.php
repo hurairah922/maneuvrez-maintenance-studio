@@ -55,6 +55,8 @@ class Sanitizer {
 		$settings['show_footer_section'] = ! empty( $input['show_footer_section'] ) ? 1 : 0;
 		$settings['show_progress']       = ! empty( $input['show_progress'] ) ? 1 : 0;
 		$settings['show_login_button']   = ! empty( $input['show_login_button'] ) ? 1 : 0;
+		$settings['bypass_query_enabled'] = ! empty( $input['bypass_query_enabled'] ) ? 1 : 0;
+		$settings['bypass_urls_enabled']  = ! empty( $input['bypass_urls_enabled'] ) ? 1 : 0;
 		$settings['delete_data_on_uninstall'] = ! empty( $input['delete_data_on_uninstall'] ) ? 1 : 0;
 
 		$settings['mode_type']    = self::sanitize_choice( $input, 'mode_type', array( 'maintenance', 'coming_soon' ), $defaults );
@@ -70,6 +72,8 @@ class Sanitizer {
 		$settings['contact_message']        = self::sanitize_text( $input, 'contact_message', $defaults );
 		$settings['status_label']           = self::sanitize_text( $input, 'status_label', $defaults );
 		$settings['login_label']            = self::sanitize_text( $input, 'login_label', $defaults );
+		$settings['bypass_query_key']       = self::sanitize_bypass_query_key( isset( $input['bypass_query_key'] ) ? $input['bypass_query_key'] : $defaults['bypass_query_key'] );
+		$settings['bypass_query_value']     = self::sanitize_bypass_query_value( isset( $input['bypass_query_value'] ) ? $input['bypass_query_value'] : $defaults['bypass_query_value'] );
 
 		$settings['primary_action_url']   = self::sanitize_url( $input, 'primary_action_url' );
 		$settings['secondary_action_url'] = self::sanitize_url( $input, 'secondary_action_url' );
@@ -95,10 +99,141 @@ class Sanitizer {
 
 		$progress_value = isset( $input['progress_value'] ) ? (int) $input['progress_value'] : (int) $defaults['progress_value'];
 		$settings['progress_value'] = max( 0, min( 100, $progress_value ) );
+		$settings['bypass_urls']    = self::sanitize_bypass_urls( isset( $input['bypass_urls'] ) ? $input['bypass_urls'] : $defaults['bypass_urls'] );
 
 		$settings = self::sanitize_social_items( $input, $settings, $defaults );
 
 		return $settings;
+	}
+
+	/**
+	 * Sanitize a temporary bypass query key.
+	 *
+	 * @param mixed $value Raw setting value.
+	 * @return string
+	 */
+	public static function sanitize_bypass_query_key( $value ) {
+		$value = trim( sanitize_text_field( (string) $value ) );
+		$value = preg_replace( '/[^A-Za-z0-9_-]/', '', $value );
+
+		if ( ! is_string( $value ) ) {
+			return '';
+		}
+
+		return substr( $value, 0, 60 );
+	}
+
+	/**
+	 * Sanitize a temporary bypass query value.
+	 *
+	 * @param mixed $value Raw setting value.
+	 * @return string
+	 */
+	public static function sanitize_bypass_query_value( $value ) {
+		$value = trim( sanitize_text_field( (string) $value ) );
+		$value = preg_replace( '/[^A-Za-z0-9_-]/', '', $value );
+
+		if ( ! is_string( $value ) ) {
+			return '';
+		}
+
+		return substr( $value, 0, 128 );
+	}
+
+	/**
+	 * Sanitize public maintenance bypass paths.
+	 *
+	 * @param mixed $value Raw textarea or array payload.
+	 * @return array<int,string>
+	 */
+	public static function sanitize_bypass_urls( $value ) {
+		if ( is_array( $value ) ) {
+			$entries = $value;
+		} else {
+			$entries = preg_split( '/\r\n|\r|\n/', (string) $value );
+		}
+
+		if ( ! is_array( $entries ) ) {
+			return array();
+		}
+
+		$normalized = array();
+
+		foreach ( $entries as $entry ) {
+			$path = self::normalize_bypass_url_entry( (string) $entry );
+
+			if ( '' === $path ) {
+				continue;
+			}
+
+			$normalized[ $path ] = true;
+		}
+
+		return array_keys( $normalized );
+	}
+
+	/**
+	 * Normalize a configured bypass URL or path into a canonical path.
+	 *
+	 * @param string $entry Raw URL or path entry.
+	 * @return string
+	 */
+	public static function normalize_bypass_url_entry( $entry ) {
+		$entry = trim( sanitize_text_field( $entry ) );
+
+		if ( '' === $entry || false !== strpos( $entry, '*' ) ) {
+			return '';
+		}
+
+		$path = '';
+
+		if ( preg_match( '#^[a-z][a-z0-9+.-]*://#i', $entry ) ) {
+			$entry_parts = wp_parse_url( $entry );
+
+			if ( ! is_array( $entry_parts ) || ! self::is_same_site_bypass_url( $entry_parts ) ) {
+				return '';
+			}
+
+			$path = isset( $entry_parts['path'] ) ? (string) $entry_parts['path'] : '/';
+		} elseif ( 0 === strpos( $entry, '/' ) ) {
+			$entry_parts = wp_parse_url( $entry );
+			$path        = is_array( $entry_parts ) && isset( $entry_parts['path'] ) ? (string) $entry_parts['path'] : $entry;
+		} else {
+			return '';
+		}
+
+		return self::normalize_bypass_path( $path );
+	}
+
+	/**
+	 * Normalize a request path for exact bypass comparisons.
+	 *
+	 * @param string $path Raw request path.
+	 * @return string
+	 */
+	public static function normalize_bypass_path( $path ) {
+		$path = trim( sanitize_text_field( $path ) );
+
+		if ( '' === $path ) {
+			return '';
+		}
+
+		$path_parts = wp_parse_url( $path );
+		$path       = is_array( $path_parts ) && isset( $path_parts['path'] ) ? (string) $path_parts['path'] : $path;
+		$path       = preg_replace( '#/+#', '/', $path );
+
+		if ( ! is_string( $path ) || '' === $path ) {
+			return '';
+		}
+
+		$path = '/' . ltrim( $path, '/' );
+		$path = '/' === $path ? $path : untrailingslashit( $path );
+
+		if ( self::is_disallowed_bypass_path( $path ) ) {
+			return '';
+		}
+
+		return $path;
 	}
 
 	/**
@@ -188,6 +323,49 @@ class Sanitizer {
 		}
 
 		return $color;
+	}
+
+	/**
+	 * Determine whether an absolute bypass URL belongs to the current site.
+	 *
+	 * @param array<string,mixed> $entry_parts Parsed URL parts.
+	 * @return bool
+	 */
+	private static function is_same_site_bypass_url( array $entry_parts ) {
+		$home_parts = wp_parse_url( home_url( '/' ) );
+
+		if ( ! is_array( $home_parts ) || empty( $entry_parts['host'] ) || empty( $home_parts['host'] ) ) {
+			return false;
+		}
+
+		if ( strtolower( (string) $entry_parts['host'] ) !== strtolower( (string) $home_parts['host'] ) ) {
+			return false;
+		}
+
+		$entry_port = isset( $entry_parts['port'] ) ? (int) $entry_parts['port'] : 0;
+		$home_port  = isset( $home_parts['port'] ) ? (int) $home_parts['port'] : 0;
+
+		return 0 === $entry_port || 0 === $home_port || $entry_port === $home_port;
+	}
+
+	/**
+	 * Block non-frontend routes from being stored as public bypass paths.
+	 *
+	 * @param string $path Normalized path.
+	 * @return bool
+	 */
+	private static function is_disallowed_bypass_path( $path ) {
+		$rest_base = '/' . trim( rest_get_url_prefix(), '/' );
+
+		if ( '/wp-login.php' === $path || '/wp-signup.php' === $path || '/wp-activate.php' === $path || '/wp-cron.php' === $path || '/xmlrpc.php' === $path ) {
+			return true;
+		}
+
+		if ( 0 === strpos( $path, '/wp-admin' ) || $path === $rest_base || 0 === strpos( $path, $rest_base . '/' ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

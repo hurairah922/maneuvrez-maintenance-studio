@@ -3,7 +3,7 @@ Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page, admin bypass, social links
 Requires at least: 6.4
 Tested up to: 7.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -40,6 +40,13 @@ No. Logged-in administrators keep normal access to the site.
 Yes. The plugin keeps `wp-login.php`, REST, AJAX, cron, and WP-CLI requests accessible.
 
 == Changelog ==
+
+= 1.0.1 =
+
+* add an optional query-parameter maintenance bypass for temporary frontend testing
+* add a public URL allowlist so exact frontend paths can stay visible during maintenance mode
+* add a compact Advanced-tab bypass UI with a random generator and live homepage preview
+* sanitize bypass keys, values, and allowlist paths while rejecting external or protected routes
 
 = 1.0.0 =
 
