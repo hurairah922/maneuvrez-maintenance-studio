@@ -3,12 +3,12 @@ Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page, admin bypass, social links
 Requires at least: 6.4
 Tested up to: 7.0
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Create a responsive maintenance or coming soon page with custom copy, colors, contact details, social links, login access, and administrator bypass.
+Create a responsive maintenance or coming soon page with custom copy, colors, contact details, social links, login access, testing bypasses, optional hidden login routing, and administrator bypass.
 
 == Description ==
 
@@ -19,7 +19,7 @@ This release includes:
 * custom page title and message settings
 * maintenance mode and coming soon mode
 * customizable colors for the default template
-* contact details, social links, and login access controls
+* contact details, social links, login access controls, optional testing bypasses, and an optional custom login URL
 * administrator bypass behavior
 * a responsive default public template
 
@@ -37,9 +37,21 @@ No. Logged-in administrators keep normal access to the site.
 
 = Are login and API requests still available? =
 
-Yes. The plugin keeps `wp-login.php`, REST, AJAX, cron, and WP-CLI requests accessible.
+Yes. REST, AJAX, cron, and WP-CLI requests remain accessible. You can optionally move the public login screen to a custom URL, and the plugin keeps required logout and password-recovery flows working.
+
+= What should I do before enabling a custom login URL? =
+
+Save the generated login URL somewhere safe first. If you lose it, disable the plugin through FTP or WP-CLI to restore the default WordPress login entry points.
 
 == Changelog ==
+
+= 1.0.2 =
+
+* add an optional custom public login URL that loads the real WordPress login screen from a saved slug
+* hide direct `wp-login.php` and `/wp-admin/` login entry points from logged-out visitors while preserving required logout and password-recovery flows
+* add Advanced-tab controls, preview messaging, and slug sanitization rules for the custom login feature
+* render blocked `/wp-admin/` requests through the active theme's frontend 404 template with the required block styles
+* fix custom login routing warnings by loading the real WordPress login flow with the expected core login globals
 
 = 1.0.1 =
 

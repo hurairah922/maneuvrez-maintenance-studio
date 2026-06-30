@@ -4,7 +4,7 @@
 
 	<file>maneuvrez-maintenance-studio.php</file>
 	<file>includes</file>
-	<file>public/templates</file>
+	<file>templates/public</file>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 

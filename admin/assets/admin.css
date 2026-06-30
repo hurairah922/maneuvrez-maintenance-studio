@@ -28,6 +28,10 @@
 	margin-top: 0.75rem;
 }
 
+.mmsm-settings-page .form-table tr.is-hidden {
+	display: none;
+}
+
 .mmsm-settings-page .mmsm-color-picker {
 	max-width: 120px;
 }

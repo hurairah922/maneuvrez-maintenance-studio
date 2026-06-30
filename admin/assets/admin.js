@@ -90,6 +90,75 @@ jQuery(document).ready(($) => {
 
 	initializeBypassPreview();
 
+	const initializeAdvancedVisibility = () => {
+		const toggleRow = (selector, isVisible) => {
+			$(selector).toggleClass('is-hidden', !isVisible).attr('aria-hidden', isVisible ? 'false' : 'true');
+		};
+
+		const customLoginToggle = $('#mmsm-custom-login-enabled');
+		const bypassQueryToggle = $('#mmsm-bypass-query-enabled');
+		const bypassUrlsToggle = $('#mmsm-bypass-urls-enabled');
+
+		const updateVisibility = () => {
+			toggleRow('.mmsm-custom-login-dependent', customLoginToggle.prop('checked'));
+			toggleRow('.mmsm-bypass-query-dependent', bypassQueryToggle.prop('checked'));
+			toggleRow('.mmsm-bypass-urls-dependent', bypassUrlsToggle.prop('checked'));
+		};
+
+		customLoginToggle.on('change', updateVisibility);
+		bypassQueryToggle.on('change', updateVisibility);
+		bypassUrlsToggle.on('change', updateVisibility);
+
+		updateVisibility();
+	};
+
+	const initializeCustomLoginPreview = () => {
+		const slugField = $('#mmsm-custom-login-slug');
+		const preview = $('.mmsm-custom-login-preview');
+
+		if (!slugField.length || !preview.length) {
+			return;
+		}
+
+		const homeUrl = String(slugField.data('homeUrl') || '');
+
+		const sanitizeSlug = (value) => String(value || '')
+			.trim()
+			.replace(/^\/+|\/+$/g, '')
+			.toLowerCase()
+			.replace(/['’]/g, '')
+			.replace(/[^a-z0-9\s_-]/g, '')
+			.trim()
+			.replace(/[\s_]+/g, '-')
+			.replace(/-+/g, '-')
+			.replace(/^-+|-+$/g, '')
+			.slice(0, 60);
+
+		const buildPreviewUrl = () => {
+			const slug = sanitizeSlug(slugField.val()) || 'secure-admin';
+
+			try {
+				const url = new URL(homeUrl);
+				url.search = '';
+				url.hash = '';
+				url.pathname = `${url.pathname.replace(/\/+$/, '')}/${slug}/`;
+				return url.toString();
+			} catch (error) {
+				return `${homeUrl.replace(/\/+$/, '')}/${encodeURIComponent(slug)}/`;
+			}
+		};
+
+		const updatePreview = () => {
+			preview.text(buildPreviewUrl());
+		};
+
+		slugField.on('input', updatePreview);
+		updatePreview();
+	};
+
+	initializeAdvancedVisibility();
+	initializeCustomLoginPreview();
+
 	const builder = $('.mmsm-social-links-builder');
 
 	if (builder.length) {

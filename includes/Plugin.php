@@ -12,6 +12,7 @@ use Maneuvrez\MaintenanceModeStudio\Components\ComponentRegistry;
 use Maneuvrez\MaintenanceModeStudio\Frontend\MaintenanceRouter;
 use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRegistry;
 use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRenderer;
+use Maneuvrez\MaintenanceModeStudio\Security\LoginUrlManager;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 
@@ -36,6 +37,13 @@ class Plugin {
 	private $router;
 
 	/**
+	 * Login URL manager.
+	 *
+	 * @var LoginUrlManager
+	 */
+	private $login_url_manager;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -44,8 +52,9 @@ class Plugin {
 		$component_registry  = new ComponentRegistry();
 		$renderer            = new TemplateRenderer( $template_registry, $component_registry, $settings_repository );
 
-		$this->admin  = new Admin( $settings_repository );
-		$this->router = new MaintenanceRouter( $renderer, $settings_repository );
+		$this->admin             = new Admin( $settings_repository );
+		$this->router            = new MaintenanceRouter( $renderer, $settings_repository );
+		$this->login_url_manager = new LoginUrlManager( $settings_repository );
 	}
 
 	/**
@@ -57,6 +66,7 @@ class Plugin {
 		$this->maybe_seed_settings();
 
 		$this->admin->register();
+		$this->login_url_manager->register();
 		$this->router->register();
 	}
 

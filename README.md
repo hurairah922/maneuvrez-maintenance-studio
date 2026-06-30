@@ -14,6 +14,8 @@ The current shipped plugin includes:
 - Contact details
 - Social links
 - Login access
+- Optional query-parameter and public URL maintenance bypasses
+- Optional custom login URL routing
 - Administrator bypass
 - Responsive default template
 
