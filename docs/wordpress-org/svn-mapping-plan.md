@@ -112,4 +112,14 @@ find media -maxdepth 1 -type f -printf '%f\t%s bytes\n' | sort
 file media/*
 bash build-zip.sh
 unzip -l ../maneuvrez-maintenance-studio.zip
+npm run release:svn
+```
+
+`npm run release:svn` copies the approved runtime files into the local WordPress.org SVN checkout at `/home/hurairah/work/wordpress/svn/maneuvrez-maintenance-studio`, creates the matching `tags/1.0.2/` working-copy snapshot, refreshes listing assets from `media/` when present, and stops before commit. After it finishes, continue from the SVN checkout with:
+
+```bash
+cd /home/hurairah/work/wordpress/svn/maneuvrez-maintenance-studio
+svn status
+svn diff
+svn commit -m "Release 1.0.2"
 ```

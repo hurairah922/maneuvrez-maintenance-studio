@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "build": "wp-scripts build",
-    "start": "wp-scripts start"
+    "start": "wp-scripts start",
+    "release:svn": "bash tools/prepare-svn-release.sh"
   },
   "devDependencies": {
     "@wordpress/scripts": "^30.8.1"
