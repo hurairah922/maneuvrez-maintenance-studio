@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Maneuvrez Maintenance Studio
  * Description: Create responsive maintenance pages, coming soon pages, launch screens, progress updates, and visitor access controls for WordPress.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Maneuvrez
  * Author URI: https://maneuvrez.com
  * Text Domain: maneuvrez-maintenance-studio
@@ -14,7 +14,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'MMSM_VERSION' ) ) {
-	define( 'MMSM_VERSION', '1.0.1' );
+	define( 'MMSM_VERSION', '1.0.2' );
 }
 
 if ( ! defined( 'MMSM_PLUGIN_FILE' ) ) {
@@ -61,6 +61,7 @@ require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsSchema.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsRepository.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Support/Escaper.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Security/Sanitizer.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Security/LoginUrlManager.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/ComponentInterface.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/HeroComponent.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/SocialLinksComponent.php';

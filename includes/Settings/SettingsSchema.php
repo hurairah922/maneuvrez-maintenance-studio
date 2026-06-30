@@ -158,6 +158,19 @@ class SettingsSchema {
 				'type'    => 'checkbox',
 				'default' => 1,
 			),
+			'custom_login_enabled'    => array(
+				'type'    => 'checkbox',
+				'default' => 0,
+			),
+			'custom_login_slug'       => array(
+				'type'    => 'text',
+				'default' => '',
+			),
+			'custom_login_block_mode' => array(
+				'type'    => 'select',
+				'default' => '404',
+				'choices' => array( '404', 'redirect' ),
+			),
 			'bypass_query_enabled'   => array(
 				'type'    => 'checkbox',
 				'default' => 0,

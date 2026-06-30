@@ -374,6 +374,36 @@ class Admin {
 		);
 
 		add_settings_field(
+			'mmsm_custom_login_enabled',
+			__( 'Enable Custom Login URL', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_custom_login_enabled_field' ),
+			$this->page_slug,
+			'mmsm_advanced_section'
+		);
+
+		add_settings_field(
+			'mmsm_custom_login_slug',
+			__( 'Custom Login Slug', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_custom_login_slug_field' ),
+			$this->page_slug,
+			'mmsm_advanced_section',
+			array(
+				'class' => 'mmsm-custom-login-dependent',
+			)
+		);
+
+		add_settings_field(
+			'mmsm_custom_login_block_mode',
+			__( 'Default Admin Routes', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_custom_login_block_mode_field' ),
+			$this->page_slug,
+			'mmsm_advanced_section',
+			array(
+				'class' => 'mmsm-custom-login-dependent',
+			)
+		);
+
+		add_settings_field(
 			'mmsm_bypass_query_enabled',
 			__( 'Testing Bypass', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_bypass_query_enabled_field' ),
@@ -386,7 +416,10 @@ class Admin {
 			__( 'Query Parameter', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_bypass_query_settings_field' ),
 			$this->page_slug,
-			'mmsm_advanced_section'
+			'mmsm_advanced_section',
+			array(
+				'class' => 'mmsm-bypass-query-dependent',
+			)
 		);
 
 		add_settings_field(
@@ -402,7 +435,10 @@ class Admin {
 			__( 'Allowlist URLs', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_bypass_urls_field' ),
 			$this->page_slug,
-			'mmsm_advanced_section'
+			'mmsm_advanced_section',
+			array(
+				'class' => 'mmsm-bypass-urls-dependent',
+			)
 		);
 
 		add_settings_field(
@@ -779,7 +815,7 @@ class Admin {
 	 * @return void
 	 */
 	public function render_advanced_section() {
-		echo '<p>' . esc_html__( 'Control optional testing bypasses, login affordances, and uninstall cleanup without affecting administrator bypass behavior.', 'maneuvrez-maintenance-studio' ) . '</p>';
+		echo '<p>' . esc_html__( 'Control optional login-entry protection, testing bypasses, and uninstall cleanup without affecting administrator bypass behavior.', 'maneuvrez-maintenance-studio' ) . '</p>';
 	}
 
 	/**
@@ -1243,6 +1279,74 @@ class Admin {
 	}
 
 	/**
+	 * Render the custom login toggle.
+	 *
+	 * @return void
+	 */
+	public function render_custom_login_enabled_field() {
+		$settings = $this->get_settings();
+		?>
+		<label for="mmsm-custom-login-enabled">
+			<input
+				type="checkbox"
+				id="mmsm-custom-login-enabled"
+				name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[custom_login_enabled]"
+				value="1"
+				<?php checked( 1, (int) $settings['custom_login_enabled'] ); ?>
+			/>
+			<?php echo esc_html__( 'Serve the WordPress login screen from a custom public URL.', 'maneuvrez-maintenance-studio' ); ?>
+		</label>
+		<p class="description"><?php echo esc_html__( 'When enabled with a valid slug, logged-out visitors will no longer see the default wp-login.php or wp-admin login entry points.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render the custom login slug field and preview.
+	 *
+	 * @return void
+	 */
+	public function render_custom_login_slug_field() {
+		$settings    = $this->get_settings();
+		$slug        = isset( $settings['custom_login_slug'] ) ? (string) $settings['custom_login_slug'] : '';
+		$preview_url = $this->get_custom_login_preview_url( $slug );
+		?>
+		<input
+			type="text"
+			class="regular-text code"
+			id="mmsm-custom-login-slug"
+			name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[custom_login_slug]"
+			value="<?php echo esc_attr( $slug ); ?>"
+			placeholder="secure-admin"
+			data-home-url="<?php echo esc_url( home_url( '/' ) ); ?>"
+			spellcheck="false"
+		/>
+		<p class="description"><?php echo esc_html__( 'Use 2 to 60 lowercase letters, numbers, or hyphens. Slashes are removed automatically and reserved WordPress paths are rejected.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<p class="description">
+			<strong><?php echo esc_html__( 'Preview URL:', 'maneuvrez-maintenance-studio' ); ?></strong>
+			<code class="mmsm-custom-login-preview"><?php echo esc_html( $preview_url ); ?></code>
+		</p>
+		<p class="description"><?php echo esc_html__( 'Save this URL before enabling. If you forget it, disable the plugin via FTP or WP-CLI.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render the default admin route behavior field.
+	 *
+	 * @return void
+	 */
+	public function render_custom_login_block_mode_field() {
+		$settings = $this->get_settings();
+		$mode     = isset( $settings['custom_login_block_mode'] ) ? (string) $settings['custom_login_block_mode'] : '404';
+		?>
+		<select id="mmsm-custom-login-block-mode" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[custom_login_block_mode]">
+			<option value="404" <?php selected( $mode, '404' ); ?>><?php echo esc_html__( 'Show site 404 page', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="redirect" <?php selected( $mode, 'redirect' ); ?>><?php echo esc_html__( 'Redirect to custom login URL', 'maneuvrez-maintenance-studio' ); ?></option>
+		</select>
+		<p class="description"><?php echo esc_html__( 'Controls logged-out visits to /wp-admin, /wp-admin/, and /wp-admin/index.php while the custom login URL is active.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
 	 * Render the query-parameter bypass toggle.
 	 *
 	 * @return void
@@ -1683,6 +1787,22 @@ class Admin {
 	}
 
 	/**
+	 * Return a preview URL for the current custom login slug value.
+	 *
+	 * @param string $slug Raw or sanitized slug.
+	 * @return string
+	 */
+	private function get_custom_login_preview_url( $slug ) {
+		$slug = Sanitizer::sanitize_custom_login_slug( $slug );
+
+		if ( '' === $slug ) {
+			return home_url( '/secure-admin/' );
+		}
+
+		return home_url( '/' . trailingslashit( $slug ) );
+	}
+
+	/**
 	 * Return available settings tabs.
 	 *
 	 * @return array<string,array<string,string>>
@@ -1963,6 +2083,9 @@ class Admin {
 			'advanced'     => array(
 				'show_login_button',
 				'show_footer_section',
+				'custom_login_enabled',
+				'custom_login_slug',
+				'custom_login_block_mode',
 				'bypass_query_enabled',
 				'bypass_query_key',
 				'bypass_query_value',

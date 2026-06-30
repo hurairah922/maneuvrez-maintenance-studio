@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+# set -euo pipefail
 
 PLUGIN_DIR="$(basename "$PWD")"
 ZIP_NAME="${PLUGIN_DIR}.zip"

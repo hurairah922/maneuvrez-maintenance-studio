@@ -55,6 +55,7 @@ class Sanitizer {
 		$settings['show_footer_section'] = ! empty( $input['show_footer_section'] ) ? 1 : 0;
 		$settings['show_progress']       = ! empty( $input['show_progress'] ) ? 1 : 0;
 		$settings['show_login_button']   = ! empty( $input['show_login_button'] ) ? 1 : 0;
+		$settings['custom_login_enabled'] = ! empty( $input['custom_login_enabled'] ) ? 1 : 0;
 		$settings['bypass_query_enabled'] = ! empty( $input['bypass_query_enabled'] ) ? 1 : 0;
 		$settings['bypass_urls_enabled']  = ! empty( $input['bypass_urls_enabled'] ) ? 1 : 0;
 		$settings['delete_data_on_uninstall'] = ! empty( $input['delete_data_on_uninstall'] ) ? 1 : 0;
@@ -62,6 +63,7 @@ class Sanitizer {
 		$settings['mode_type']    = self::sanitize_choice( $input, 'mode_type', array( 'maintenance', 'coming_soon' ), $defaults );
 		$settings['template_key'] = self::sanitize_choice( $input, 'template_key', array( 'default' ), $defaults );
 		$settings['theme_mode']   = self::sanitize_choice( $input, 'theme_mode', array( 'light', 'dark', 'system' ), $defaults );
+		$settings['custom_login_block_mode'] = self::sanitize_choice( $input, 'custom_login_block_mode', array( '404', 'redirect' ), $defaults );
 
 		$settings['page_title']             = self::sanitize_text( $input, 'page_title', $defaults );
 		$settings['message']                = self::sanitize_textarea( $input, 'message', $defaults );
@@ -72,6 +74,7 @@ class Sanitizer {
 		$settings['contact_message']        = self::sanitize_text( $input, 'contact_message', $defaults );
 		$settings['status_label']           = self::sanitize_text( $input, 'status_label', $defaults );
 		$settings['login_label']            = self::sanitize_text( $input, 'login_label', $defaults );
+		$settings['custom_login_slug']      = self::sanitize_custom_login_slug( isset( $input['custom_login_slug'] ) ? $input['custom_login_slug'] : $defaults['custom_login_slug'] );
 		$settings['bypass_query_key']       = self::sanitize_bypass_query_key( isset( $input['bypass_query_key'] ) ? $input['bypass_query_key'] : $defaults['bypass_query_key'] );
 		$settings['bypass_query_value']     = self::sanitize_bypass_query_value( isset( $input['bypass_query_value'] ) ? $input['bypass_query_value'] : $defaults['bypass_query_value'] );
 
@@ -138,6 +141,37 @@ class Sanitizer {
 		}
 
 		return substr( $value, 0, 128 );
+	}
+
+	/**
+	 * Sanitize a custom public login slug.
+	 *
+	 * @param mixed $value Raw setting value.
+	 * @return string
+	 */
+	public static function sanitize_custom_login_slug( $value ) {
+		$slug = trim( sanitize_text_field( (string) $value ) );
+		$slug = trim( $slug, '/' );
+
+		if ( '' === $slug ) {
+			return '';
+		}
+
+		$slug = sanitize_title( $slug );
+
+		if ( ! is_string( $slug ) || '' === $slug ) {
+			return '';
+		}
+
+		if ( strlen( $slug ) < 2 || strlen( $slug ) > 60 ) {
+			return '';
+		}
+
+		if ( in_array( $slug, self::get_reserved_custom_login_slugs(), true ) ) {
+			return '';
+		}
+
+		return $slug;
 	}
 
 	/**
@@ -323,6 +357,27 @@ class Sanitizer {
 		}
 
 		return $color;
+	}
+
+	/**
+	 * Return reserved slugs that must never become the public login path.
+	 *
+	 * @return array<int,string>
+	 */
+	private static function get_reserved_custom_login_slugs() {
+		return array(
+			'wp-admin',
+			'wp-login',
+			'wp-login.php',
+			'wp-json',
+			'wp-content',
+			'wp-includes',
+			'xmlrpc.php',
+			'wp-cron.php',
+			'admin',
+			'login',
+			'dashboard',
+		);
 	}
 
 	/**
