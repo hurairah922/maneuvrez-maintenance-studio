@@ -2,9 +2,9 @@
 /**
  * Plugin Name: Maneuvrez Maintenance Studio
  * Description: Create responsive maintenance pages, coming soon pages, launch screens, progress updates, and visitor access controls for WordPress.
- * Version: 1.0.2
- * Author: Maneuvrez
- * Author URI: https://maneuvrez.com
+ * Version: 1.1.1
+ * Author: Abu Hurarrah
+ * Author URI: https://abuhurarrah.com
  * Text Domain: maneuvrez-maintenance-studio
  * Domain Path: /languages
  * License: GPL-2.0-or-later
@@ -14,7 +14,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'MMSM_VERSION' ) ) {
-	define( 'MMSM_VERSION', '1.0.2' );
+	define( 'MMSM_VERSION', '1.1.1' );
 }
 
 if ( ! defined( 'MMSM_PLUGIN_FILE' ) ) {
@@ -60,10 +60,12 @@ if ( ! defined( 'MMSM_UNINSTALL_FEEDBACK_OPTION' ) ) {
 require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsSchema.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsRepository.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Support/Escaper.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Support/ContactChannels.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Security/Sanitizer.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Security/LoginUrlManager.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/ComponentInterface.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/HeroComponent.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Components/ContactChannelsComponent.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/SocialLinksComponent.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/ContactRevealComponent.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/LoginComponent.php';
@@ -72,6 +74,7 @@ require_once MMSM_PLUGIN_PATH . 'includes/Components/ComponentRegistry.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Admin/Admin.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Frontend/TemplateRegistry.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Frontend/TemplateRenderer.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Frontend/ContactChannelsRenderer.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Frontend/MaintenanceRouter.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Activator.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Deactivator.php';

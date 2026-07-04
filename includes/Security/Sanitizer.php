@@ -9,6 +9,7 @@ namespace Maneuvrez\MaintenanceModeStudio\Security;
 
 use Maneuvrez\MaintenanceModeStudio\Components\SocialLinksComponent;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsSchema;
+use Maneuvrez\MaintenanceModeStudio\Support\ContactChannels;
 use Maneuvrez\MaintenanceModeStudio\Support\Escaper;
 
 defined( 'ABSPATH' ) || exit;
@@ -59,11 +60,21 @@ class Sanitizer {
 		$settings['bypass_query_enabled'] = ! empty( $input['bypass_query_enabled'] ) ? 1 : 0;
 		$settings['bypass_urls_enabled']  = ! empty( $input['bypass_urls_enabled'] ) ? 1 : 0;
 		$settings['delete_data_on_uninstall'] = ! empty( $input['delete_data_on_uninstall'] ) ? 1 : 0;
+		$settings['contact_channels_enabled'] = ! empty( $input['contact_channels_enabled'] ) ? 1 : 0;
 
 		$settings['mode_type']    = self::sanitize_choice( $input, 'mode_type', array( 'maintenance', 'coming_soon' ), $defaults );
 		$settings['template_key'] = self::sanitize_choice( $input, 'template_key', array( 'default' ), $defaults );
 		$settings['theme_mode']   = self::sanitize_choice( $input, 'theme_mode', array( 'light', 'dark', 'system' ), $defaults );
 		$settings['custom_login_block_mode'] = self::sanitize_choice( $input, 'custom_login_block_mode', array( '404', 'redirect' ), $defaults );
+		$settings['contact_channels_maintenance_display'] = self::sanitize_choice( $input, 'contact_channels_maintenance_display', array( 'off', 'inside', 'floating', 'both' ), $defaults );
+		$settings['contact_channels_live_display'] = self::sanitize_choice( $input, 'contact_channels_live_display', array( 'off', 'floating' ), $defaults );
+		$settings['contact_channels_logged_in_visibility'] = self::sanitize_choice( $input, 'contact_channels_logged_in_visibility', array( 'show_all', 'hide_admins', 'hide_logged_in' ), $defaults );
+		$settings['contact_channels_display_style'] = self::sanitize_choice( $input, 'contact_channels_display_style', array( 'auto', 'row', 'reveal' ), $defaults );
+		$settings['contact_channels_position'] = self::sanitize_choice( $input, 'contact_channels_position', array( 'bottom_right', 'bottom_left', 'top_right', 'top_left' ), $defaults );
+		$settings['contact_channels_button_shape'] = self::sanitize_choice( $input, 'contact_channels_button_shape', array( 'rounded', 'pill', 'circle', 'square' ), $defaults );
+		$settings['contact_channels_button_display'] = self::sanitize_choice( $input, 'contact_channels_button_display', array( 'icon_label', 'icon_only', 'label_only' ), $defaults );
+		$settings['contact_channels_color_mode'] = self::sanitize_choice( $input, 'contact_channels_color_mode', array( 'theme', 'brand', 'custom' ), $defaults );
+		$settings['social_links_display'] = self::sanitize_choice( $input, 'social_links_display', array( 'icon_label', 'icon_only' ), $defaults );
 
 		$settings['page_title']             = self::sanitize_text( $input, 'page_title', $defaults );
 		$settings['message']                = self::sanitize_textarea( $input, 'message', $defaults );
@@ -72,6 +83,9 @@ class Sanitizer {
 		$settings['secondary_action_label'] = self::sanitize_text( $input, 'secondary_action_label', $defaults, false );
 		$settings['contact_label']          = self::sanitize_text( $input, 'contact_label', $defaults );
 		$settings['contact_message']        = self::sanitize_text( $input, 'contact_message', $defaults );
+		$settings['contact_channels_heading'] = self::sanitize_text( $input, 'contact_channels_heading', $defaults );
+		$settings['contact_channels_description'] = self::sanitize_text( $input, 'contact_channels_description', $defaults );
+		$settings['contact_channels_primary_label'] = self::sanitize_text( $input, 'contact_channels_primary_label', $defaults );
 		$settings['status_label']           = self::sanitize_text( $input, 'status_label', $defaults );
 		$settings['login_label']            = self::sanitize_text( $input, 'login_label', $defaults );
 		$settings['custom_login_slug']      = self::sanitize_custom_login_slug( isset( $input['custom_login_slug'] ) ? $input['custom_login_slug'] : $defaults['custom_login_slug'] );
@@ -99,10 +113,16 @@ class Sanitizer {
 		$settings['link_text_color']    = self::sanitize_hex_color_setting( $input, 'link_text_color', $defaults );
 		$settings['button_text_color']  = self::sanitize_hex_color_setting( $input, 'button_text_color', $defaults );
 		$settings['border_color']       = self::sanitize_hex_color_setting( $input, 'border_color', $defaults );
+		$settings['contact_channels_background_color'] = self::sanitize_optional_hex_color_setting( $input, 'contact_channels_background_color' );
+		$settings['contact_channels_text_color'] = self::sanitize_optional_hex_color_setting( $input, 'contact_channels_text_color' );
+		$settings['contact_channels_icon_color'] = self::sanitize_optional_hex_color_setting( $input, 'contact_channels_icon_color' );
+		$settings['contact_channels_hover_background_color'] = self::sanitize_optional_hex_color_setting( $input, 'contact_channels_hover_background_color' );
+		$settings['contact_channels_hover_text_color'] = self::sanitize_optional_hex_color_setting( $input, 'contact_channels_hover_text_color' );
 
 		$progress_value = isset( $input['progress_value'] ) ? (int) $input['progress_value'] : (int) $defaults['progress_value'];
 		$settings['progress_value'] = max( 0, min( 100, $progress_value ) );
 		$settings['bypass_urls']    = self::sanitize_bypass_urls( isset( $input['bypass_urls'] ) ? $input['bypass_urls'] : $defaults['bypass_urls'] );
+		$settings['contact_channels_items'] = self::sanitize_contact_channels_items( isset( $input['contact_channels_items'] ) ? $input['contact_channels_items'] : $defaults['contact_channels_items'] );
 
 		$settings = self::sanitize_social_items( $input, $settings, $defaults );
 
@@ -357,6 +377,129 @@ class Sanitizer {
 		}
 
 		return $color;
+	}
+
+	/**
+	 * Sanitize an optional hex color field.
+	 *
+	 * @param array<string,mixed> $input Submitted settings.
+	 * @param string              $key Field key.
+	 * @return string
+	 */
+	private static function sanitize_optional_hex_color_setting( array $input, $key ) {
+		$color = isset( $input[ $key ] ) ? sanitize_hex_color( $input[ $key ] ) : '';
+
+		return empty( $color ) ? '' : $color;
+	}
+
+	/**
+	 * Sanitize Contact Channels repeater rows.
+	 *
+	 * @param mixed $value Raw repeater payload.
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function sanitize_contact_channels_items( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$allowed_types   = array_keys( ContactChannels::get_channel_type_labels() );
+		$allowed_sources = array_keys( ContactChannels::get_icon_source_labels() );
+		$allowed_icons   = array_keys( ContactChannels::get_dashicon_choices() );
+		$items           = array();
+
+		foreach ( $value as $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+
+			$type = isset( $item['type'] ) ? sanitize_key( $item['type'] ) : '';
+
+			if ( ! in_array( $type, $allowed_types, true ) ) {
+				continue;
+			}
+
+			$country_code = ContactChannels::normalize_country_code( isset( $item['country_code'] ) ? $item['country_code'] : '' );
+			$raw_value    = isset( $item['value'] ) ? (string) $item['value'] : '';
+			$value        = self::sanitize_contact_channel_value( $type, $raw_value, $country_code );
+			$label        = isset( $item['label'] ) ? sanitize_text_field( $item['label'] ) : '';
+			$message      = isset( $item['prefilled_message'] ) ? sanitize_text_field( $item['prefilled_message'] ) : '';
+			$icon_source  = isset( $item['icon_source'] ) ? sanitize_key( $item['icon_source'] ) : 'default';
+			$icon_library = isset( $item['icon_library'] ) ? sanitize_key( $item['icon_library'] ) : 'dashicons';
+			$icon_value   = isset( $item['icon_value'] ) ? sanitize_key( $item['icon_value'] ) : '';
+			$open_new_tab = ! empty( $item['open_new_tab'] ) ? 1 : 0;
+
+			if ( '' === $value ) {
+				continue;
+			}
+
+			if ( ! in_array( $icon_source, $allowed_sources, true ) ) {
+				$icon_source = 'default';
+			}
+
+			if ( 'dashicons' !== $icon_source ) {
+				$icon_library = 'dashicons';
+				$icon_value   = '';
+			} else {
+				$icon_library = 'dashicons';
+
+				if ( ! in_array( $icon_value, $allowed_icons, true ) ) {
+					$icon_value = '';
+				}
+			}
+
+			$items[] = array(
+				'type'              => $type,
+				'country_code'      => $country_code,
+				'value'             => $value,
+				'label'             => substr( $label, 0, 80 ),
+				'prefilled_message' => substr( $message, 0, 280 ),
+				'icon_source'       => $icon_source,
+				'icon_library'      => $icon_library,
+				'icon_value'        => $icon_value,
+				'open_new_tab'      => $open_new_tab,
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Sanitize a Contact Channels destination value by type.
+	 *
+	 * @param string $type Channel type.
+	 * @param string $value Raw destination value.
+	 * @param string $country_code Selected dial code.
+	 * @return string
+	 */
+	private static function sanitize_contact_channel_value( $type, $value, $country_code ) {
+		if ( 'whatsapp' === $type || 'phone' === $type ) {
+			$value = trim( (string) $value );
+
+			if ( '' === $country_code && 0 !== strpos( $value, '+' ) ) {
+				return '';
+			}
+
+			return ContactChannels::normalize_phone_value( $value, $country_code );
+		}
+
+		if ( 'email' === $type ) {
+			$email = sanitize_email( $value );
+
+			return is_email( $email ) ? $email : '';
+		}
+
+		if ( 'messenger' === $type ) {
+			$value = trim( sanitize_text_field( $value ) );
+
+			return '' === ContactChannels::build_item_url( 'messenger', array( 'value' => $value ) ) ? '' : substr( $value, 0, 160 );
+		}
+
+		if ( 'directions' === $type || 'custom' === $type ) {
+			return Escaper::public_url( $value );
+		}
+
+		return '';
 	}
 
 	/**

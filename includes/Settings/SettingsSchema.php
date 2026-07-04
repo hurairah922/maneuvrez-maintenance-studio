@@ -136,6 +136,86 @@ class SettingsSchema {
 				'type'    => 'email',
 				'default' => '',
 			),
+			'contact_channels_enabled' => array(
+				'type'    => 'checkbox',
+				'default' => 0,
+			),
+			'contact_channels_maintenance_display' => array(
+				'type'    => 'select',
+				'default' => 'inside',
+				'choices' => array( 'off', 'inside', 'floating', 'both' ),
+			),
+			'contact_channels_live_display' => array(
+				'type'    => 'select',
+				'default' => 'off',
+				'choices' => array( 'off', 'floating' ),
+			),
+			'contact_channels_logged_in_visibility' => array(
+				'type'    => 'select',
+				'default' => 'hide_admins',
+				'choices' => array( 'show_all', 'hide_admins', 'hide_logged_in' ),
+			),
+			'contact_channels_display_style' => array(
+				'type'    => 'select',
+				'default' => 'auto',
+				'choices' => array( 'auto', 'row', 'reveal' ),
+			),
+			'contact_channels_heading' => array(
+				'type'    => 'text',
+				'default' => 'Need help?',
+			),
+			'contact_channels_description' => array(
+				'type'    => 'text',
+				'default' => 'Contact us while the site is being updated.',
+			),
+			'contact_channels_primary_label' => array(
+				'type'    => 'text',
+				'default' => 'Contact Us',
+			),
+			'contact_channels_position' => array(
+				'type'    => 'select',
+				'default' => 'bottom_right',
+				'choices' => array( 'bottom_right', 'bottom_left', 'top_right', 'top_left' ),
+			),
+			'contact_channels_button_shape' => array(
+				'type'    => 'select',
+				'default' => 'rounded',
+				'choices' => array( 'rounded', 'pill', 'circle', 'square' ),
+			),
+			'contact_channels_button_display' => array(
+				'type'    => 'select',
+				'default' => 'icon_label',
+				'choices' => array( 'icon_label', 'icon_only', 'label_only' ),
+			),
+			'contact_channels_color_mode' => array(
+				'type'    => 'select',
+				'default' => 'theme',
+				'choices' => array( 'theme', 'brand', 'custom' ),
+			),
+			'contact_channels_background_color' => array(
+				'type'    => 'color',
+				'default' => '',
+			),
+			'contact_channels_text_color' => array(
+				'type'    => 'color',
+				'default' => '',
+			),
+			'contact_channels_icon_color' => array(
+				'type'    => 'color',
+				'default' => '',
+			),
+			'contact_channels_hover_background_color' => array(
+				'type'    => 'color',
+				'default' => '',
+			),
+			'contact_channels_hover_text_color' => array(
+				'type'    => 'color',
+				'default' => '',
+			),
+			'contact_channels_items' => array(
+				'type'    => 'repeater',
+				'default' => array(),
+			),
 			'show_footer_section'    => array(
 				'type'    => 'checkbox',
 				'default' => 1,
@@ -198,6 +278,11 @@ class SettingsSchema {
 			'login_label'            => array(
 				'type'    => 'text',
 				'default' => 'Admin login',
+			),
+			'social_links_display'   => array(
+				'type'    => 'select',
+				'default' => 'icon_label',
+				'choices' => array( 'icon_label', 'icon_only' ),
 			),
 			'social_links'           => array(
 				'type'    => 'repeater',

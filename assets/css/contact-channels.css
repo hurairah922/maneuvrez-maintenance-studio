@@ -1,0 +1,224 @@
+.mmsm-contact-channels {
+	--mm-primary: #2563eb;
+	--mm-button-text: #ffffff;
+	--mm-surface: #ffffff;
+	--mm-border: #dbe3ef;
+	--mm-heading-text: #111827;
+	--mmsm-contact-bg: var(--mm-primary);
+	--mmsm-contact-text: var(--mm-button-text);
+	--mmsm-contact-icon: currentColor;
+	--mmsm-contact-hover-bg: color-mix(in srgb, var(--mmsm-contact-bg) 88%, #000000);
+	--mmsm-contact-hover-text: var(--mmsm-contact-text);
+	font-family: inherit;
+}
+
+.mmsm-contact-channel-list,
+.mmsm-contact-channel-menu {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 14px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mmsm-contact-channel-button,
+.mmsm-contact-channel-trigger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 9px;
+	min-height: 46px;
+	padding: 0 16px;
+	border: 1px solid var(--mm-border);
+	border-radius: 14px;
+	background: var(--mmsm-contact-bg);
+	color: var(--mmsm-contact-text);
+	font: inherit;
+	font-weight: 700;
+	line-height: 1;
+	text-decoration: none;
+	cursor: pointer;
+	box-shadow: 0 14px 30px color-mix(in srgb, var(--mmsm-contact-bg) 22%, transparent);
+	transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.mmsm-contact-channel-button .dashicons,
+.mmsm-contact-channel-trigger .dashicons {
+	width: 18px;
+	height: 18px;
+	color: var(--mmsm-contact-icon);
+	font-size: 18px;
+	line-height: 18px;
+}
+
+.mmsm-contact-channel-button:hover,
+.mmsm-contact-channel-trigger:hover {
+	background: var(--mmsm-contact-hover-bg);
+	color: var(--mmsm-contact-hover-text);
+	transform: translateY(-1px);
+}
+
+.mmsm-contact-channel-button:hover .dashicons,
+.mmsm-contact-channel-trigger:hover .dashicons {
+	color: var(--mmsm-contact-hover-text);
+}
+
+.mmsm-contact-channel-button:focus-visible,
+.mmsm-contact-channel-trigger:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--mm-primary) 70%, #ffffff);
+	outline-offset: 3px;
+}
+
+.mmsm-contact-channels-shape-pill .mmsm-contact-channel-button,
+.mmsm-contact-channels-shape-pill .mmsm-contact-channel-trigger {
+	border-radius: 999px;
+}
+
+.mmsm-contact-channels-shape-square .mmsm-contact-channel-button,
+.mmsm-contact-channels-shape-square .mmsm-contact-channel-trigger {
+	border-radius: 4px;
+}
+
+.mmsm-contact-channels-shape-circle.mmsm-contact-channels-display-icon_only .mmsm-contact-channel-button,
+.mmsm-contact-channels-shape-circle.mmsm-contact-channels-display-icon_only .mmsm-contact-channel-trigger {
+	width: 52px;
+	min-width: 52px;
+	padding: 0;
+	border-radius: 999px;
+}
+
+.mmsm-contact-channel-reveal {
+	position: relative;
+	display: inline-flex;
+	flex-direction: column;
+	align-items: flex-start;
+	margin-top: 14px;
+}
+
+.mmsm-contact-channel-menu[hidden] {
+	display: none;
+}
+
+.mmsm-contact-channel-menu {
+	display: grid;
+	position: absolute;
+	z-index: 30;
+	bottom: calc(100% + 10px);
+	left: 0;
+	min-width: min(260px, calc(100vw - 32px));
+	padding: 10px;
+	border: 1px solid var(--mm-border);
+	border-radius: 16px;
+	background: var(--mm-surface);
+	box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+}
+
+.mmsm-contact-channel-menu .mmsm-contact-channel-button {
+	width: 100%;
+	justify-content: flex-start;
+	box-shadow: none;
+}
+
+.mmsm-contact-channels-color-theme .mmsm-contact-channel-button,
+.mmsm-contact-channels-color-theme .mmsm-contact-channel-trigger {
+	background: var(--mm-primary);
+	color: var(--mm-button-text);
+}
+
+.mmsm-contact-channels-color-brand .mmsm-contact-channel-whatsapp {
+	--mmsm-contact-bg: #1fa855;
+	--mmsm-contact-text: #ffffff;
+}
+
+.mmsm-contact-channels-color-brand .mmsm-contact-channel-messenger {
+	--mmsm-contact-bg: #1877f2;
+	--mmsm-contact-text: #ffffff;
+}
+
+.mmsm-contact-channels-color-brand .mmsm-contact-channel-phone {
+	--mmsm-contact-bg: #0f766e;
+	--mmsm-contact-text: #ffffff;
+}
+
+.mmsm-contact-channels-color-brand .mmsm-contact-channel-email {
+	--mmsm-contact-bg: #7c3aed;
+	--mmsm-contact-text: #ffffff;
+}
+
+.mmsm-contact-channels-color-brand .mmsm-contact-channel-directions {
+	--mmsm-contact-bg: #047857;
+	--mmsm-contact-text: #ffffff;
+}
+
+.mmsm-contact-channels-floating {
+	position: fixed;
+	right: max(18px, env(safe-area-inset-right));
+	bottom: max(18px, env(safe-area-inset-bottom));
+	z-index: 9990;
+}
+
+.mmsm-contact-channels-position-bottom_left.mmsm-contact-channels-floating {
+	right: auto;
+	left: max(18px, env(safe-area-inset-left));
+}
+
+.mmsm-contact-channels-position-top_right.mmsm-contact-channels-floating {
+	top: max(18px, env(safe-area-inset-top));
+	bottom: auto;
+}
+
+.mmsm-contact-channels-position-top_left.mmsm-contact-channels-floating {
+	top: max(18px, env(safe-area-inset-top));
+	right: auto;
+	bottom: auto;
+	left: max(18px, env(safe-area-inset-left));
+}
+
+.mmsm-contact-channels-floating .mmsm-contact-channel-reveal {
+	margin-top: 0;
+}
+
+.mmsm-contact-channels-floating .mmsm-contact-channel-menu {
+	left: auto;
+	right: 0;
+}
+
+.mmsm-contact-channels-position-bottom_left.mmsm-contact-channels-floating .mmsm-contact-channel-menu {
+	right: auto;
+	left: 0;
+}
+
+.mmsm-contact-channels-position-top_right.mmsm-contact-channels-floating .mmsm-contact-channel-menu,
+.mmsm-contact-channels-position-top_left.mmsm-contact-channels-floating .mmsm-contact-channel-menu {
+	top: calc(100% + 10px);
+	bottom: auto;
+}
+
+.mmsm-contact-channels-position-top_left.mmsm-contact-channels-floating .mmsm-contact-channel-menu {
+	right: auto;
+	left: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mmsm-contact-channel-button,
+	.mmsm-contact-channel-trigger {
+		transition: none;
+	}
+}
+
+@media (max-width: 480px) {
+	.mmsm-contact-channel-list {
+		flex-direction: column;
+	}
+
+	.mmsm-contact-channel-button,
+	.mmsm-contact-channel-trigger {
+		width: 100%;
+	}
+
+	.mmsm-contact-channels-floating .mmsm-contact-channel-button,
+	.mmsm-contact-channels-floating .mmsm-contact-channel-trigger {
+		width: auto;
+	}
+}

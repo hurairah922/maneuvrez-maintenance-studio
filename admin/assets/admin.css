@@ -1,6 +1,87 @@
+.mmsm-settings-page {
+	max-width: 1480px;
+}
+
+.mmsm-settings-page .mmsm-settings-header {
+	margin: 0 0 16px;
+}
+
+.mmsm-settings-page .mmsm-settings-kicker {
+	display: block;
+	margin-bottom: 5px;
+	color: #2271b1;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.mmsm-settings-page .mmsm-settings-header h1 {
+	margin: 0;
+	font-size: 24px;
+	line-height: 1.25;
+}
+
 .mmsm-settings-page .mmsm-settings-intro {
 	max-width: 64ch;
-	margin-bottom: 1rem;
+	margin: 8px 0 0;
+	color: #50575e;
+}
+
+.mmsm-settings-page .mmsm-settings-shell {
+	display: grid;
+	grid-template-columns: 220px minmax(0, 1fr);
+	gap: 18px;
+	align-items: start;
+}
+
+.mmsm-settings-page .mmsm-settings-sidebar {
+	position: sticky;
+	top: 44px;
+	display: grid;
+	gap: 4px;
+	padding: 10px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.mmsm-settings-page .mmsm-settings-nav-item {
+	display: grid;
+	grid-template-columns: 22px minmax(0, 1fr);
+	gap: 10px;
+	align-items: center;
+	min-height: 40px;
+	padding: 8px 10px;
+	border-radius: 6px;
+	color: #2c3338;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.mmsm-settings-page .mmsm-settings-nav-item:hover,
+.mmsm-settings-page .mmsm-settings-nav-item:focus {
+	background: #f6f7f7;
+	color: #135e96;
+	box-shadow: none;
+	outline: 0;
+}
+
+.mmsm-settings-page .mmsm-settings-nav-item.is-active {
+	background: #2271b1;
+	color: #fff;
+}
+
+.mmsm-settings-page .mmsm-settings-nav-item .dashicons {
+	width: 22px;
+	height: 22px;
+	font-size: 20px;
+	line-height: 22px;
+}
+
+.mmsm-settings-page .mmsm-settings-content {
+	min-width: 0;
 }
 
 .mmsm-settings-page .mmsm-settings-tabs {
@@ -9,11 +90,119 @@
 
 .mmsm-settings-page .mmsm-settings-panel {
 	max-width: 980px;
-	padding: 8px 0 0;
+	min-width: 0;
+	padding: 0;
+}
+
+.mmsm-settings-page .mmsm-settings-panel:not(.mmsm-settings-panel-contact_channels) {
+	padding: 18px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.mmsm-settings-page .mmsm-settings-panel-contact_channels {
+	max-width: none;
 }
 
 .mmsm-settings-page .mmsm-settings-panel .title {
 	margin-bottom: 0.35rem;
+}
+
+.mmsm-settings-page .mmsm-design-preview {
+	max-width: 760px;
+	margin: 16px 0 10px;
+}
+
+.mmsm-settings-page .mmsm-design-preview-canvas {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 180px;
+	gap: 14px;
+	padding: 18px;
+	border: 1px solid var(--mmsm-design-preview-border, #dbe3ef);
+	border-radius: 8px;
+	background: var(--mmsm-design-preview-bg, #f8fafc);
+}
+
+.mmsm-settings-page .mmsm-design-preview-card,
+.mmsm-settings-page .mmsm-design-preview-panel {
+	border: 1px solid var(--mmsm-design-preview-border, #dbe3ef);
+	border-radius: 6px;
+	background: var(--mmsm-design-preview-surface, #fff);
+}
+
+.mmsm-settings-page .mmsm-design-preview-card {
+	padding: 16px;
+}
+
+.mmsm-settings-page .mmsm-design-preview-kicker {
+	display: block;
+	margin-bottom: 6px;
+	color: var(--mmsm-design-preview-muted, #64748b);
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.mmsm-settings-page .mmsm-design-preview-card strong {
+	display: block;
+	color: var(--mmsm-design-preview-heading, #111827);
+	font-size: 20px;
+	line-height: 1.25;
+}
+
+.mmsm-settings-page .mmsm-design-preview-card p {
+	max-width: 46ch;
+	margin: 8px 0 14px;
+	color: var(--mmsm-design-preview-body, #334155);
+}
+
+.mmsm-settings-page .mmsm-design-preview-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+}
+
+.mmsm-settings-page .mmsm-design-preview-button {
+	display: inline-flex;
+	align-items: center;
+	min-height: 36px;
+	padding: 0 14px;
+	border-radius: 6px;
+	background: var(--mmsm-design-preview-primary, #2563eb);
+	color: var(--mmsm-design-preview-button-text, #fff);
+	font-weight: 700;
+}
+
+.mmsm-settings-page .mmsm-design-preview-link {
+	color: var(--mmsm-design-preview-link, #2563eb);
+	font-weight: 700;
+}
+
+.mmsm-settings-page .mmsm-design-preview-panel {
+	display: grid;
+	align-content: center;
+	gap: 10px;
+	padding: 14px;
+	color: var(--mmsm-design-preview-muted, #64748b);
+}
+
+.mmsm-settings-page .mmsm-design-preview-panel div {
+	overflow: hidden;
+	height: 8px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--mmsm-design-preview-border, #dbe3ef) 72%, transparent);
+}
+
+.mmsm-settings-page .mmsm-design-preview-panel i {
+	display: block;
+	width: 68%;
+	height: 100%;
+	border-radius: inherit;
+	background: var(--mmsm-design-preview-primary, #2563eb);
 }
 
 .mmsm-settings-page .form-table th {
@@ -32,8 +221,770 @@
 	display: none;
 }
 
+.mmsm-settings-page .form-table tr.mmsm-contact-channels-field-row th {
+	display: none;
+}
+
+.mmsm-settings-page .mmsm-settings-panel-contact_channels .form-table,
+.mmsm-settings-page .mmsm-settings-panel-contact_channels .form-table tbody,
+.mmsm-settings-page .form-table tr.mmsm-contact-channels-field-row {
+	display: block;
+	width: 100%;
+}
+
+.mmsm-settings-page .form-table tr.mmsm-contact-channels-field-row td {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	padding-left: 0;
+}
+
+.mmsm-settings-page .mmsm-settings-save-button {
+	min-height: 36px;
+	padding-right: 18px;
+	padding-left: 18px;
+}
+
 .mmsm-settings-page .mmsm-color-picker {
 	max-width: 120px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-builder {
+	max-width: 1280px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-hero,
+.mmsm-settings-page .mmsm-contact-channels-preview,
+.mmsm-settings-page .mmsm-contact-channels-panel,
+.mmsm-settings-page .mmsm-contact-channel-item {
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.mmsm-settings-page .mmsm-contact-channels-hero {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 14px 18px;
+	margin: 0 0 16px;
+	padding: 18px;
+	border-top: 4px solid #2271b1;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-eyebrow {
+	display: block;
+	margin-bottom: 4px;
+	color: #2271b1;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-hero h3,
+.mmsm-settings-page .mmsm-contact-channels-preview h3 {
+	margin: 0;
+	color: #1d2327;
+	font-size: 18px;
+	line-height: 1.35;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-hero p {
+	max-width: 72ch;
+	margin: 6px 0 0;
+	color: #50575e;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-hero-status {
+	align-self: start;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-status-pill,
+.mmsm-settings-page .mmsm-contact-channel-state,
+.mmsm-settings-page .mmsm-contact-channels-preview-count {
+	display: inline-flex;
+	align-items: center;
+	min-height: 24px;
+	padding: 0 10px;
+	border-radius: 999px;
+	background: #f0f0f1;
+	color: #50575e;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-status-pill.is-on,
+.mmsm-settings-page .mmsm-contact-channel-state.is-ready,
+.mmsm-settings-page .mmsm-contact-channels-steps li.is-complete span {
+	background: #008a20;
+	color: #fff;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-steps {
+	grid-column: 1 / -1;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+	margin: 2px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-steps li {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 2px 10px;
+	align-items: center;
+	margin: 0;
+	padding: 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #f6f7f7;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-steps li span {
+	grid-row: 1 / span 2;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: #dcdcde;
+	color: #50575e;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-steps li strong {
+	color: #1d2327;
+	line-height: 1.2;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-steps li em {
+	color: #646970;
+	font-size: 12px;
+	font-style: normal;
+	line-height: 1.35;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-workspace {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 360px;
+	gap: 16px;
+	align-items: start;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-main {
+	min-width: 0;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-grid {
+	display: grid;
+	grid-template-columns: minmax(300px, 0.85fr) minmax(360px, 1.15fr);
+	gap: 16px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-panel,
+.mmsm-settings-page .mmsm-contact-channel-item {
+	padding: 16px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-panel h3,
+.mmsm-settings-page .mmsm-contact-channel-list-title {
+	margin: 0 0 14px;
+	color: #1d2327;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-panel-appearance {
+	grid-column: 1 / -1;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(220px, 1fr));
+	gap: 0 18px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-panel-appearance h3,
+.mmsm-settings-page .mmsm-contact-channels-panel-appearance > .description,
+.mmsm-settings-page .mmsm-contact-channels-panel-appearance > .mmsm-contact-channel-custom-colors {
+	grid-column: 1 / -1;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-panel p,
+.mmsm-settings-page .mmsm-contact-channel-item p {
+	margin: 0 0 12px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-panel label,
+.mmsm-settings-page .mmsm-contact-channel-item label {
+	font-weight: 500;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-panel select,
+.mmsm-settings-page .mmsm-contact-channels-panel input.regular-text {
+	width: min(100%, 420px);
+	max-width: 100%;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-list {
+	display: grid;
+	gap: 16px;
+	margin-top: 10px;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-list-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin: 18px 0 10px;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-list-header .description {
+	margin: -8px 0 0;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-toolbar {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	margin: -4px 0 14px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-heading {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 10px;
+	align-items: center;
+	min-width: 0;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-icon-preview {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 8px;
+	background: #e7f5ee;
+	color: #008a20;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-icon-preview.is-hidden {
+	display: none;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-subsummary {
+	display: block;
+	margin-top: 3px;
+	color: #646970;
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-fields {
+	display: grid;
+	grid-template-columns: minmax(160px, 0.5fr) minmax(220px, 0.7fr) minmax(320px, 1.3fr);
+	gap: 0 14px;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-options {
+	margin-top: 4px;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-options summary {
+	display: inline-flex;
+	align-items: center;
+	min-height: 30px;
+	color: #2271b1;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-option-fields {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0 16px;
+	margin-top: 10px;
+	padding-top: 12px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-fields .regular-text {
+	width: 100%;
+	max-width: 100%;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-option-fields p,
+.mmsm-settings-page .mmsm-contact-channel-icon-value-field {
+	min-width: 0;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-option-fields .regular-text,
+.mmsm-settings-page .mmsm-contact-channel-option-fields select {
+	width: 100%;
+	max-width: 100%;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-fields select,
+.mmsm-settings-page .mmsm-contact-channel-custom-colors input {
+	max-width: 100%;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-custom-colors {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 14px;
+	max-width: 760px;
+	margin-top: 8px;
+	padding-top: 14px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.mmsm-settings-page .mmsm-contact-color-group {
+	display: grid;
+	gap: 12px;
+	padding: 14px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.mmsm-settings-page .mmsm-contact-color-group-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.mmsm-settings-page .mmsm-contact-color-state-tabs {
+	display: inline-flex;
+	overflow: hidden;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.mmsm-settings-page .mmsm-contact-color-state-toggle {
+	min-height: 32px;
+	padding: 0 12px;
+	border: 0;
+	border-right: 1px solid #c3c4c7;
+	background: transparent;
+	color: #1d2327;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.mmsm-settings-page .mmsm-contact-color-state-toggle:last-child {
+	border-right: 0;
+}
+
+.mmsm-settings-page .mmsm-contact-color-state-toggle:hover,
+.mmsm-settings-page .mmsm-contact-color-state-toggle:focus-visible {
+	background: #f6f7f7;
+}
+
+.mmsm-settings-page .mmsm-contact-color-state-toggle.is-active {
+	background: #2271b1;
+	color: #fff;
+}
+
+.mmsm-settings-page .mmsm-contact-color-panel {
+	display: none;
+}
+
+.mmsm-settings-page .mmsm-contact-color-panel.is-active {
+	display: grid;
+	gap: 10px;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-row {
+	display: grid;
+	grid-template-columns: minmax(100px, 150px) minmax(0, 1fr);
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-row-dual {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-row-trio {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-control {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-row:not(.mmsm-contact-channel-color-row-dual):not(.mmsm-contact-channel-color-row-trio) .mmsm-contact-channel-color-control {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-label {
+	color: #1d2327;
+	font-weight: 600;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-control .wp-picker-container {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-control .wp-picker-holder {
+	flex-basis: 100%;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-control .wp-picker-input-wrap {
+	white-space: normal;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-color-control .description {
+	display: none;
+	margin: 0;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview {
+	position: sticky;
+	top: 48px;
+	padding: 16px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 14px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage {
+	position: relative;
+	min-height: 390px;
+	overflow: hidden;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #f6f7f7;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-disabled {
+	background: repeating-linear-gradient(
+		-45deg,
+		#f6f7f7,
+		#f6f7f7 10px,
+		#f0f0f1 10px,
+		#f0f0f1 20px
+	);
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-disabled .mmsm-contact-preview-button,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-disabled .mmsm-contact-channels-preview-floating {
+	opacity: 0.58;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-card {
+	margin: 22px;
+	padding: 16px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fff;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-card strong {
+	display: block;
+	margin-bottom: 6px;
+	color: #1d2327;
+	font-size: 16px;
+	line-height: 1.35;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-card p {
+	margin: 0 0 14px;
+	color: #646970;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.mmsm-settings-page .mmsm-contact-preview-button,
+.mmsm-settings-page .mmsm-contact-channels-preview-floating {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	min-height: 38px;
+	padding: 0 14px;
+	border: 0;
+	border-radius: 10px;
+	background: #2271b1;
+	color: #fff;
+	font-weight: 700;
+	text-decoration: none;
+	box-shadow: 0 4px 14px rgba(34, 113, 177, 0.18);
+}
+
+.mmsm-settings-page .mmsm-contact-preview-button .dashicons,
+.mmsm-settings-page .mmsm-contact-channels-preview-floating .dashicons {
+	color: currentcolor;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-floating {
+	position: absolute;
+	right: 18px;
+	bottom: 18px;
+	cursor: default;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-position-bottom_left .mmsm-contact-channels-preview-floating {
+	right: auto;
+	left: 18px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-position-top_right .mmsm-contact-channels-preview-floating {
+	top: 18px;
+	bottom: auto;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-position-top_left .mmsm-contact-channels-preview-floating {
+	top: 18px;
+	right: auto;
+	bottom: auto;
+	left: 18px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-shape-pill .mmsm-contact-preview-button,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-shape-pill .mmsm-contact-channels-preview-floating {
+	border-radius: 999px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-shape-circle .mmsm-contact-preview-button,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-shape-circle .mmsm-contact-channels-preview-floating {
+	width: 44px;
+	min-width: 44px;
+	height: 44px;
+	padding: 0;
+	border-radius: 50%;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-shape-square .mmsm-contact-preview-button,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-shape-square .mmsm-contact-channels-preview-floating {
+	border-radius: 2px;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-display-icon_only .mmsm-contact-preview-label,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-display-label_only .dashicons,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-display-icon_only [data-contact-preview-floating-label],
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-display-label_only .mmsm-contact-channels-preview-floating .dashicons {
+	display: none;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-brand .mmsm-contact-preview-button.is-whatsapp,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-brand .mmsm-contact-channels-preview-floating {
+	background: #25d366;
+	color: #10391f;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-brand .mmsm-contact-preview-button.is-messenger {
+	background: #0084ff;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-brand .mmsm-contact-preview-button.is-phone {
+	background: #008a20;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-brand .mmsm-contact-preview-button.is-email {
+	background: #3858e9;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-brand .mmsm-contact-preview-button.is-directions {
+	background: #d63638;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-custom .mmsm-contact-preview-button,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-custom .mmsm-contact-channels-preview-floating {
+	background: var(--mmsm-contact-preview-bg, #2271b1);
+	color: var(--mmsm-contact-preview-text, #fff);
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-custom .mmsm-contact-preview-button:hover,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-custom .mmsm-contact-channels-preview-floating:hover {
+	background: var(--mmsm-contact-preview-hover-bg, #135e96);
+	color: var(--mmsm-contact-preview-hover-text, #fff);
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-custom .mmsm-contact-preview-button .dashicons,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-custom .mmsm-contact-channels-preview-floating .dashicons {
+	color: var(--mmsm-contact-preview-icon, currentcolor);
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-custom .mmsm-contact-preview-button:hover .dashicons,
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-color-custom .mmsm-contact-channels-preview-floating:hover .dashicons {
+	color: var(--mmsm-contact-preview-hover-text, currentcolor);
+}
+
+.mmsm-settings-page .mmsm-contact-channels-preview-stage.is-empty .mmsm-contact-channels-preview-buttons::before {
+	content: "Add a destination to preview the contact buttons.";
+	display: block;
+	width: 100%;
+	padding: 12px;
+	border: 1px dashed #c3c4c7;
+	border-radius: 6px;
+	color: #646970;
+	text-align: center;
+}
+
+.mmsm-settings-page .mmsm-contact-channel-help {
+	display: block;
+	max-width: 48ch;
+	margin-top: 5px;
+	color: #646970;
+	font-size: 12px;
+	line-height: 1.45;
+}
+
+.mmsm-settings-page .mmsm-contact-channels-builder.is-contact-channels-disabled .mmsm-contact-channels-panel,
+.mmsm-settings-page .mmsm-contact-channels-builder.is-contact-channels-disabled .mmsm-contact-channel-item {
+	border-color: #e2e4e7;
+}
+
+@media (max-width: 1280px) {
+	.mmsm-settings-page .mmsm-contact-channels-workspace,
+	.mmsm-settings-page .mmsm-contact-channels-grid,
+	.mmsm-settings-page .mmsm-contact-channels-panel-appearance,
+	.mmsm-settings-page .mmsm-contact-channel-fields,
+	.mmsm-settings-page .mmsm-contact-channel-option-fields,
+	.mmsm-settings-page .mmsm-contact-channel-custom-colors {
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-contact-channels-panel-appearance h3,
+	.mmsm-settings-page .mmsm-contact-channels-panel-appearance > .description,
+	.mmsm-settings-page .mmsm-contact-channels-panel-appearance > .mmsm-contact-channel-custom-colors {
+		grid-column: auto;
+	}
+
+	.mmsm-settings-page .mmsm-contact-channels-preview {
+		position: static;
+	}
+}
+
+@media (max-width: 782px) {
+	.mmsm-settings-page .mmsm-design-preview-canvas {
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-contact-color-group-header,
+	.mmsm-settings-page .mmsm-contact-channel-color-row,
+	.mmsm-settings-page .mmsm-contact-channel-color-row-dual,
+	.mmsm-settings-page .mmsm-contact-channel-color-row-trio,
+	.mmsm-settings-page .mmsm-contact-channel-color-control {
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-contact-color-group-header {
+		display: grid;
+	}
+
+	.mmsm-settings-page .mmsm-contact-color-state-tabs {
+		width: 100%;
+	}
+
+	.mmsm-settings-page .mmsm-contact-color-state-toggle {
+		flex: 1 1 0;
+	}
+
+	.mmsm-settings-page .mmsm-social-links-intro,
+	.mmsm-settings-page .mmsm-social-item-toolbar {
+		display: grid;
+	}
+
+	.mmsm-settings-page .mmsm-social-item-actions {
+		justify-content: flex-start;
+	}
+
+	.mmsm-settings-page .mmsm-social-item-primary-fields,
+	.mmsm-settings-page .mmsm-social-icon-picker {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 1100px) {
+	.mmsm-settings-page .mmsm-settings-shell {
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-settings-sidebar {
+		position: static;
+		display: flex;
+		overflow-x: auto;
+	}
+
+	.mmsm-settings-page .mmsm-settings-nav-item {
+		flex: 0 0 auto;
+		min-width: 150px;
+	}
+}
+
+@media (max-width: 782px) {
+	.mmsm-settings-page .mmsm-contact-channels-hero {
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-contact-channels-steps {
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-contact-channel-list-header,
+	.mmsm-settings-page .mmsm-contact-channel-toolbar {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-contact-channel-actions {
+		justify-content: flex-start;
+	}
+
+	.mmsm-settings-page .mmsm-contact-channels-preview-stage {
+		min-height: 320px;
+	}
+}
+
+.mmsm-settings-page .mmsm-contact-channel-custom-colors.is-hidden,
+.mmsm-settings-page .mmsm-contact-channel-country-field.is-hidden,
+.mmsm-settings-page .mmsm-contact-channel-message-field.is-hidden,
+.mmsm-settings-page .mmsm-contact-channel-icon-value-field.is-hidden,
+.mmsm-settings-page .mmsm-contact-channels-enabled-fields.is-hidden,
+.mmsm-settings-page .mmsm-contact-display-dependent.is-hidden,
+.mmsm-settings-page .mmsm-contact-live-dependent.is-hidden,
+.mmsm-settings-page .mmsm-contact-floating-dependent.is-hidden,
+.mmsm-settings-page .mmsm-contact-maintenance-inside-dependent.is-hidden,
+.mmsm-settings-page .mmsm-contact-trigger-label-dependent.is-hidden {
+	display: none;
 }
 
 .mmsm-settings-page .mmsm-bypass-query-builder {
@@ -82,25 +1033,178 @@
 	word-break: break-all;
 }
 
-.mmsm-settings-page .mmsm-social-item-group {
-	max-width: 520px;
+.mmsm-settings-page .mmsm-social-links-builder {
+	max-width: 920px;
+}
+
+.mmsm-settings-page .mmsm-social-links-intro {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
 	margin-bottom: 16px;
 	padding: 16px;
 	border: 1px solid #dcdcde;
-	border-radius: 12px;
+	border-radius: 6px;
 	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.mmsm-settings-page .mmsm-social-links-intro h3 {
+	margin: 0;
+	font-size: 18px;
+	line-height: 1.35;
+}
+
+.mmsm-settings-page .mmsm-social-links-intro .description {
+	margin: 6px 0 0;
+}
+
+.mmsm-settings-page .mmsm-social-links-list {
+	display: grid;
+	gap: 14px;
+}
+
+.mmsm-settings-page .mmsm-social-links-display-panel {
+	display: grid;
+	grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
+	align-items: end;
+	gap: 14px;
+	margin-bottom: 14px;
+	padding: 14px 16px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.mmsm-settings-page .mmsm-social-links-display-panel p {
+	margin: 0;
+}
+
+.mmsm-settings-page .mmsm-social-links-display-panel select {
+	width: 100%;
+	max-width: 100%;
+}
+
+.mmsm-settings-page .mmsm-social-item-group {
+	margin-bottom: 16px;
+	padding: 16px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .mmsm-settings-page .mmsm-social-item-toolbar {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: space-between;
-	gap: 12px;
-	margin-bottom: 10px;
+	gap: 16px;
+	margin-bottom: 14px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.mmsm-settings-page .mmsm-social-item-heading {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 10px;
+	align-items: center;
+	min-width: 0;
+}
+
+.mmsm-settings-page .mmsm-social-item-icon-preview {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #f6f7f7;
+	color: #2271b1;
+}
+
+.mmsm-settings-page .mmsm-social-item-icon-preview svg,
+.mmsm-settings-page .mmsm-social-item-icon-preview img {
+	display: block;
+	width: 20px;
+	height: 20px;
+}
+
+.mmsm-settings-page .mmsm-social-item-icon-preview svg {
+	fill: none;
+	stroke: currentColor;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 1.8;
+}
+
+.mmsm-settings-page .mmsm-social-item-icon-preview img {
+	object-fit: contain;
+}
+
+.mmsm-settings-page .mmsm-social-item-icon-preview .dashicons {
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+	line-height: 20px;
+}
+
+.mmsm-settings-page .mmsm-social-item-subsummary {
+	display: block;
+	margin-top: 3px;
+	color: #646970;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.4;
+	word-break: break-word;
+}
+
+.mmsm-settings-page .mmsm-social-item-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.mmsm-settings-page .mmsm-social-item-state {
+	display: inline-flex;
+	align-items: center;
+	min-height: 24px;
+	padding: 0 10px;
+	border-radius: 999px;
+	background: #f0f0f1;
+	color: #50575e;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.mmsm-settings-page .mmsm-social-item-state.is-ready {
+	background: #008a20;
+	color: #fff;
 }
 
 .mmsm-settings-page .mmsm-social-item-group p {
 	margin: 0 0 10px;
+}
+
+.mmsm-settings-page .mmsm-social-item-primary-fields,
+.mmsm-settings-page .mmsm-social-icon-picker {
+	display: grid;
+	grid-template-columns: minmax(180px, 0.7fr) minmax(260px, 1.3fr);
+	gap: 0 14px;
+}
+
+.mmsm-settings-page .mmsm-social-item-primary-fields select,
+.mmsm-settings-page .mmsm-social-item-primary-fields .regular-text,
+.mmsm-settings-page .mmsm-social-custom-fields .regular-text,
+.mmsm-settings-page .mmsm-social-icon-picker select {
+	width: 100%;
+	max-width: 100%;
 }
 
 .mmsm-settings-page .mmsm-social-custom-fields.is-hidden,
@@ -111,9 +1215,29 @@
 	display: none;
 }
 
+.mmsm-settings-page .mmsm-social-icon-options {
+	margin-top: 4px;
+}
+
+.mmsm-settings-page .mmsm-social-icon-options summary {
+	display: inline-flex;
+	align-items: center;
+	min-height: 30px;
+	color: #2271b1;
+	font-weight: 600;
+	cursor: pointer;
+}
+
 .mmsm-settings-page .mmsm-social-icon-picker {
-	border-top: 1px solid #f0f0f1;
+	margin-top: 10px;
 	padding-top: 12px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.mmsm-settings-page .mmsm-social-icon-library-fields,
+.mmsm-settings-page .mmsm-social-icon-upload-fields,
+.mmsm-settings-page .mmsm-social-icon-picker > .description {
+	grid-column: 1 / -1;
 }
 
 .mmsm-settings-page .mmsm-social-icon-preview-wrap {
@@ -128,6 +1252,24 @@
 	border: 1px solid #dcdcde;
 	border-radius: 10px;
 	background: #f6f7f7;
+}
+
+@media (max-width: 782px) {
+	.mmsm-settings-page .mmsm-social-links-intro,
+	.mmsm-settings-page .mmsm-social-links-display-panel,
+	.mmsm-settings-page .mmsm-social-item-toolbar {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-social-item-actions {
+		justify-content: flex-start;
+	}
+
+	.mmsm-settings-page .mmsm-social-item-primary-fields,
+	.mmsm-settings-page .mmsm-social-icon-picker {
+		grid-template-columns: 1fr;
+	}
 }
 
 .mmsm-uninstall-feedback-modal {
@@ -212,6 +1354,11 @@
 }
 
 @media (max-width: 600px) {
+	.mmsm-settings-page .mmsm-contact-channels-grid,
+	.mmsm-settings-page .mmsm-contact-channel-fields {
+		grid-template-columns: 1fr;
+	}
+
 	.mmsm-settings-page .mmsm-bypass-query-row {
 		align-items: stretch;
 	}

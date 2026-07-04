@@ -91,6 +91,30 @@ class SocialLinksComponent implements ComponentInterface {
 	}
 
 	/**
+	 * Return the Dashicon slug used for a platform default.
+	 *
+	 * @param string $platform Platform key.
+	 * @return string
+	 */
+	public static function get_platform_dashicon_slug( $platform ) {
+		$icons = array(
+			'facebook'  => 'facebook-alt',
+			'instagram' => 'admin-links',
+			'linkedin'  => 'admin-links',
+			'x'         => 'twitter',
+			'youtube'   => 'video-alt3',
+			'github'    => 'admin-links',
+			'tiktok'    => 'video-alt3',
+			'threads'   => 'share-alt',
+			'website'   => 'admin-site',
+			'email'     => 'email-alt',
+			'custom'    => 'admin-links',
+		);
+
+		return isset( $icons[ $platform ] ) ? $icons[ $platform ] : $icons['custom'];
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public function get_key() {
@@ -116,6 +140,14 @@ class SocialLinksComponent implements ComponentInterface {
 	 */
 	public function get_settings_schema() {
 		return array(
+			array(
+				'key'      => 'social_links_display',
+				'label'    => __( 'Display style', 'maneuvrez-maintenance-studio' ),
+				'type'     => 'select',
+				'default'  => 'icon_label',
+				'required' => false,
+				'allowed'  => array( 'icon_label', 'icon_only' ),
+			),
 			array(
 				'key'      => 'social_links',
 				'label'    => __( 'Social links', 'maneuvrez-maintenance-studio' ),
@@ -169,7 +201,12 @@ class SocialLinksComponent implements ComponentInterface {
 	 * {@inheritDoc}
 	 */
 	public function render( array $settings, array $context = array() ) {
-		$links = $this->build_links( $settings );
+		$links   = $this->build_links( $settings );
+		$display = isset( $settings['social_links_display'] ) ? sanitize_key( (string) $settings['social_links_display'] ) : 'icon_label';
+
+		if ( ! in_array( $display, array( 'icon_label', 'icon_only' ), true ) ) {
+			$display = 'icon_label';
+		}
 
 		if ( empty( $links ) ) {
 			return '';
@@ -177,13 +214,14 @@ class SocialLinksComponent implements ComponentInterface {
 
 		ob_start();
 		?>
-		<section class="mmsm-component mmsm-component-social" aria-label="<?php echo esc_attr__( 'Social links', 'maneuvrez-maintenance-studio' ); ?>">
+		<section class="<?php echo esc_attr( 'mmsm-component mmsm-component-social mmsm-social-display-' . $display ); ?>" aria-label="<?php echo esc_attr__( 'Social links', 'maneuvrez-maintenance-studio' ); ?>">
 			<ul class="mmsm-social-list">
 				<?php foreach ( $links as $link ) : ?>
 					<li>
 						<a
 							class="mmsm-social-link"
 							href="<?php echo esc_url( $link['url'] ); ?>"
+							aria-label="<?php echo esc_attr( $link['label'] ); ?>"
 							<?php if ( ! empty( $link['new_tab'] ) ) : ?>
 								target="_blank" rel="noreferrer noopener"
 							<?php endif; ?>
@@ -300,7 +338,7 @@ class SocialLinksComponent implements ComponentInterface {
 			}
 		}
 
-		return $this->get_platform_icon( $platform );
+		return self::get_platform_icon_markup( $platform );
 	}
 
 	/**
@@ -379,62 +417,10 @@ class SocialLinksComponent implements ComponentInterface {
 	 * @param string $platform Platform key.
 	 * @return string
 	 */
-	private function get_platform_icon( $platform ) {
-		$icons = array(
-			'facebook'  => '<svg viewBox="0 0 24 24" role="img" focusable="false"><circle cx="12" cy="12" r="10"></circle><text x="12" y="16" text-anchor="middle">f</text></svg>',
-			'instagram' => '<svg viewBox="0 0 24 24" role="img" focusable="false"><rect x="4" y="4" width="16" height="16" rx="4"></rect><circle cx="12" cy="12" r="3.5"></circle><circle cx="17" cy="7" r="1"></circle></svg>',
-			'linkedin'  => '<svg viewBox="0 0 24 24" role="img" focusable="false"><rect x="4" y="4" width="16" height="16" rx="3"></rect><text x="12" y="16" text-anchor="middle">in</text></svg>',
-			'x'         => '<svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M6 5L18 19M18 5L6 19"></path></svg>',
-			'youtube'   => '<svg viewBox="0 0 24 24" role="img" focusable="false"><rect x="3" y="6" width="18" height="12" rx="4"></rect><path d="M10 9L16 12L10 15Z"></path></svg>',
-			'github'    => '<svg viewBox="0 0 24 24" role="img" focusable="false"><circle cx="12" cy="12" r="10"></circle><text x="12" y="16" text-anchor="middle">gh</text></svg>',
-			'tiktok'    => '<svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M13 5V15A3 3 0 1 1 10 12"></path><path d="M13 5C14 7 16 8 18 8"></path></svg>',
-			'threads'   => '<svg viewBox="0 0 24 24" role="img" focusable="false"><circle cx="12" cy="12" r="9"></circle><text x="12" y="16" text-anchor="middle">@</text></svg>',
-			'website'   => '<svg viewBox="0 0 24 24" role="img" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12H21M12 3C14.8 5.4 16.4 8.6 16.4 12C16.4 15.4 14.8 18.6 12 21M12 3C9.2 5.4 7.6 8.6 7.6 12C7.6 15.4 9.2 18.6 12 21"></path></svg>',
-			'email'     => '<svg viewBox="0 0 24 24" role="img" focusable="false"><rect x="3" y="6" width="18" height="12" rx="2"></rect><path d="M4 8L12 13L20 8"></path></svg>',
-			'custom'    => '<svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M10 14L14 10"></path><path d="M8 16L6 18A3 3 0 1 1 2 14L4 12"></path><path d="M16 8L18 6A3 3 0 1 1 22 10L20 12"></path></svg>',
-		);
-
-		if ( ! isset( $icons[ $platform ] ) ) {
-			$platform = 'custom';
-		}
-
-		return wp_kses(
-			$icons[ $platform ],
-			array(
-				'img'    => array(
-					'src' => true,
-					'alt' => true,
-				),
-				'span'   => array(
-					'class' => true,
-					'aria-label' => true,
-				),
-				'svg'    => array(
-					'viewBox'   => true,
-					'role'      => true,
-					'focusable' => true,
-				),
-				'path'   => array(
-					'd' => true,
-				),
-				'circle' => array(
-					'cx' => true,
-					'cy' => true,
-					'r'  => true,
-				),
-				'rect'   => array(
-					'x'      => true,
-					'y'      => true,
-					'width'  => true,
-					'height' => true,
-					'rx'     => true,
-				),
-				'text'   => array(
-					'x'           => true,
-					'y'           => true,
-					'text-anchor' => true,
-				),
-			)
+	public static function get_platform_icon_markup( $platform ) {
+		return sprintf(
+			'<span class="dashicons dashicons-%1$s" aria-hidden="true"></span>',
+			esc_attr( self::get_platform_dashicon_slug( $platform ) )
 		);
 	}
 }
