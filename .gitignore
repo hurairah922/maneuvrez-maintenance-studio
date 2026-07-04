@@ -15,7 +15,6 @@ README.md
 .codex/
 .github/
 tools/
-tests/
 public/
 build-zip.sh
 composer.json
