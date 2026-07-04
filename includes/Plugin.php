@@ -9,6 +9,7 @@ namespace Maneuvrez\MaintenanceModeStudio;
 
 use Maneuvrez\MaintenanceModeStudio\Admin\Admin;
 use Maneuvrez\MaintenanceModeStudio\Components\ComponentRegistry;
+use Maneuvrez\MaintenanceModeStudio\Frontend\ContactChannelsRenderer;
 use Maneuvrez\MaintenanceModeStudio\Frontend\MaintenanceRouter;
 use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRegistry;
 use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRenderer;
@@ -44,6 +45,13 @@ class Plugin {
 	private $login_url_manager;
 
 	/**
+	 * Live-site Contact Channels renderer.
+	 *
+	 * @var ContactChannelsRenderer
+	 */
+	private $contact_channels_renderer;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -55,6 +63,7 @@ class Plugin {
 		$this->admin             = new Admin( $settings_repository );
 		$this->router            = new MaintenanceRouter( $renderer, $settings_repository );
 		$this->login_url_manager = new LoginUrlManager( $settings_repository );
+		$this->contact_channels_renderer = new ContactChannelsRenderer( $settings_repository );
 	}
 
 	/**
@@ -68,6 +77,7 @@ class Plugin {
 		$this->admin->register();
 		$this->login_url_manager->register();
 		$this->router->register();
+		$this->contact_channels_renderer->register();
 	}
 
 	/**

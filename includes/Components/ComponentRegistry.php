@@ -27,6 +27,7 @@ class ComponentRegistry {
 		$this->register( new HeroComponent() );
 		$this->register( new StatusProgressComponent() );
 		$this->register( new ContactRevealComponent() );
+		$this->register( new ContactChannelsComponent() );
 		$this->register( new SocialLinksComponent() );
 		$this->register( new LoginComponent() );
 	}

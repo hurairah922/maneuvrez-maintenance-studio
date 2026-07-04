@@ -114,6 +114,7 @@ class LoginUrlManager {
 	 */
 	public function render_frontend_not_found() {
 		if ( ! defined( 'WP_USE_THEMES' ) ) {
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Core WordPress constant required before calling wp().
 			define( 'WP_USE_THEMES', true );
 		}
 

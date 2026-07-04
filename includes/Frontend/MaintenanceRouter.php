@@ -140,7 +140,9 @@ class MaintenanceRouter {
 			return false;
 		}
 
-		return (string) wp_unslash( $_GET[ $key ] ) === $value; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query bypass check for request routing.
+		$query_value = sanitize_text_field( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query bypass check for request routing.
+		return hash_equals( $value, $query_value );
+		// return (string) wp_unslash( $_GET[ $key ] ) === $value; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query bypass check for request routing.
 	}
 
 	/**

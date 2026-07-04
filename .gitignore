@@ -2,6 +2,26 @@
 node_modules/
 vendor/
 
+# Local planning, prompts, and project notes
+docs/
+specs/
+*-prompt-pack/
+*prompt-pack/
+mms-contact-channels-prompt-pack/
+README.md
+
+# Repository and development tooling
+.agents/
+.codex/
+.github/
+tools/
+public/
+build-zip.sh
+composer.lock
+package-lock.json
+phpunit.xml.dist
+.distignore
+
 # Build artifacts
 build/
 dist/

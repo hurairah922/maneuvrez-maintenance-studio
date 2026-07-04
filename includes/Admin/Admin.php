@@ -10,6 +10,7 @@ namespace Maneuvrez\MaintenanceModeStudio\Admin;
 use Maneuvrez\MaintenanceModeStudio\Components\SocialLinksComponent;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
+use Maneuvrez\MaintenanceModeStudio\Support\ContactChannels;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -336,6 +337,24 @@ class Admin {
 		);
 
 		add_settings_section(
+			'mmsm_contact_channels_section',
+			__( 'Contact Channels', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_contact_channels_section' ),
+			$this->page_slug
+		);
+
+		add_settings_field(
+			'mmsm_contact_channels',
+			__( 'Contact Channels', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_contact_channels_field' ),
+			$this->page_slug,
+			'mmsm_contact_channels_section',
+			array(
+				'class' => 'mmsm-contact-channels-field-row',
+			)
+		);
+
+		add_settings_section(
 			'mmsm_social_links_section',
 			__( 'Social Links', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_social_links_section' ),
@@ -471,35 +490,44 @@ class Admin {
 		$active_tab = $this->get_active_tab();
 		?>
 		<div class="wrap mmsm-settings-page">
-			<h1><?php echo esc_html__( 'Maneuvrez Maintenance Studio', 'maneuvrez-maintenance-studio' ); ?></h1>
-			<p class="mmsm-settings-intro">
-				<?php echo esc_html__( 'Configure the maintenance page template, core copy, and a few reusable components without editing code.', 'maneuvrez-maintenance-studio' ); ?>
-			</p>
+			<div class="mmsm-settings-header">
+				<div>
+					<span class="mmsm-settings-kicker"><?php echo esc_html__( 'Maintenance Mode Studio', 'maneuvrez-maintenance-studio' ); ?></span>
+					<h1><?php echo esc_html__( 'Maneuvrez Maintenance Studio', 'maneuvrez-maintenance-studio' ); ?></h1>
+					<p class="mmsm-settings-intro">
+						<?php echo esc_html__( 'Configure the maintenance page template, core copy, and reusable visitor components without editing code.', 'maneuvrez-maintenance-studio' ); ?>
+					</p>
+				</div>
+			</div>
 
 			<?php settings_errors( MMSM_SETTINGS_OPTION ); ?>
-			<nav class="nav-tab-wrapper mmsm-settings-tabs" aria-label="<?php echo esc_attr__( 'Maneuvrez Maintenance Studio settings sections', 'maneuvrez-maintenance-studio' ); ?>">
-				<?php foreach ( $this->get_tabs() as $tab_key => $tab ) : ?>
-					<a
-						href="<?php echo esc_url( $this->get_tab_url( $tab_key ) ); ?>"
-						class="<?php echo esc_attr( 'nav-tab' . ( $active_tab === $tab_key ? ' nav-tab-active' : '' ) ); ?>"
-					>
-						<?php echo esc_html( $tab['label'] ); ?>
-					</a>
-				<?php endforeach; ?>
-			</nav>
 
-			<form action="<?php echo esc_url( admin_url( 'options.php' ) ); ?>" method="post">
-				<?php
-					settings_fields( $this->settings_group );
-					wp_nonce_field( 'mmsm_save_settings', 'mmsm_settings_nonce' );
-					?>
-					<input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( $this->get_tab_url( $active_tab ) ); ?>" />
-					<input type="hidden" name="mmsm_active_tab" value="<?php echo esc_attr( $active_tab ); ?>" />
+			<div class="mmsm-settings-shell">
+				<nav class="mmsm-settings-sidebar" aria-label="<?php echo esc_attr__( 'Maneuvrez Maintenance Studio settings sections', 'maneuvrez-maintenance-studio' ); ?>">
+					<?php foreach ( $this->get_tabs() as $tab_key => $tab ) : ?>
+						<a
+							href="<?php echo esc_url( $this->get_tab_url( $tab_key ) ); ?>"
+							class="<?php echo esc_attr( 'mmsm-settings-nav-item' . ( $active_tab === $tab_key ? ' is-active' : '' ) ); ?>"
+						>
+							<span class="<?php echo esc_attr( 'dashicons ' . $tab['icon'] ); ?>" aria-hidden="true"></span>
+							<span><?php echo esc_html( $tab['label'] ); ?></span>
+						</a>
+					<?php endforeach; ?>
+				</nav>
+
+				<form class="mmsm-settings-content" action="<?php echo esc_url( admin_url( 'options.php' ) ); ?>" method="post">
 					<?php
-					$this->render_active_tab();
-				submit_button( __( 'Save Settings', 'maneuvrez-maintenance-studio' ) );
-				?>
-			</form>
+						settings_fields( $this->settings_group );
+						wp_nonce_field( 'mmsm_save_settings', 'mmsm_settings_nonce' );
+						?>
+						<input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( $this->get_tab_url( $active_tab ) ); ?>" />
+						<input type="hidden" name="mmsm_active_tab" value="<?php echo esc_attr( $active_tab ); ?>" />
+						<?php
+						$this->render_active_tab();
+					submit_button( __( 'Save Settings', 'maneuvrez-maintenance-studio' ), 'primary', 'submit', true, array( 'class' => 'mmsm-settings-save-button' ) );
+					?>
+				</form>
+			</div>
 		</div>
 		<?php
 	}
@@ -611,6 +639,10 @@ class Admin {
 
 		if ( 'social_links' === $active_tab && isset( $_POST['mmsm_social_links_present'] ) && ! isset( $input['social_links'] ) ) {
 			$input['social_links'] = array();
+		}
+
+		if ( 'contact_channels' === $active_tab && isset( $_POST['mmsm_contact_channels_present'] ) && ! isset( $input['contact_channels_items'] ) ) {
+			$input['contact_channels_items'] = array();
 		}
 
 		$mmsm_sanitized_settings = Sanitizer::sanitize_settings( array_merge( $existing, $input ) );
@@ -788,7 +820,39 @@ class Admin {
 	 * @return void
 	 */
 	public function render_design_section() {
-		echo '<p>' . esc_html__( 'Use WordPress color pickers for the safe theme color roles that drive light, dark, and system modes.', 'maneuvrez-maintenance-studio' ) . '</p>';
+		$settings = $this->get_settings();
+		$style    = sprintf(
+			'--mmsm-design-preview-bg:%1$s;--mmsm-design-preview-surface:%2$s;--mmsm-design-preview-primary:%3$s;--mmsm-design-preview-heading:%4$s;--mmsm-design-preview-body:%5$s;--mmsm-design-preview-muted:%6$s;--mmsm-design-preview-link:%7$s;--mmsm-design-preview-button-text:%8$s;--mmsm-design-preview-border:%9$s;',
+			esc_attr( (string) $settings['background_color'] ),
+			esc_attr( (string) $settings['surface_color'] ),
+			esc_attr( (string) $settings['primary_color'] ),
+			esc_attr( (string) $settings['heading_text_color'] ),
+			esc_attr( (string) $settings['body_text_color'] ),
+			esc_attr( (string) $settings['muted_text_color'] ),
+			esc_attr( (string) $settings['link_text_color'] ),
+			esc_attr( (string) $settings['button_text_color'] ),
+			esc_attr( (string) $settings['border_color'] )
+		);
+		?>
+		<p><?php echo esc_html__( 'Use WordPress color pickers for the safe theme color roles that drive light, dark, and system modes.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<div class="mmsm-design-preview" data-design-preview style="<?php echo esc_attr( $style ); ?>">
+			<div class="mmsm-design-preview-canvas">
+				<div class="mmsm-design-preview-card">
+					<span class="mmsm-design-preview-kicker"><?php echo esc_html__( 'Maintenance preview', 'maneuvrez-maintenance-studio' ); ?></span>
+					<strong><?php echo esc_html__( "We'll be back soon", 'maneuvrez-maintenance-studio' ); ?></strong>
+					<p><?php echo esc_html__( 'A compact live sample of your background, surface, text, border, link, and button colors.', 'maneuvrez-maintenance-studio' ); ?></p>
+					<div class="mmsm-design-preview-actions">
+						<span class="mmsm-design-preview-button"><?php echo esc_html__( 'Notify me', 'maneuvrez-maintenance-studio' ); ?></span>
+						<span class="mmsm-design-preview-link"><?php echo esc_html__( 'Contact support', 'maneuvrez-maintenance-studio' ); ?></span>
+					</div>
+				</div>
+				<div class="mmsm-design-preview-panel">
+					<span><?php echo esc_html__( 'Progress', 'maneuvrez-maintenance-studio' ); ?></span>
+					<div><i></i></div>
+				</div>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
@@ -798,6 +862,16 @@ class Admin {
 	 */
 	public function render_components_section() {
 		echo '<p>' . esc_html__( 'These optional settings feed the hero, status, and contact components rendered by the default template.', 'maneuvrez-maintenance-studio' ) . '</p>';
+	}
+
+	/**
+	 * Render the Contact Channels section description.
+	 *
+	 * @return void
+	 */
+	public function render_contact_channels_section() {
+		echo '<p>' . esc_html__( 'Let visitors contact you while your site is being updated, with an optional live-site floating button after maintenance mode is off.', 'maneuvrez-maintenance-studio' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'These links open visitor apps or pages such as WhatsApp, Messenger, phone, email, or directions. No chat scripts, SDKs, or tracking pixels are loaded by the plugin.', 'maneuvrez-maintenance-studio' ) . '</p>';
 	}
 
 	/**
@@ -1498,18 +1572,311 @@ class Admin {
 		?>
 		<input type="hidden" name="mmsm_social_links_present" value="1" />
 		<div class="mmsm-social-links-builder" data-next-index="<?php echo esc_attr( (string) count( $social_links ) ); ?>">
+			<div class="mmsm-social-links-intro">
+				<div>
+					<span class="mmsm-settings-kicker"><?php echo esc_html__( 'Footer links', 'maneuvrez-maintenance-studio' ); ?></span>
+					<h3><?php echo esc_html__( 'Social Links', 'maneuvrez-maintenance-studio' ); ?></h3>
+					<p class="description"><?php echo esc_html__( 'Choose the platform and destination first. Icon overrides stay grouped under each row so the default path remains simple.', 'maneuvrez-maintenance-studio' ); ?></p>
+				</div>
+				<button type="button" class="button button-primary mmsm-add-social-item"><?php echo esc_html__( 'Add link', 'maneuvrez-maintenance-studio' ); ?></button>
+			</div>
+			<div class="mmsm-social-links-display-panel">
+				<?php
+				$this->render_select_field(
+					'social_links_display',
+					'mmsm-social-links-display',
+					__( 'Display style', 'maneuvrez-maintenance-studio' ),
+					array(
+						'icon_label' => __( 'Icon + label', 'maneuvrez-maintenance-studio' ),
+						'icon_only'  => __( 'Icon only', 'maneuvrez-maintenance-studio' ),
+					),
+					(string) $settings['social_links_display']
+				);
+				?>
+				<p class="description"><?php echo esc_html__( 'Icon-only keeps the label available to screen readers while hiding it visually.', 'maneuvrez-maintenance-studio' ); ?></p>
+			</div>
 			<div class="mmsm-social-links-list">
 				<?php foreach ( $social_links as $index => $social_item ) : ?>
 					<?php $this->render_social_link_row( $index, is_array( $social_item ) ? $social_item : $default_item, $platforms ); ?>
 				<?php endforeach; ?>
 			</div>
-			<p>
-				<button type="button" class="button button-secondary mmsm-add-social-item"><?php echo esc_html__( 'Add more', 'maneuvrez-maintenance-studio' ); ?></button>
-			</p>
 			<script type="text/template" class="mmsm-social-item-template">
 				<?php $this->render_social_link_row( '__INDEX__', $default_item, $platforms ); ?>
 			</script>
-			<p class="description"><?php echo esc_html__( 'Known platforms use built-in labels. Choose Custom only when you need a custom name and uploaded image icon.', 'maneuvrez-maintenance-studio' ); ?></p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the Contact Channels settings.
+	 *
+	 * @return void
+	 */
+	public function render_contact_channels_field() {
+		$settings      = $this->get_settings();
+		$items         = isset( $settings['contact_channels_items'] ) && is_array( $settings['contact_channels_items'] ) ? array_values( $settings['contact_channels_items'] ) : array();
+		$default_item  = $this->get_default_contact_channel_item();
+		$channel_types = ContactChannels::get_channel_type_labels();
+
+		if ( empty( $items ) ) {
+			$items = array( $default_item );
+		}
+		?>
+		<input type="hidden" name="mmsm_contact_channels_present" value="1" />
+		<div class="mmsm-contact-channels-builder" data-next-index="<?php echo esc_attr( (string) count( $items ) ); ?>">
+			<div class="mmsm-contact-channels-hero">
+				<div>
+					<span class="mmsm-contact-channels-eyebrow"><?php echo esc_html__( 'Visitor contact buttons', 'maneuvrez-maintenance-studio' ); ?></span>
+					<h3><?php echo esc_html__( 'Build a clear contact path', 'maneuvrez-maintenance-studio' ); ?></h3>
+					<p data-contact-channels-summary><?php echo esc_html__( 'Turn them on when you are ready to show visitor contact buttons.', 'maneuvrez-maintenance-studio' ); ?></p>
+				</div>
+				<div class="mmsm-contact-channels-hero-status" role="status" aria-live="polite">
+					<span class="mmsm-contact-channels-status-pill" data-contact-channels-status><?php echo esc_html__( 'Off', 'maneuvrez-maintenance-studio' ); ?></span>
+				</div>
+				<ol class="mmsm-contact-channels-steps" aria-label="<?php echo esc_attr__( 'Contact Channels setup progress', 'maneuvrez-maintenance-studio' ); ?>">
+					<li data-contact-step="enabled">
+						<span>1</span>
+						<strong><?php echo esc_html__( 'Enable', 'maneuvrez-maintenance-studio' ); ?></strong>
+						<em><?php echo esc_html__( 'Turn on the feature', 'maneuvrez-maintenance-studio' ); ?></em>
+					</li>
+					<li data-contact-step="display">
+						<span>2</span>
+						<strong><?php echo esc_html__( 'Place', 'maneuvrez-maintenance-studio' ); ?></strong>
+						<em><?php echo esc_html__( 'Choose where it appears', 'maneuvrez-maintenance-studio' ); ?></em>
+					</li>
+					<li data-contact-step="channels">
+						<span>3</span>
+						<strong><?php echo esc_html__( 'Connect', 'maneuvrez-maintenance-studio' ); ?></strong>
+						<em><?php echo esc_html__( 'Add at least one destination', 'maneuvrez-maintenance-studio' ); ?></em>
+					</li>
+				</ol>
+			</div>
+			<div class="mmsm-contact-channels-workspace">
+				<div class="mmsm-contact-channels-main">
+					<div class="mmsm-contact-channels-grid">
+						<div class="mmsm-contact-channels-panel mmsm-contact-channels-panel-visibility">
+					<h3><?php echo esc_html__( 'Visibility', 'maneuvrez-maintenance-studio' ); ?></h3>
+					<p>
+						<label for="mmsm-contact-channels-enabled">
+							<input
+								type="checkbox"
+								id="mmsm-contact-channels-enabled"
+								name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_enabled]"
+								value="1"
+								<?php checked( 1, (int) $settings['contact_channels_enabled'] ); ?>
+							/>
+							<?php echo esc_html__( 'Enable Contact Channels', 'maneuvrez-maintenance-studio' ); ?>
+						</label>
+					</p>
+					<div class="mmsm-contact-channels-enabled-fields">
+						<?php
+						$this->render_select_field(
+							'contact_channels_maintenance_display',
+							'mmsm-contact-channels-maintenance-display',
+							__( 'Show during maintenance', 'maneuvrez-maintenance-studio' ),
+							array(
+								'off'      => __( 'Off', 'maneuvrez-maintenance-studio' ),
+								'inside'   => __( 'Inside page', 'maneuvrez-maintenance-studio' ),
+								'floating' => __( 'Floating button', 'maneuvrez-maintenance-studio' ),
+								'both'     => __( 'Inside page and floating button', 'maneuvrez-maintenance-studio' ),
+							),
+							(string) $settings['contact_channels_maintenance_display']
+						);
+						$this->render_select_field(
+							'contact_channels_live_display',
+							'mmsm-contact-channels-live-display',
+							__( 'Show on live site', 'maneuvrez-maintenance-studio' ),
+							array(
+								'off'      => __( 'Off', 'maneuvrez-maintenance-studio' ),
+								'floating' => __( 'Floating button', 'maneuvrez-maintenance-studio' ),
+							),
+							(string) $settings['contact_channels_live_display']
+						);
+						?>
+						<div class="mmsm-contact-live-dependent">
+							<?php
+							$this->render_select_field(
+								'contact_channels_logged_in_visibility',
+								'mmsm-contact-channels-logged-in-visibility',
+								__( 'Live-site visibility for logged-in users', 'maneuvrez-maintenance-studio' ),
+								array(
+									'show_all'       => __( 'Show to visitors and logged-in users', 'maneuvrez-maintenance-studio' ),
+									'hide_admins'    => __( 'Hide for administrators', 'maneuvrez-maintenance-studio' ),
+									'hide_logged_in' => __( 'Hide for all logged-in users', 'maneuvrez-maintenance-studio' ),
+								),
+								(string) $settings['contact_channels_logged_in_visibility']
+							);
+							?>
+						</div>
+					</div>
+				</div>
+				<div class="mmsm-contact-channels-panel mmsm-contact-channels-panel-content mmsm-contact-display-dependent">
+					<h3><?php echo esc_html__( 'Content', 'maneuvrez-maintenance-studio' ); ?></h3>
+					<p class="mmsm-contact-maintenance-inside-dependent">
+						<label for="mmsm-contact-channels-heading"><?php echo esc_html__( 'Heading', 'maneuvrez-maintenance-studio' ); ?></label><br />
+						<input type="text" class="regular-text" id="mmsm-contact-channels-heading" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_heading]" value="<?php echo esc_attr( (string) $settings['contact_channels_heading'] ); ?>" />
+					</p>
+					<p class="mmsm-contact-maintenance-inside-dependent">
+						<label for="mmsm-contact-channels-description"><?php echo esc_html__( 'Description', 'maneuvrez-maintenance-studio' ); ?></label><br />
+						<input type="text" class="regular-text" id="mmsm-contact-channels-description" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_description]" value="<?php echo esc_attr( (string) $settings['contact_channels_description'] ); ?>" />
+					</p>
+					<p class="mmsm-contact-trigger-label-dependent">
+						<label for="mmsm-contact-channels-primary-label"><?php echo esc_html__( 'Floating button / reveal menu label', 'maneuvrez-maintenance-studio' ); ?></label><br />
+						<input type="text" class="regular-text" id="mmsm-contact-channels-primary-label" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_primary_label]" value="<?php echo esc_attr( (string) $settings['contact_channels_primary_label'] ); ?>" />
+						<span class="description"><?php echo esc_html__( 'Used for the floating button and the reveal menu trigger. Individual channel labels still appear inside button rows and menus.', 'maneuvrez-maintenance-studio' ); ?></span>
+					</p>
+					<div class="mmsm-contact-floating-dependent">
+						<?php
+						$this->render_select_field(
+							'contact_channels_position',
+							'mmsm-contact-channels-position',
+							__( 'Floating position', 'maneuvrez-maintenance-studio' ),
+							array(
+								'bottom_right' => __( 'Bottom right', 'maneuvrez-maintenance-studio' ),
+								'bottom_left'  => __( 'Bottom left', 'maneuvrez-maintenance-studio' ),
+								'top_right'    => __( 'Top right', 'maneuvrez-maintenance-studio' ),
+								'top_left'     => __( 'Top left', 'maneuvrez-maintenance-studio' ),
+							),
+							(string) $settings['contact_channels_position']
+						);
+						?>
+					</div>
+					<div class="mmsm-contact-maintenance-inside-dependent">
+						<?php
+						$this->render_select_field(
+							'contact_channels_display_style',
+							'mmsm-contact-channels-display-style',
+							__( 'Maintenance display style', 'maneuvrez-maintenance-studio' ),
+							array(
+								'auto'   => __( 'Auto', 'maneuvrez-maintenance-studio' ),
+								'row'    => __( 'Button row', 'maneuvrez-maintenance-studio' ),
+								'reveal' => __( 'Reveal menu', 'maneuvrez-maintenance-studio' ),
+							),
+							(string) $settings['contact_channels_display_style']
+						);
+						?>
+					</div>
+				</div>
+				<div class="mmsm-contact-channels-panel mmsm-contact-channels-panel-appearance mmsm-contact-display-dependent">
+					<h3><?php echo esc_html__( 'Appearance', 'maneuvrez-maintenance-studio' ); ?></h3>
+					<?php
+					$this->render_select_field(
+						'contact_channels_button_shape',
+						'mmsm-contact-channels-button-shape',
+						__( 'Button shape', 'maneuvrez-maintenance-studio' ),
+						array(
+							'rounded' => __( 'Rounded', 'maneuvrez-maintenance-studio' ),
+							'pill'    => __( 'Pill', 'maneuvrez-maintenance-studio' ),
+							'circle'  => __( 'Circle', 'maneuvrez-maintenance-studio' ),
+							'square'  => __( 'Square', 'maneuvrez-maintenance-studio' ),
+						),
+						(string) $settings['contact_channels_button_shape']
+					);
+					$this->render_select_field(
+						'contact_channels_button_display',
+						'mmsm-contact-channels-button-display',
+						__( 'Button display', 'maneuvrez-maintenance-studio' ),
+						array(
+							'icon_label' => __( 'Icon + label', 'maneuvrez-maintenance-studio' ),
+							'icon_only'  => __( 'Icon only', 'maneuvrez-maintenance-studio' ),
+							'label_only' => __( 'Label only', 'maneuvrez-maintenance-studio' ),
+						),
+						(string) $settings['contact_channels_button_display']
+					);
+					$this->render_select_field(
+						'contact_channels_color_mode',
+						'mmsm-contact-channels-color-mode',
+						__( 'Button color style', 'maneuvrez-maintenance-studio' ),
+						array(
+							'theme'  => __( 'Match site / maintenance theme', 'maneuvrez-maintenance-studio' ),
+							'brand'  => __( 'Use platform brand colors', 'maneuvrez-maintenance-studio' ),
+							'custom' => __( 'Custom colors', 'maneuvrez-maintenance-studio' ),
+						),
+						(string) $settings['contact_channels_color_mode']
+					);
+					?>
+					<p class="description"><?php echo esc_html__( 'Platform colors help visitors recognize each option. The plugin does not load official platform widgets or scripts.', 'maneuvrez-maintenance-studio' ); ?></p>
+					<div class="mmsm-contact-channel-custom-colors" data-contact-color-controls>
+						<div class="mmsm-contact-color-group" data-contact-color-group="colors">
+							<div class="mmsm-contact-color-group-header">
+								<strong><?php echo esc_html__( 'Colors', 'maneuvrez-maintenance-studio' ); ?></strong>
+								<div class="mmsm-contact-color-state-tabs" role="tablist" aria-label="<?php echo esc_attr__( 'Contact button color state', 'maneuvrez-maintenance-studio' ); ?>">
+									<button type="button" class="mmsm-contact-color-state-toggle is-active" data-contact-color-tab="colors-normal" aria-selected="true"><?php echo esc_html__( 'Normal', 'maneuvrez-maintenance-studio' ); ?></button>
+									<button type="button" class="mmsm-contact-color-state-toggle" data-contact-color-tab="colors-hover" aria-selected="false"><?php echo esc_html__( 'Hover', 'maneuvrez-maintenance-studio' ); ?></button>
+								</div>
+							</div>
+							<div class="mmsm-contact-color-panel is-active" data-contact-color-panel="colors-normal">
+								<div class="mmsm-contact-channel-color-row mmsm-contact-channel-color-row-trio">
+									<div class="mmsm-contact-channel-color-control">
+										<span class="mmsm-contact-channel-color-label"><?php echo esc_html__( 'Background', 'maneuvrez-maintenance-studio' ); ?></span>
+										<?php $this->render_color_picker_input( 'contact_channels_background_color', 'mmsm-contact-channels-background-color', __( 'Normal background color.', 'maneuvrez-maintenance-studio' ) ); ?>
+									</div>
+									<div class="mmsm-contact-channel-color-control">
+										<span class="mmsm-contact-channel-color-label"><?php echo esc_html__( 'Text', 'maneuvrez-maintenance-studio' ); ?></span>
+										<?php $this->render_color_picker_input( 'contact_channels_text_color', 'mmsm-contact-channels-text-color', __( 'Normal text color.', 'maneuvrez-maintenance-studio' ) ); ?>
+									</div>
+									<div class="mmsm-contact-channel-color-control">
+										<span class="mmsm-contact-channel-color-label"><?php echo esc_html__( 'Icon', 'maneuvrez-maintenance-studio' ); ?></span>
+										<?php $this->render_color_picker_input( 'contact_channels_icon_color', 'mmsm-contact-channels-icon-color', __( 'Normal icon color.', 'maneuvrez-maintenance-studio' ) ); ?>
+									</div>
+								</div>
+							</div>
+							<div class="mmsm-contact-color-panel" data-contact-color-panel="colors-hover">
+								<div class="mmsm-contact-channel-color-row mmsm-contact-channel-color-row-dual">
+									<div class="mmsm-contact-channel-color-control">
+										<span class="mmsm-contact-channel-color-label"><?php echo esc_html__( 'Background', 'maneuvrez-maintenance-studio' ); ?></span>
+										<?php $this->render_color_picker_input( 'contact_channels_hover_background_color', 'mmsm-contact-channels-hover-background-color', __( 'Hover background color.', 'maneuvrez-maintenance-studio' ) ); ?>
+									</div>
+									<div class="mmsm-contact-channel-color-control">
+										<span class="mmsm-contact-channel-color-label"><?php echo esc_html__( 'Text & icon', 'maneuvrez-maintenance-studio' ); ?></span>
+										<?php $this->render_color_picker_input( 'contact_channels_hover_text_color', 'mmsm-contact-channels-hover-text-color', __( 'Hover text and icon color.', 'maneuvrez-maintenance-studio' ) ); ?>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+					<div class="mmsm-contact-display-dependent">
+						<div class="mmsm-contact-channel-list-header">
+							<div>
+								<h3 class="mmsm-contact-channel-list-title"><?php echo esc_html__( 'Channels', 'maneuvrez-maintenance-studio' ); ?></h3>
+								<p class="description"><?php echo esc_html__( 'Start with a channel type and destination. Optional label, icon, and link behavior stay tucked under More options.', 'maneuvrez-maintenance-studio' ); ?></p>
+							</div>
+							<button type="button" class="button button-primary mmsm-add-contact-channel"><?php echo esc_html__( 'Add channel', 'maneuvrez-maintenance-studio' ); ?></button>
+						</div>
+						<div class="mmsm-contact-channel-list">
+							<?php foreach ( $items as $index => $item ) : ?>
+								<?php $this->render_contact_channel_row( $index, is_array( $item ) ? $item : $default_item, $channel_types ); ?>
+							<?php endforeach; ?>
+						</div>
+						<script type="text/template" class="mmsm-contact-channel-template">
+							<?php $this->render_contact_channel_row( '__INDEX__', $default_item, $channel_types ); ?>
+						</script>
+					</div>
+				</div>
+				<aside class="mmsm-contact-channels-preview" aria-live="polite">
+					<div class="mmsm-contact-channels-preview-header">
+						<div>
+							<span class="mmsm-contact-channels-eyebrow"><?php echo esc_html__( 'Live preview', 'maneuvrez-maintenance-studio' ); ?></span>
+							<h3><?php echo esc_html__( 'Visitor view', 'maneuvrez-maintenance-studio' ); ?></h3>
+						</div>
+						<span class="mmsm-contact-channels-preview-count" data-contact-preview-count><?php echo esc_html__( '0 ready', 'maneuvrez-maintenance-studio' ); ?></span>
+					</div>
+					<div class="mmsm-contact-channels-preview-stage" data-contact-preview-stage>
+						<div class="mmsm-contact-channels-preview-card">
+							<strong data-contact-preview-heading><?php echo esc_html( (string) $settings['contact_channels_heading'] ); ?></strong>
+							<p data-contact-preview-description><?php echo esc_html( (string) $settings['contact_channels_description'] ); ?></p>
+							<div class="mmsm-contact-channels-preview-buttons" data-contact-preview-buttons></div>
+						</div>
+						<button type="button" class="mmsm-contact-channels-preview-floating" data-contact-preview-floating>
+							<span class="dashicons dashicons-format-chat" aria-hidden="true"></span>
+							<span data-contact-preview-floating-label><?php echo esc_html( (string) $settings['contact_channels_primary_label'] ); ?></span>
+						</button>
+					</div>
+					<p class="description" data-contact-preview-note><?php echo esc_html__( 'Preview updates as you choose placement, labels, colors, and destinations.', 'maneuvrez-maintenance-studio' ); ?></p>
+				</aside>
+			</div>
 		</div>
 		<?php
 	}
@@ -1592,6 +1959,165 @@ class Admin {
 	}
 
 	/**
+	 * Render a standard select field.
+	 *
+	 * @param string               $key Field key.
+	 * @param string               $id Input id.
+	 * @param string               $label Field label.
+	 * @param array<string,string> $choices Select choices.
+	 * @param string               $current Current value.
+	 * @return void
+	 */
+	private function render_select_field( $key, $id, $label, array $choices, $current ) {
+		?>
+		<p>
+			<label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $label ); ?></label><br />
+			<select
+				id="<?php echo esc_attr( $id ); ?>"
+				name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[<?php echo esc_attr( $key ); ?>]"
+			>
+				<?php foreach ( $choices as $value => $choice_label ) : ?>
+					<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $current, (string) $value ); ?>>
+						<?php echo esc_html( $choice_label ); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render a single Contact Channels repeater row.
+	 *
+	 * @param int|string           $index Row index.
+	 * @param array<string,mixed>  $item Channel item values.
+	 * @param array<string,string> $channel_types Supported channel types.
+	 * @return void
+	 */
+	private function render_contact_channel_row( $index, array $item, array $channel_types ) {
+		$type          = isset( $item['type'] ) ? (string) $item['type'] : 'whatsapp';
+		$country_code  = isset( $item['country_code'] ) ? (string) $item['country_code'] : '';
+		$value         = isset( $item['value'] ) ? (string) $item['value'] : '';
+		$display_value = $this->get_contact_channel_display_value( $type, $value, $country_code );
+		$label         = isset( $item['label'] ) ? (string) $item['label'] : '';
+		$message       = isset( $item['prefilled_message'] ) ? (string) $item['prefilled_message'] : '';
+		$icon_source   = isset( $item['icon_source'] ) ? (string) $item['icon_source'] : 'default';
+		$icon_value    = isset( $item['icon_value'] ) ? (string) $item['icon_value'] : '';
+		$open_new_tab  = ! empty( $item['open_new_tab'] );
+		$country_codes = ContactChannels::get_country_codes();
+		$icon_sources  = ContactChannels::get_icon_source_labels();
+		$dashicons     = ContactChannels::get_dashicon_choices();
+		?>
+		<div class="mmsm-contact-channel-item" data-contact-channel-item>
+			<div class="mmsm-contact-channel-toolbar">
+				<div class="mmsm-contact-channel-heading">
+					<span class="mmsm-contact-channel-icon-preview dashicons dashicons-format-chat" data-contact-channel-icon-preview aria-hidden="true"></span>
+					<div>
+						<strong data-contact-channel-summary><?php echo esc_html__( 'Contact channel', 'maneuvrez-maintenance-studio' ); ?></strong>
+						<span class="mmsm-contact-channel-subsummary" data-contact-channel-subsummary><?php echo esc_html__( 'Choose a destination before this row can render.', 'maneuvrez-maintenance-studio' ); ?></span>
+					</div>
+				</div>
+				<div class="mmsm-contact-channel-actions">
+					<span class="mmsm-contact-channel-state" data-contact-channel-state><?php echo esc_html__( 'Needs destination', 'maneuvrez-maintenance-studio' ); ?></span>
+					<button type="button" class="button-link-delete mmsm-remove-contact-channel"><?php echo esc_html__( 'Remove', 'maneuvrez-maintenance-studio' ); ?></button>
+				</div>
+			</div>
+			<div class="mmsm-contact-channel-fields">
+				<p>
+					<label><?php echo esc_html__( 'Type', 'maneuvrez-maintenance-studio' ); ?></label><br />
+					<select class="mmsm-contact-channel-type" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_items][<?php echo esc_attr( (string) $index ); ?>][type]">
+						<?php foreach ( $channel_types as $type_key => $type_label ) : ?>
+							<option value="<?php echo esc_attr( $type_key ); ?>" <?php selected( $type, $type_key ); ?>>
+								<?php echo esc_html( $type_label ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</p>
+				<p class="mmsm-contact-channel-country-field">
+					<label><?php echo esc_html__( 'Country code', 'maneuvrez-maintenance-studio' ); ?></label><br />
+					<select class="mmsm-contact-channel-country-code" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_items][<?php echo esc_attr( (string) $index ); ?>][country_code]">
+						<?php foreach ( $country_codes as $code => $code_label ) : ?>
+							<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $country_code, $code ); ?>>
+								<?php echo esc_html( $code_label ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</p>
+				<p>
+					<label class="mmsm-contact-channel-value-label"><?php echo esc_html__( 'Destination', 'maneuvrez-maintenance-studio' ); ?></label><br />
+					<input
+						type="text"
+						class="regular-text code mmsm-contact-channel-value"
+						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_items][<?php echo esc_attr( (string) $index ); ?>][value]"
+						value="<?php echo esc_attr( $display_value ); ?>"
+						placeholder="+923001234567, page-name, hello@example.com, or https://"
+					/>
+					<span class="mmsm-contact-channel-help" data-contact-channel-help></span>
+				</p>
+			</div>
+			<details class="mmsm-contact-channel-options">
+				<summary><?php echo esc_html__( 'More options', 'maneuvrez-maintenance-studio' ); ?></summary>
+				<div class="mmsm-contact-channel-option-fields">
+					<p>
+						<label><?php echo esc_html__( 'Button label', 'maneuvrez-maintenance-studio' ); ?></label><br />
+						<input
+							type="text"
+							class="regular-text mmsm-contact-channel-label-input"
+							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_items][<?php echo esc_attr( (string) $index ); ?>][label]"
+							value="<?php echo esc_attr( $label ); ?>"
+							placeholder="<?php echo esc_attr( ContactChannels::get_default_labels()[ $type ] ?? __( 'Contact Us', 'maneuvrez-maintenance-studio' ) ); ?>"
+						/>
+					</p>
+					<p class="mmsm-contact-channel-message-field">
+						<label><?php echo esc_html__( 'WhatsApp prefilled message', 'maneuvrez-maintenance-studio' ); ?></label><br />
+						<input
+							type="text"
+							class="regular-text"
+							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_items][<?php echo esc_attr( (string) $index ); ?>][prefilled_message]"
+							value="<?php echo esc_attr( $message ); ?>"
+						/>
+					</p>
+					<p>
+						<label><?php echo esc_html__( 'Icon', 'maneuvrez-maintenance-studio' ); ?></label><br />
+						<select class="mmsm-contact-channel-icon-source" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_items][<?php echo esc_attr( (string) $index ); ?>][icon_source]">
+							<?php foreach ( $icon_sources as $source_key => $source_label ) : ?>
+								<option value="<?php echo esc_attr( $source_key ); ?>" <?php selected( $icon_source, $source_key ); ?>>
+									<?php echo esc_html( $source_label ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</p>
+					<div class="mmsm-contact-channel-icon-value-field">
+						<input type="hidden" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_items][<?php echo esc_attr( (string) $index ); ?>][icon_library]" value="dashicons" />
+						<p>
+							<label><?php echo esc_html__( 'Dashicon', 'maneuvrez-maintenance-studio' ); ?></label><br />
+							<select name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_items][<?php echo esc_attr( (string) $index ); ?>][icon_value]">
+								<?php foreach ( $dashicons as $dashicon_key => $dashicon_label ) : ?>
+									<option value="<?php echo esc_attr( $dashicon_key ); ?>" <?php selected( $icon_value, $dashicon_key ); ?>>
+										<?php echo esc_html( $dashicon_label ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</p>
+					</div>
+					<p>
+						<label>
+							<input
+								type="checkbox"
+								name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_items][<?php echo esc_attr( (string) $index ); ?>][open_new_tab]"
+								value="1"
+								<?php checked( $open_new_tab ); ?>
+							/>
+							<?php echo esc_html__( 'Open in a new tab when supported.', 'maneuvrez-maintenance-studio' ); ?>
+						</label>
+					</p>
+				</div>
+			</details>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render a single social link repeater row.
 	 *
 	 * @param int|string               $index Row index.
@@ -1616,120 +2142,145 @@ class Admin {
 		$icon_sources    = SocialLinksComponent::get_icon_source_labels();
 		$icon_libraries  = SocialLinksComponent::get_icon_libraries();
 		$dashicons       = SocialLinksComponent::get_dashicon_choices();
+		$platform_label  = isset( $platforms[ $platform ] ) ? $platforms[ $platform ] : __( 'Social link', 'maneuvrez-maintenance-studio' );
+		$display_label   = $is_custom && '' !== $custom_name ? $custom_name : $platform_label;
 		?>
 		<div class="mmsm-social-item-group" data-social-item>
 			<div class="mmsm-social-item-toolbar">
-				<strong><?php echo esc_html__( 'Social item', 'maneuvrez-maintenance-studio' ); ?></strong>
-				<button type="button" class="button-link-delete mmsm-remove-social-item"><?php echo esc_html__( 'Remove', 'maneuvrez-maintenance-studio' ); ?></button>
-			</div>
-			<p>
-				<label><?php echo esc_html__( 'Platform', 'maneuvrez-maintenance-studio' ); ?></label><br />
-				<select
-					class="mmsm-social-platform-select"
-					name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][platform]"
-				>
-					<?php foreach ( $platforms as $platform_key => $platform_label ) : ?>
-						<option value="<?php echo esc_attr( $platform_key ); ?>" <?php selected( $platform, $platform_key ); ?>>
-							<?php echo esc_html( $platform_label ); ?>
-						</option>
-					<?php endforeach; ?>
-				</select>
-			</p>
-			<p>
-				<label><?php echo esc_html__( 'URL or Email', 'maneuvrez-maintenance-studio' ); ?></label><br />
-				<input
-					type="text"
-					class="regular-text code"
-					name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][url]"
-					value="<?php echo esc_attr( $url ); ?>"
-					placeholder="https://example.com or hello@example.com"
-				/>
-			</p>
-			<div class="mmsm-social-custom-fields<?php echo $is_custom ? '' : ' is-hidden'; ?>" data-custom-fields>
-				<p>
-					<label><?php echo esc_html__( 'Custom Platform Name', 'maneuvrez-maintenance-studio' ); ?></label><br />
-					<input
-						type="text"
-						class="regular-text"
-						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][custom_name]"
-						value="<?php echo esc_attr( $custom_name ); ?>"
-					/>
-				</p>
-			</div>
-			<div class="mmsm-social-icon-picker">
-				<p>
-					<label><?php echo esc_html__( 'Icon Source', 'maneuvrez-maintenance-studio' ); ?></label><br />
-					<select
-						class="mmsm-social-icon-source-select"
-						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_source]"
+				<div class="mmsm-social-item-heading">
+					<span
+						class="mmsm-social-item-icon-preview"
+						data-social-icon-preview
+						<?php if ( '' !== $icon_color ) : ?>
+							style="<?php echo esc_attr( 'color: ' . $icon_color . ';' ); ?>"
+						<?php endif; ?>
 					>
-						<?php foreach ( $icon_sources as $source_key => $source_label ) : ?>
-							<option value="<?php echo esc_attr( $source_key ); ?>" <?php selected( $icon_source, $source_key ); ?>>
-								<?php echo esc_html( $source_label ); ?>
+						<?php echo SocialLinksComponent::get_platform_icon_markup( $platform ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</span>
+					<div>
+						<strong data-social-item-summary><?php echo esc_html( $display_label ); ?></strong>
+						<span class="mmsm-social-item-subsummary" data-social-item-subsummary><?php echo esc_html( '' !== $url ? $url : __( 'Add a destination URL or email.', 'maneuvrez-maintenance-studio' ) ); ?></span>
+					</div>
+				</div>
+				<div class="mmsm-social-item-actions">
+					<span class="mmsm-social-item-state" data-social-item-state><?php echo esc_html( '' !== $url ? __( 'Ready', 'maneuvrez-maintenance-studio' ) : __( 'Needs URL', 'maneuvrez-maintenance-studio' ) ); ?></span>
+					<button type="button" class="button-link-delete mmsm-remove-social-item"><?php echo esc_html__( 'Remove', 'maneuvrez-maintenance-studio' ); ?></button>
+				</div>
+			</div>
+			<div class="mmsm-social-item-primary-fields">
+				<p>
+					<label><?php echo esc_html__( 'Platform', 'maneuvrez-maintenance-studio' ); ?></label><br />
+					<select
+						class="mmsm-social-platform-select"
+						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][platform]"
+					>
+						<?php foreach ( $platforms as $platform_key => $choice_label ) : ?>
+							<option value="<?php echo esc_attr( $platform_key ); ?>" <?php selected( $platform, $platform_key ); ?>>
+								<?php echo esc_html( $choice_label ); ?>
 							</option>
 						<?php endforeach; ?>
 					</select>
 				</p>
-				<div class="mmsm-social-icon-library-fields<?php echo $is_library ? '' : ' is-hidden'; ?>" data-icon-library-fields>
-					<p>
-						<label><?php echo esc_html__( 'Icon Library', 'maneuvrez-maintenance-studio' ); ?></label><br />
-						<select
-							class="mmsm-social-icon-library-select"
-							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_library]"
-						>
-							<?php foreach ( $icon_libraries as $library_key => $library ) : ?>
-								<option value="<?php echo esc_attr( $library_key ); ?>" <?php selected( $icon_library, $library_key ); ?>>
-									<?php echo esc_html( isset( $library['label'] ) ? (string) $library['label'] : $library_key ); ?>
-								</option>
-							<?php endforeach; ?>
-						</select>
-					</p>
-					<p>
-						<label><?php echo esc_html__( 'Library Icon', 'maneuvrez-maintenance-studio' ); ?></label><br />
-						<select
-							class="mmsm-social-icon-value-select"
-							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_value]"
-						>
-							<?php foreach ( $dashicons as $dashicon_key => $dashicon_label ) : ?>
-								<option value="<?php echo esc_attr( $dashicon_key ); ?>" <?php selected( $icon_value, $dashicon_key ); ?>>
-									<?php echo esc_html( $dashicon_label ); ?>
-								</option>
-							<?php endforeach; ?>
-						</select>
-					</p>
-				</div>
-				<div class="mmsm-social-icon-upload-fields<?php echo $is_upload ? '' : ' is-hidden'; ?>" data-icon-upload-fields>
-					<input
-						type="hidden"
-						class="mmsm-social-icon-id"
-						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][custom_icon_id]"
-						value="<?php echo esc_attr( (string) $custom_icon_id ); ?>"
-					/>
-					<div class="mmsm-social-icon-preview-wrap">
-						<img
-							class="mmsm-social-icon-preview<?php echo empty( $custom_icon_url ) ? ' is-hidden' : ''; ?>"
-							src="<?php echo esc_url( ! empty( $custom_icon_url ) ? $custom_icon_url : '' ); ?>"
-							alt=""
-						/>
-					</div>
-					<p>
-						<button type="button" class="button mmsm-upload-social-icon"><?php echo esc_html__( 'Choose icon', 'maneuvrez-maintenance-studio' ); ?></button>
-						<button type="button" class="button-link-delete mmsm-remove-social-icon<?php echo 0 === $custom_icon_id ? ' is-hidden' : ''; ?>"><?php echo esc_html__( 'Remove icon', 'maneuvrez-maintenance-studio' ); ?></button>
-					</p>
-					<p class="description"><?php echo esc_html__( 'Uploaded icons use the media library. PNG, JPG, and WEBP are accepted.', 'maneuvrez-maintenance-studio' ); ?></p>
-				</div>
 				<p>
-					<label><?php echo esc_html__( 'Icon Color', 'maneuvrez-maintenance-studio' ); ?></label><br />
+					<label><?php echo esc_html__( 'Destination', 'maneuvrez-maintenance-studio' ); ?></label><br />
 					<input
 						type="text"
-						class="mmsm-color-picker mmsm-social-icon-color-picker"
-						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_color]"
-						value="<?php echo esc_attr( $icon_color ); ?>"
-						data-default-color=""
+						class="regular-text code mmsm-social-url-input"
+						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][url]"
+						value="<?php echo esc_attr( $url ); ?>"
+						placeholder="https://example.com"
 					/>
 				</p>
-				<p class="description"><?php echo esc_html__( 'Applies to built-in and library icons. Uploaded image icons keep their original colors.', 'maneuvrez-maintenance-studio' ); ?></p>
 			</div>
+			<div class="mmsm-social-custom-fields<?php echo $is_custom ? '' : ' is-hidden'; ?>" data-custom-fields>
+				<p>
+					<label><?php echo esc_html__( 'Custom platform name', 'maneuvrez-maintenance-studio' ); ?></label><br />
+					<input
+						type="text"
+						class="regular-text mmsm-social-custom-name-input"
+						name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][custom_name]"
+						value="<?php echo esc_attr( $custom_name ); ?>"
+						placeholder="<?php echo esc_attr__( 'Community, Store, Support...', 'maneuvrez-maintenance-studio' ); ?>"
+					/>
+				</p>
+			</div>
+			<details class="mmsm-social-icon-options" <?php echo ( $is_library || $is_upload || '' !== $icon_color ) ? 'open' : ''; ?>>
+				<summary><?php echo esc_html__( 'Icon options', 'maneuvrez-maintenance-studio' ); ?></summary>
+				<div class="mmsm-social-icon-picker">
+					<p>
+						<label><?php echo esc_html__( 'Icon source', 'maneuvrez-maintenance-studio' ); ?></label><br />
+						<select
+							class="mmsm-social-icon-source-select"
+							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_source]"
+						>
+							<?php foreach ( $icon_sources as $source_key => $source_label ) : ?>
+								<option value="<?php echo esc_attr( $source_key ); ?>" <?php selected( $icon_source, $source_key ); ?>>
+									<?php echo esc_html( $source_label ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</p>
+					<div class="mmsm-social-icon-library-fields<?php echo $is_library ? '' : ' is-hidden'; ?>" data-icon-library-fields>
+						<p>
+							<label><?php echo esc_html__( 'Icon library', 'maneuvrez-maintenance-studio' ); ?></label><br />
+							<select
+								class="mmsm-social-icon-library-select"
+								name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_library]"
+							>
+								<?php foreach ( $icon_libraries as $library_key => $library ) : ?>
+									<option value="<?php echo esc_attr( $library_key ); ?>" <?php selected( $icon_library, $library_key ); ?>>
+										<?php echo esc_html( isset( $library['label'] ) ? (string) $library['label'] : $library_key ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</p>
+						<p>
+							<label><?php echo esc_html__( 'Dashicon', 'maneuvrez-maintenance-studio' ); ?></label><br />
+							<select
+								class="mmsm-social-icon-value-select"
+								name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_value]"
+							>
+								<?php foreach ( $dashicons as $dashicon_key => $dashicon_label ) : ?>
+									<option value="<?php echo esc_attr( $dashicon_key ); ?>" <?php selected( $icon_value, $dashicon_key ); ?>>
+										<?php echo esc_html( $dashicon_label ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</p>
+					</div>
+					<div class="mmsm-social-icon-upload-fields<?php echo $is_upload ? '' : ' is-hidden'; ?>" data-icon-upload-fields>
+						<input
+							type="hidden"
+							class="mmsm-social-icon-id"
+							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][custom_icon_id]"
+							value="<?php echo esc_attr( (string) $custom_icon_id ); ?>"
+						/>
+						<div class="mmsm-social-icon-preview-wrap">
+							<img
+								class="mmsm-social-icon-preview<?php echo empty( $custom_icon_url ) ? ' is-hidden' : ''; ?>"
+								src="<?php echo esc_url( ! empty( $custom_icon_url ) ? $custom_icon_url : '' ); ?>"
+								alt=""
+							/>
+						</div>
+						<p>
+							<button type="button" class="button mmsm-upload-social-icon"><?php echo esc_html__( 'Choose icon', 'maneuvrez-maintenance-studio' ); ?></button>
+							<button type="button" class="button-link-delete mmsm-remove-social-icon<?php echo 0 === $custom_icon_id ? ' is-hidden' : ''; ?>"><?php echo esc_html__( 'Remove icon', 'maneuvrez-maintenance-studio' ); ?></button>
+						</p>
+						<p class="description"><?php echo esc_html__( 'Uploaded icons use the media library. PNG, JPG, and WEBP are accepted.', 'maneuvrez-maintenance-studio' ); ?></p>
+					</div>
+					<p>
+						<label><?php echo esc_html__( 'Icon color', 'maneuvrez-maintenance-studio' ); ?></label><br />
+						<input
+							type="text"
+							class="mmsm-color-picker mmsm-social-icon-color-picker"
+							name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[social_links][<?php echo esc_attr( (string) $index ); ?>][icon_color]"
+							value="<?php echo esc_attr( $icon_color ); ?>"
+							data-default-color=""
+						/>
+					</p>
+					<p class="description"><?php echo esc_html__( 'The preview updates as you switch sources. Uploaded image icons keep their original colors.', 'maneuvrez-maintenance-studio' ); ?></p>
+				</div>
+			</details>
 			<p>
 				<label>
 					<input
@@ -1762,6 +2313,54 @@ class Admin {
 			'icon_color'     => '',
 			'open_new_tab'   => 1,
 		);
+	}
+
+	/**
+	 * Return the default admin Contact Channels row.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_default_contact_channel_item() {
+		return array(
+			'type'              => 'whatsapp',
+			'country_code'      => '',
+			'value'             => '',
+			'label'             => '',
+			'prefilled_message' => '',
+			'icon_source'       => 'default',
+			'icon_library'      => 'dashicons',
+			'icon_value'        => '',
+			'open_new_tab'      => 1,
+		);
+	}
+
+	/**
+	 * Return the value shown in the destination field for paired phone controls.
+	 *
+	 * @param string $type Channel type.
+	 * @param string $value Saved value.
+	 * @param string $country_code Saved country code.
+	 * @return string
+	 */
+	private function get_contact_channel_display_value( $type, $value, $country_code ) {
+		if ( ! in_array( $type, array( 'whatsapp', 'phone' ), true ) || '' === $country_code || '' === $value ) {
+			return $value;
+		}
+
+		$country_digits = preg_replace( '/\D+/', '', $country_code );
+		$value_digits   = preg_replace( '/\D+/', '', $value );
+
+		if ( ! is_string( $country_digits ) || ! is_string( $value_digits ) || '' === $country_digits ) {
+			return $value;
+		}
+
+		if ( 0 !== strpos( $value_digits, $country_digits ) ) {
+			return $value;
+		}
+
+		$local_value = substr( $value_digits, strlen( $country_digits ) );
+
+		return '' === $local_value ? $value : $local_value;
 	}
 
 	/**
@@ -1812,26 +2411,37 @@ class Admin {
 			'general'      => array(
 				'label'   => __( 'General', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_general_section',
+				'icon'    => 'dashicons-admin-settings',
 			),
 			'template'     => array(
 				'label'   => __( 'Template', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_template_section',
+				'icon'    => 'dashicons-layout',
 			),
 			'design'       => array(
 				'label'   => __( 'Design', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_design_section',
+				'icon'    => 'dashicons-admin-appearance',
 			),
 			'components'   => array(
 				'label'   => __( 'Components', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_components_section',
+				'icon'    => 'dashicons-screenoptions',
+			),
+			'contact_channels' => array(
+				'label'   => __( 'Contact Channels', 'maneuvrez-maintenance-studio' ),
+				'section' => 'mmsm_contact_channels_section',
+				'icon'    => 'dashicons-format-chat',
 			),
 			'social_links' => array(
 				'label'   => __( 'Social Links', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_social_links_section',
+				'icon'    => 'dashicons-share',
 			),
 			'advanced'     => array(
 				'label'   => __( 'Advanced', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_advanced_section',
+				'icon'    => 'dashicons-admin-tools',
 			),
 		);
 	}
@@ -1862,16 +2472,17 @@ class Admin {
 		$active_tab = $this->get_active_tab();
 		$section_id = $tabs[ $active_tab ]['section'];
 
-		$this->render_section_fields( $section_id );
+		$this->render_section_fields( $section_id, $active_tab );
 	}
 
 	/**
 	 * Render a registered section title, description, and fields.
 	 *
 	 * @param string $section_id Settings section id.
+	 * @param string $active_tab Active tab key.
 	 * @return void
 	 */
-	private function render_section_fields( $section_id ) {
+	private function render_section_fields( $section_id, $active_tab ) {
 		global $wp_settings_sections, $wp_settings_fields;
 
 		if ( ! isset( $wp_settings_sections[ $this->page_slug ][ $section_id ] ) ) {
@@ -1881,7 +2492,7 @@ class Admin {
 		$section = $wp_settings_sections[ $this->page_slug ][ $section_id ];
 		$has_fields = ! empty( $wp_settings_fields[ $this->page_slug ][ $section_id ] );
 		?>
-		<div class="mmsm-settings-panel">
+		<div class="<?php echo esc_attr( 'mmsm-settings-panel mmsm-settings-panel-' . $active_tab ); ?>">
 			<?php if ( ! empty( $section['title'] ) ) : ?>
 				<h2 class="title"><?php echo esc_html( $section['title'] ); ?></h2>
 			<?php endif; ?>
@@ -2057,7 +2668,28 @@ class Admin {
 				'contact_message',
 				'contact_email',
 			),
+			'contact_channels' => array(
+				'contact_channels_enabled',
+				'contact_channels_maintenance_display',
+				'contact_channels_live_display',
+				'contact_channels_logged_in_visibility',
+				'contact_channels_display_style',
+				'contact_channels_heading',
+				'contact_channels_description',
+				'contact_channels_primary_label',
+				'contact_channels_position',
+				'contact_channels_button_shape',
+				'contact_channels_button_display',
+				'contact_channels_color_mode',
+				'contact_channels_background_color',
+				'contact_channels_text_color',
+				'contact_channels_icon_color',
+				'contact_channels_hover_background_color',
+				'contact_channels_hover_text_color',
+				'contact_channels_items',
+			),
 			'social_links' => array(
+				'social_links_display',
 				'social_links',
 				'social_x_url',
 				'social_instagram_url',

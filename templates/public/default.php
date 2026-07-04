@@ -45,6 +45,14 @@ defined( 'ABSPATH' ) || exit;
 			<?php endif; ?>
 		</main>
 	</div>
+	<?php
+	if (
+		! empty( $settings['contact_channels_enabled'] )
+		&& in_array( (string) $settings['contact_channels_maintenance_display'], array( 'floating', 'both' ), true )
+	) {
+		echo Maneuvrez\MaintenanceModeStudio\Components\ContactChannelsComponent::render_floating( $settings, 'maintenance' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+	?>
 	<?php wp_print_scripts( $context['assets']['scripts'] ); ?>
 </body>
 </html>
