@@ -39,7 +39,7 @@ class TemplateRegistry {
 						),
 					),
 					'layout'      => array(
-					'main'   => array( 'hero', 'status_progress', 'contact_reveal' ),
+					'main'   => array( 'hero', 'status_progress', 'contact_reveal', 'contact_channels' ),
 					'footer' => array( 'social_links', 'login' ),
 				),
 			),

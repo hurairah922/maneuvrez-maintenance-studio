@@ -10,6 +10,7 @@ namespace Maneuvrez\MaintenanceModeStudio\Frontend;
 use Maneuvrez\MaintenanceModeStudio\Components\ComponentRegistry;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
+use Maneuvrez\MaintenanceModeStudio\Support\ContactChannels;
 use Maneuvrez\MaintenanceModeStudio\Support\Escaper;
 
 defined( 'ABSPATH' ) || exit;
@@ -176,6 +177,22 @@ class TemplateRenderer {
 	 * @return bool
 	 */
 	private function should_enqueue_dashicons( array $settings ) {
+		if ( ! empty( $settings['contact_channels_enabled'] ) && ContactChannels::needs_dashicons( $settings ) ) {
+			$display = isset( $settings['contact_channels_maintenance_display'] ) ? (string) $settings['contact_channels_maintenance_display'] : 'inside';
+
+			if ( in_array( $display, array( 'inside', 'floating', 'both' ), true ) ) {
+				return true;
+			}
+		}
+
+		if ( ! empty( $settings['contact_channels_enabled'] ) && 'label_only' !== (string) ( $settings['contact_channels_button_display'] ?? '' ) ) {
+			$display = isset( $settings['contact_channels_maintenance_display'] ) ? (string) $settings['contact_channels_maintenance_display'] : 'inside';
+
+			if ( in_array( $display, array( 'floating', 'both' ), true ) && count( ContactChannels::build_items( $settings ) ) > 1 ) {
+				return true;
+			}
+		}
+
 		$social_links = isset( $settings['social_links'] ) && is_array( $settings['social_links'] ) ? $settings['social_links'] : array();
 
 		foreach ( $social_links as $item ) {
@@ -186,7 +203,7 @@ class TemplateRenderer {
 			$icon_source  = isset( $item['icon_source'] ) ? sanitize_key( $item['icon_source'] ) : '';
 			$icon_library = isset( $item['icon_library'] ) ? sanitize_key( $item['icon_library'] ) : '';
 
-			if ( 'library' === $icon_source && 'dashicons' === $icon_library ) {
+			if ( '' === $icon_source || 'platform' === $icon_source || ( 'library' === $icon_source && 'dashicons' === $icon_library ) ) {
 				return true;
 			}
 		}

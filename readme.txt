@@ -1,26 +1,29 @@
 === Maneuvrez Maintenance Studio ===
 Contributors: hurairah922
-Tags: maintenance mode, coming soon, maintenance page, admin bypass, social links
+Tags: maintenance mode, coming soon, maintenance page, contact buttons, social links
 Requires at least: 6.4
 Tested up to: 7.0
-Stable tag: 1.0.2
+Stable tag: 1.1.1
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Create a responsive maintenance or coming soon page with custom copy, colors, contact details, social links, login access, testing bypasses, optional hidden login routing, and administrator bypass.
+Create a responsive maintenance or coming soon page with custom design, contact buttons, social links, login access, and bypass controls.
 
 == Description ==
 
 Maneuvrez Maintenance Studio helps WordPress site owners replace the default downtime screen with a polished maintenance or coming soon page.
 
-This release includes:
+Core features include:
 
 * custom page title and message settings
 * maintenance mode and coming soon mode
-* customizable colors for the default template
-* contact details, social links, login access controls, optional testing bypasses, and an optional custom login URL
-* administrator bypass behavior
+* customizable colors for the default template with live design preview
+* Contact Channels for WhatsApp, Messenger, phone, email, directions, and custom links
+* optional live-site floating contact button after maintenance mode is turned off
+* social links with platform defaults, WordPress Dashicons, uploads, and icon-only display
+* login access controls, optional testing bypasses, and an optional custom login URL
+* administrator bypass behavior for logged-in site managers
 * a responsive default public template
 
 == Installation ==
@@ -39,11 +42,37 @@ No. Logged-in administrators keep normal access to the site.
 
 Yes. REST, AJAX, cron, and WP-CLI requests remain accessible. You can optionally move the public login screen to a custom URL, and the plugin keeps required logout and password-recovery flows working.
 
+= Do Contact Channels load third-party chat widgets? =
+
+No. Contact Channels render normal links for services such as WhatsApp, Messenger, phone, email, maps, and custom URLs. The plugin does not load third-party chat SDKs, tracking pixels, or embedded widgets for those buttons.
+
+= Can Contact Channels appear after maintenance mode is off? =
+
+Yes. You can show an optional floating contact button on the live site, and choose whether logged-in users or administrators should see it.
+
 = What should I do before enabling a custom login URL? =
 
 Save the generated login URL somewhere safe first. If you lose it, disable the plugin through FTP or WP-CLI to restore the default WordPress login entry points.
 
 == Changelog ==
+
+= 1.1.1 =
+
+* correct plugin author information
+
+= 1.1.0 =
+
+* add a dedicated Contact Channels settings tab with WhatsApp, Messenger, phone, email, directions, and custom link rows
+* add maintenance-page and live-site display controls for Contact Channels, including inside-page buttons, reveal menus, and floating buttons
+* add live Contact Channels previews that update while changing placement, labels, colors, icons, destinations, and button style
+* add floating button positions for top left, top right, bottom left, and bottom right
+* add grouped normal and hover color controls for Contact Channels buttons, including background, text, and icon colors
+* add country code pairing for phone and WhatsApp rows to avoid duplicated country codes when settings are saved again
+* add WordPress Dashicon choices for Contact Channels and social links so icons render from assets available in WordPress
+* add social link display options for icon-only or icon-plus-label output while keeping labels available to screen readers
+* improve the Social Links admin builder with clearer rows, icon previews, destination states, and grouped icon options
+* redesign the settings screen with a sidebar-style navigation layout, clearer panels, and a live Design-tab color preview
+* fix single-channel floating Contact Channels buttons so the configured floating button label is used on the live site
 
 = 1.0.2 =
 
