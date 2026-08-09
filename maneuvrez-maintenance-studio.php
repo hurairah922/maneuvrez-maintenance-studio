@@ -2,9 +2,9 @@
 /**
  * Plugin Name: Maneuvrez Maintenance Studio
  * Description: Create responsive maintenance pages, coming soon pages, launch screens, progress updates, and visitor access controls for WordPress.
- * Version: 1.2.0
- * Author: Abu Hurarrah
- * Author URI: https://abuhurarrah.com
+ * Version: 1.2.1
+ * Author: Maneuvrez
+ * Author URI: https://www.maneuvrez.com
  * Text Domain: maneuvrez-maintenance-studio
  * Domain Path: /languages
  * License: GPL-2.0-or-later
@@ -14,7 +14,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'MMSM_VERSION' ) ) {
-	define( 'MMSM_VERSION', '1.2.0' );
+	define( 'MMSM_VERSION', '1.2.1' );
 }
 
 if ( ! defined( 'MMSM_PLUGIN_FILE' ) ) {

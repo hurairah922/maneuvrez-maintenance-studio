@@ -3,7 +3,7 @@ Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page, contact buttons, social links
 Requires at least: 6.4
 Tested up to: 7.0
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -61,6 +61,10 @@ Save the generated login URL somewhere safe first. If you lose it, disable the p
 
 == Changelog ==
 
+= 1.2.1 =
+
+* update public plugin author branding to Maneuvrez
+
 = 1.2.0 =
 
 * add a configurable maintenance-page countdown using the WordPress site timezone
@@ -69,10 +73,6 @@ Save the generated login URL somewhere safe first. If you lose it, disable the p
 * add completion actions to hold at zero, hide the countdown, show a message, or turn off maintenance mode
 * add one-time expiry scheduling, stale-event cleanup, request-time fallback, and a simple admin scheduling health check
 * add a live countdown settings preview that follows the entered target time and remains visible beside the settings on wide screens
-
-= 1.1.1 =
-
-* correct plugin author information
 
 = 1.1.0 =
 
