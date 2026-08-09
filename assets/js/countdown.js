@@ -5,7 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	countdowns.forEach((countdown) => {
 		const target = Number.parseInt(countdown.dataset.targetTimestamp || '', 10) * 1000;
 		const values = countdown.querySelector('[data-mmsm-countdown-values]');
-		let intervalId = null;
+		const animationsEnabled = !reducedMotion && !countdown.classList.contains('mmsm-countdown-animation-none');
+		const animateDigits = !countdown.classList.contains('mmsm-countdown-scope-cards');
+		const animateCards = countdown.classList.contains('mmsm-countdown-scope-cards') || countdown.classList.contains('mmsm-countdown-scope-both');
+		let timeoutId = null;
 
 		if (!Number.isFinite(target) || target <= 0 || !values) {
 			return;
@@ -25,24 +28,38 @@ document.addEventListener('DOMContentLoaded', () => {
 				return;
 			}
 
+			const current = element.querySelector('[data-mmsm-countdown-current]') || element;
 			const nextValue = String(value).padStart(2, '0');
 
-			if (element.textContent === nextValue) {
+			if (current.textContent === nextValue) {
 				return;
 			}
 
-			element.textContent = nextValue;
+			element.dataset.previousValue = current.textContent;
+			current.textContent = nextValue;
 
-			if (!reducedMotion) {
+			if (animationsEnabled && animateDigits) {
 				element.classList.remove('is-ticking');
-				window.requestAnimationFrame(() => element.classList.add('is-ticking'));
+				// Force the browser to commit the reset so every changed digit animates.
+				void element.offsetWidth;
+				element.classList.add('is-ticking');
+			}
+
+			if (animationsEnabled && animateCards) {
+				const card = element.closest('.mmsm-countdown-unit');
+
+				if (card) {
+					card.classList.remove('is-ticking-card');
+					void card.offsetWidth;
+					card.classList.add('is-ticking-card');
+				}
 			}
 		};
 
 		const finish = () => {
-			if (intervalId !== null) {
-				window.clearInterval(intervalId);
-				intervalId = null;
+			if (timeoutId !== null) {
+				window.clearTimeout(timeoutId);
+				timeoutId = null;
 			}
 
 			if (countdown.dataset.completed === 'true') {
@@ -86,6 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		};
 
+		const scheduleNextUpdate = () => {
+			const millisecondsToNextSecond = 1000 - (Date.now() % 1000);
+			timeoutId = window.setTimeout(update, millisecondsToNextSecond + 20);
+		};
+
 		const update = () => {
 			const remaining = Math.max(0, Math.ceil((target - Date.now()) / 1000));
 
@@ -96,12 +118,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			if (remaining === 0) {
 				finish();
+				return;
 			}
+
+			scheduleNextUpdate();
 		};
 
 		update();
-		if (countdown.dataset.completed !== 'true') {
-			intervalId = window.setInterval(update, 1000);
-		}
+
+		document.addEventListener('visibilitychange', () => {
+			if (document.visibilityState !== 'visible' || countdown.dataset.completed === 'true') {
+				return;
+			}
+
+			if (timeoutId !== null) {
+				window.clearTimeout(timeoutId);
+			}
+
+			update();
+		});
 	});
 });

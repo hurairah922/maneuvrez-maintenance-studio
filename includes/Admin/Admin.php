@@ -973,6 +973,7 @@ class Admin {
 	public function render_countdown_section() {
 		$countdown = $this->get_maintenance_countdown();
 		$schedule  = $this->countdown_scheduler->get_status( CountdownService::INSTANCE_MAINTENANCE );
+		$remaining = $this->countdown_service->get_remaining_seconds( $countdown );
 		$preview_classes = array(
 			'mmsm-countdown-admin-preview',
 			! empty( $countdown['enabled'] ) ? '' : 'is-disabled',
@@ -980,6 +981,7 @@ class Admin {
 		$stage_classes = array(
 			'mmsm-countdown-admin-preview-stage',
 			'is-animation-' . sanitize_html_class( (string) $countdown['animation_style'] ),
+			'is-scope-' . sanitize_html_class( (string) $countdown['animation_scope'] ),
 		);
 		?>
 		<p><?php echo esc_html__( 'Schedule one countdown for the maintenance or coming-soon page. The selected time uses the WordPress site timezone.', 'maneuvrez-maintenance-studio' ); ?></p>
@@ -994,15 +996,15 @@ class Admin {
 				<div class="mmsm-countdown-admin-preview-grid">
 					<?php
 					$preview_units = array(
-						'days'    => array( 'value' => '12', 'label' => __( 'Days', 'maneuvrez-maintenance-studio' ) ),
-						'hours'   => array( 'value' => '08', 'label' => __( 'Hours', 'maneuvrez-maintenance-studio' ) ),
-						'minutes' => array( 'value' => '34', 'label' => __( 'Minutes', 'maneuvrez-maintenance-studio' ) ),
-						'seconds' => array( 'value' => '56', 'label' => __( 'Seconds', 'maneuvrez-maintenance-studio' ) ),
+						'days'    => array( 'value' => floor( $remaining / DAY_IN_SECONDS ), 'label' => __( 'Days', 'maneuvrez-maintenance-studio' ) ),
+						'hours'   => array( 'value' => floor( ( $remaining % DAY_IN_SECONDS ) / HOUR_IN_SECONDS ), 'label' => __( 'Hours', 'maneuvrez-maintenance-studio' ) ),
+						'minutes' => array( 'value' => floor( ( $remaining % HOUR_IN_SECONDS ) / MINUTE_IN_SECONDS ), 'label' => __( 'Minutes', 'maneuvrez-maintenance-studio' ) ),
+						'seconds' => array( 'value' => $remaining % MINUTE_IN_SECONDS, 'label' => __( 'Seconds', 'maneuvrez-maintenance-studio' ) ),
 					);
 					foreach ( $preview_units as $unit => $preview_unit ) :
 						?>
 						<div class="<?php echo empty( $countdown[ 'show_' . $unit ] ) ? 'is-hidden' : ''; ?>" data-countdown-preview-unit="<?php echo esc_attr( $unit ); ?>">
-							<b><?php echo esc_html( $preview_unit['value'] ); ?></b>
+							<b data-countdown-preview-value="<?php echo esc_attr( $unit ); ?>"><?php echo esc_html( str_pad( (string) $preview_unit['value'], 2, '0', STR_PAD_LEFT ) ); ?></b>
 							<span><?php echo esc_html( $preview_unit['label'] ); ?></span>
 						</div>
 					<?php endforeach; ?>
@@ -1083,8 +1085,9 @@ class Admin {
 		$countdown = $this->get_maintenance_countdown();
 		$timezone  = wp_timezone();
 		$local     = $this->countdown_service->format_local_datetime( (int) $countdown['target_timestamp'], $timezone );
+		$offset    = $timezone->getOffset( new \DateTimeImmutable( 'now', $timezone ) );
 		?>
-		<input type="datetime-local" id="mmsm-countdown-target" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][target_local]" value="<?php echo esc_attr( $local ); ?>" />
+		<input type="datetime-local" id="mmsm-countdown-target" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][target_local]" value="<?php echo esc_attr( $local ); ?>" data-saved-local="<?php echo esc_attr( $local ); ?>" data-saved-timestamp="<?php echo esc_attr( (string) $countdown['target_timestamp'] ); ?>" data-site-timezone="<?php echo esc_attr( $timezone->getName() ); ?>" data-site-offset="<?php echo esc_attr( (string) $offset ); ?>" />
 		<p class="description">
 			<?php
 			echo esc_html(
@@ -1183,11 +1186,21 @@ class Admin {
 	public function render_countdown_appearance_field() {
 		$countdown = $this->get_maintenance_countdown();
 		?>
-		<p><label for="mmsm-countdown-animation"><strong><?php echo esc_html__( 'Number animation', 'maneuvrez-maintenance-studio' ); ?></strong></label><br />
+		<p><label for="mmsm-countdown-animation"><strong><?php echo esc_html__( 'Animation style', 'maneuvrez-maintenance-studio' ); ?></strong></label><br />
 		<select id="mmsm-countdown-animation" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][animation_style]">
 			<option value="none" <?php selected( $countdown['animation_style'], 'none' ); ?>><?php echo esc_html__( 'None', 'maneuvrez-maintenance-studio' ); ?></option>
-			<option value="pulse" <?php selected( $countdown['animation_style'], 'pulse' ); ?>><?php echo esc_html__( 'Pulse', 'maneuvrez-maintenance-studio' ); ?></option>
-			<option value="slide" <?php selected( $countdown['animation_style'], 'slide' ); ?>><?php echo esc_html__( 'Slide', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="fade" <?php selected( $countdown['animation_style'], 'fade' ); ?>><?php echo esc_html__( 'Soft fade', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="slide" <?php selected( $countdown['animation_style'], 'slide' ); ?>><?php echo esc_html__( 'Smooth slide', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="flip" <?php selected( $countdown['animation_style'], 'flip' ); ?>><?php echo esc_html__( 'Flip card', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="pulse" <?php selected( $countdown['animation_style'], 'pulse' ); ?>><?php echo esc_html__( 'Soft pulse', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="bounce" <?php selected( $countdown['animation_style'], 'bounce' ); ?>><?php echo esc_html__( 'Bounce', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="roll" <?php selected( $countdown['animation_style'], 'roll' ); ?>><?php echo esc_html__( 'Rolling digit', 'maneuvrez-maintenance-studio' ); ?></option>
+		</select></p>
+		<p><label for="mmsm-countdown-animation-scope"><strong><?php echo esc_html__( 'Animate', 'maneuvrez-maintenance-studio' ); ?></strong></label><br />
+		<select id="mmsm-countdown-animation-scope" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][animation_scope]">
+			<option value="digits" <?php selected( $countdown['animation_scope'], 'digits' ); ?>><?php echo esc_html__( 'Digits only', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="cards" <?php selected( $countdown['animation_scope'], 'cards' ); ?>><?php echo esc_html__( 'Timer cards', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="both" <?php selected( $countdown['animation_scope'], 'both' ); ?>><?php echo esc_html__( 'Digits and cards', 'maneuvrez-maintenance-studio' ); ?></option>
 		</select></p>
 		<p><label for="mmsm-countdown-color-mode"><strong><?php echo esc_html__( 'Colors', 'maneuvrez-maintenance-studio' ); ?></strong></label><br />
 		<select id="mmsm-countdown-color-mode" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][color_mode]">
@@ -1207,7 +1220,8 @@ class Admin {
 				<label><span><?php echo esc_html( $label ); ?></span><input type="text" class="mmsm-color-picker" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( (string) $countdown[ $key ] ); ?>" data-default-color="" /></label>
 			<?php endforeach; ?>
 		</div>
-		<p class="description"><?php echo esc_html__( 'Theme colors are the recommended default. Decorative motion is automatically disabled when a visitor prefers reduced motion.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Choose whether the style moves the changing digits, their timer cards, or both. Decorative motion is automatically disabled when a visitor prefers reduced motion.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Theme colors are the recommended default.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 

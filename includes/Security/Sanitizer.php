@@ -158,6 +158,7 @@ class Sanitizer {
 			'expiry_action'    => isset( $raw['expiry_action'] ) ? sanitize_key( $raw['expiry_action'] ) : $defaults['expiry_action'],
 			'finished_message' => isset( $raw['finished_message'] ) ? sanitize_textarea_field( $raw['finished_message'] ) : $defaults['finished_message'],
 			'animation_style'  => isset( $raw['animation_style'] ) ? sanitize_key( $raw['animation_style'] ) : $defaults['animation_style'],
+			'animation_scope'  => isset( $raw['animation_scope'] ) ? sanitize_key( $raw['animation_scope'] ) : $defaults['animation_scope'],
 			'color_mode'       => isset( $raw['color_mode'] ) ? sanitize_key( $raw['color_mode'] ) : $defaults['color_mode'],
 			'background_color' => self::sanitize_optional_hex_color_setting( $raw, 'background_color' ),
 			'number_color'     => self::sanitize_optional_hex_color_setting( $raw, 'number_color' ),
@@ -169,8 +170,12 @@ class Sanitizer {
 			$instance['expiry_action'] = $defaults['expiry_action'];
 		}
 
-		if ( ! in_array( $instance['animation_style'], array( 'none', 'pulse', 'slide' ), true ) ) {
+		if ( ! in_array( $instance['animation_style'], array( 'none', 'fade', 'slide', 'flip', 'pulse', 'bounce', 'roll' ), true ) ) {
 			$instance['animation_style'] = $defaults['animation_style'];
+		}
+
+		if ( ! in_array( $instance['animation_scope'], array( 'digits', 'cards', 'both' ), true ) ) {
+			$instance['animation_scope'] = $defaults['animation_scope'];
 		}
 
 		if ( ! in_array( $instance['color_mode'], array( 'theme', 'custom' ), true ) ) {

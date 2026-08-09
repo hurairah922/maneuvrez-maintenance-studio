@@ -344,6 +344,7 @@ class SettingsSchema {
 			'expiry_action'    => 'hold_zero',
 			'finished_message' => '',
 			'animation_style'  => 'slide',
+			'animation_scope'  => 'digits',
 			'color_mode'       => 'theme',
 			'background_color' => '',
 			'number_color'     => '',

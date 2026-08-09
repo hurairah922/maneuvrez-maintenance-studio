@@ -83,7 +83,8 @@ class CountdownComponent implements ComponentInterface {
 		$is_message       = CountdownService::STATE_EXPIRED === $state && 'show_message' === $action;
 		$remaining        = CountdownService::STATE_SCHEDULED === $state ? (int) $public_state['remaining_seconds'] : 0;
 		$units            = $this->get_visible_units( $instance, $remaining );
-		$animation_style  = in_array( $instance['animation_style'], array( 'none', 'pulse', 'slide' ), true ) ? (string) $instance['animation_style'] : 'slide';
+		$animation_style  = in_array( $instance['animation_style'], array( 'none', 'fade', 'slide', 'flip', 'pulse', 'bounce', 'roll' ), true ) ? (string) $instance['animation_style'] : 'slide';
+		$animation_scope  = in_array( $instance['animation_scope'], array( 'digits', 'cards', 'both' ), true ) ? (string) $instance['animation_scope'] : 'digits';
 		$color_mode       = 'custom' === $instance['color_mode'] ? 'custom' : 'theme';
 		$component_style  = 'custom' === $color_mode ? $this->get_custom_style( $instance ) : '';
 
@@ -94,7 +95,7 @@ class CountdownComponent implements ComponentInterface {
 		ob_start();
 		?>
 		<section
-			class="<?php echo esc_attr( 'mmsm-component mmsm-component-countdown mmsm-countdown-units-' . count( $units ) . ' mmsm-countdown-animation-' . $animation_style . ' mmsm-countdown-color-' . $color_mode ); ?>"
+			class="<?php echo esc_attr( 'mmsm-component mmsm-component-countdown mmsm-countdown-units-' . count( $units ) . ' mmsm-countdown-animation-' . $animation_style . ' mmsm-countdown-scope-' . $animation_scope . ' mmsm-countdown-color-' . $color_mode ); ?>"
 			aria-label="<?php echo esc_attr( '' !== $heading ? $heading : __( 'Countdown', 'maneuvrez-maintenance-studio' ) ); ?>"
 			<?php if ( '' !== $component_style ) : ?>style="<?php echo esc_attr( $component_style ); ?>"<?php endif; ?>
 			data-mmsm-countdown
@@ -113,7 +114,7 @@ class CountdownComponent implements ComponentInterface {
 			<div class="mmsm-countdown-grid" role="timer" aria-live="off"<?php echo $is_message ? ' hidden' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> data-mmsm-countdown-values>
 				<?php foreach ( $units as $unit_key => $unit ) : ?>
 					<div class="mmsm-countdown-unit" role="group" aria-label="<?php echo esc_attr( $unit['label'] ); ?>">
-						<span class="mmsm-countdown-value" data-mmsm-countdown-value="<?php echo esc_attr( $unit_key ); ?>"><?php echo esc_html( $this->format_value( $unit['value'] ) ); ?></span>
+						<span class="mmsm-countdown-value" data-mmsm-countdown-value="<?php echo esc_attr( $unit_key ); ?>"><span data-mmsm-countdown-current><?php echo esc_html( $this->format_value( $unit['value'] ) ); ?></span></span>
 						<span class="mmsm-countdown-label"><?php echo esc_html( $unit['label'] ); ?></span>
 					</div>
 				<?php endforeach; ?>

@@ -78,6 +78,47 @@ class Test_MMSM_Countdown_Admin extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Every administrator animation choice survives normalization.
+	 *
+	 * @return void
+	 */
+	public function test_countdown_animation_choices_are_allowlisted() {
+		foreach ( array( 'none', 'fade', 'slide', 'flip', 'pulse', 'bounce', 'roll' ) as $animation ) {
+			$countdowns = Sanitizer::sanitize_countdowns(
+				array(
+					'maintenance' => array(
+						'animation_style' => $animation,
+					),
+				)
+			);
+
+			$this->assertSame( $animation, $countdowns['maintenance']['animation_style'] );
+		}
+	}
+
+	/**
+	 * Digit/card animation targeting is restricted to supported choices.
+	 *
+	 * @return void
+	 */
+	public function test_countdown_animation_scope_is_allowlisted() {
+		foreach ( array( 'digits', 'cards', 'both' ) as $scope ) {
+			$countdowns = Sanitizer::sanitize_countdowns(
+				array(
+					'maintenance' => array(
+						'animation_scope' => $scope,
+					),
+				)
+			);
+
+			$this->assertSame( $scope, $countdowns['maintenance']['animation_scope'] );
+		}
+
+		$invalid = Sanitizer::sanitize_countdowns( array( 'maintenance' => array( 'animation_scope' => 'page' ) ) );
+		$this->assertSame( 'digits', $invalid['maintenance']['animation_scope'] );
+	}
+
+	/**
 	 * A Countdown-tab save converts site-local time and preserves other tabs.
 	 *
 	 * @return void

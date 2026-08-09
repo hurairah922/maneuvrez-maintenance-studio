@@ -83,9 +83,9 @@ class Test_MMSM_Countdown_Component extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'data-state="scheduled"', $markup );
 		$this->assertStringContainsString( 'role="timer" aria-live="off"', $markup );
-		$this->assertStringContainsString( 'data-mmsm-countdown-value="days">01</span>', $markup );
-		$this->assertStringContainsString( 'data-mmsm-countdown-value="hours">01</span>', $markup );
-		$this->assertStringContainsString( 'data-mmsm-countdown-value="seconds">01</span>', $markup );
+		$this->assertMatchesRegularExpression( '/data-mmsm-countdown-value="days"><span[^>]*>01<\/span>/', $markup );
+		$this->assertMatchesRegularExpression( '/data-mmsm-countdown-value="hours"><span[^>]*>01<\/span>/', $markup );
+		$this->assertMatchesRegularExpression( '/data-mmsm-countdown-value="seconds"><span[^>]*>01<\/span>/', $markup );
 		$this->assertStringNotContainsString( 'data-mmsm-countdown-value="minutes"', $markup );
 		$this->assertStringContainsString( 'Launching soon', $markup );
 		$this->assertStringNotContainsString( '<script>', $markup );
@@ -152,7 +152,8 @@ class Test_MMSM_Countdown_Component extends WP_UnitTestCase {
 			array(
 				'enabled'          => 1,
 				'target_timestamp' => 2000,
-				'animation_style'  => 'pulse',
+				'animation_style'  => 'flip',
+				'animation_scope'  => 'both',
 				'color_mode'       => 'custom',
 				'background_color' => '#123abc',
 				'number_color'     => '#ffffff',
@@ -160,7 +161,8 @@ class Test_MMSM_Countdown_Component extends WP_UnitTestCase {
 		);
 		$markup = $this->component->render( $settings, array( 'current_timestamp' => 1000 ) );
 
-		$this->assertStringContainsString( 'mmsm-countdown-animation-pulse', $markup );
+		$this->assertStringContainsString( 'mmsm-countdown-animation-flip', $markup );
+		$this->assertStringContainsString( 'mmsm-countdown-scope-both', $markup );
 		$this->assertStringContainsString( 'mmsm-countdown-color-custom', $markup );
 		$this->assertStringContainsString( '--mmsm-countdown-bg: #123abc', $markup );
 		$this->assertStringContainsString( '--mmsm-countdown-number: #ffffff', $markup );
