@@ -150,6 +150,23 @@ class Test_MMSM_Countdown_Foundation extends WP_UnitTestCase {
 	}
 
 	/**
+	 * DST-observing site time uses the correct seasonal offset and rejects gaps.
+	 *
+	 * @return void
+	 */
+	public function test_dst_timezone_datetime_round_trip() {
+		$timezone = new DateTimeZone( 'America/New_York' );
+		$summer   = $this->service->parse_local_datetime( '2026-07-15T12:00', $timezone );
+		$winter   = $this->service->parse_local_datetime( '2026-01-15T12:00', $timezone );
+
+		$this->assertSame( '2026-07-15T12:00', $this->service->format_local_datetime( $summer, $timezone ) );
+		$this->assertSame( '2026-01-15T12:00', $this->service->format_local_datetime( $winter, $timezone ) );
+		$this->assertSame( -14400, $timezone->getOffset( new DateTimeImmutable( '@' . $summer ) ) );
+		$this->assertSame( -18000, $timezone->getOffset( new DateTimeImmutable( '@' . $winter ) ) );
+		$this->assertSame( 0, $this->service->parse_local_datetime( '2026-03-08T02:30', $timezone ) );
+	}
+
+	/**
 	 * Unknown instance identifiers fail closed.
 	 *
 	 * @return void

@@ -8,6 +8,7 @@
 use Maneuvrez\MaintenanceModeStudio\Components\ComponentRegistry;
 use Maneuvrez\MaintenanceModeStudio\Components\CountdownComponent;
 use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRegistry;
+use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRenderer;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 
 /**
@@ -166,6 +167,39 @@ class Test_MMSM_Countdown_Component extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'mmsm-countdown-color-custom', $markup );
 		$this->assertStringContainsString( '--mmsm-countdown-bg: #123abc', $markup );
 		$this->assertStringContainsString( '--mmsm-countdown-number: #ffffff', $markup );
+	}
+
+	/**
+	 * The ticking script is omitted unless a future countdown is visible.
+	 *
+	 * @return void
+	 */
+	public function test_countdown_script_loads_only_for_scheduled_state() {
+		$renderer = new TemplateRenderer();
+		wp_dequeue_script( 'mmsm-countdown' );
+		$disabled = $this->get_settings(
+			array(
+				'enabled'          => 0,
+				'target_timestamp' => time() + HOUR_IN_SECONDS,
+			)
+		);
+
+		ob_start();
+		$renderer->render( $disabled );
+		ob_end_clean();
+		$this->assertFalse( wp_script_is( 'mmsm-countdown', 'enqueued' ) );
+
+		$scheduled = $this->get_settings(
+			array(
+				'enabled'          => 1,
+				'target_timestamp' => time() + HOUR_IN_SECONDS,
+			)
+		);
+
+		ob_start();
+		$renderer->render( $scheduled );
+		ob_end_clean();
+		$this->assertTrue( wp_script_is( 'mmsm-countdown', 'enqueued' ) );
 	}
 
 	/**
