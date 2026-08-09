@@ -227,6 +227,102 @@ body.mmsm-maintenance-page {
 	transform: translateY(-1px);
 }
 
+.mmsm-countdown-heading {
+	margin: 0;
+	color: var(--mm-heading-text);
+	font-size: clamp(1rem, 2vw, 1.25rem);
+	letter-spacing: 0.02em;
+}
+
+.mmsm-countdown-description {
+	margin: 8px 0 0;
+	color: var(--mm-body-text);
+	line-height: 1.6;
+}
+
+.mmsm-countdown-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 18px;
+}
+
+.mmsm-countdown-units-1 .mmsm-countdown-grid {
+	grid-template-columns: minmax(0, 1fr);
+	max-width: 150px;
+}
+
+.mmsm-countdown-units-2 .mmsm-countdown-grid {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	max-width: 310px;
+}
+
+.mmsm-countdown-units-3 .mmsm-countdown-grid {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mmsm-countdown-unit {
+	min-width: 0;
+	padding: clamp(10px, 2vw, 16px) 6px;
+	overflow-wrap: anywhere;
+	border: 1px solid var(--mm-border);
+	border-radius: 16px;
+	background: color-mix(in srgb, var(--mm-primary) 8%, var(--mm-surface));
+	text-align: center;
+}
+
+.mmsm-countdown-value,
+.mmsm-countdown-label {
+	display: block;
+}
+
+.mmsm-countdown-value {
+	color: var(--mm-heading-text);
+	font-size: clamp(1.45rem, 5vw, 2.5rem);
+	font-variant-numeric: tabular-nums;
+	font-weight: 750;
+	letter-spacing: -0.03em;
+	line-height: 1;
+}
+
+.mmsm-countdown-value.is-ticking {
+	animation: mmsm-countdown-tick 280ms ease-out;
+}
+
+.mmsm-countdown-label {
+	margin-top: 8px;
+	color: var(--mm-muted-text);
+	font-size: clamp(0.68rem, 2vw, 0.78rem);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	line-height: 1.25;
+	text-transform: uppercase;
+}
+
+.mmsm-countdown-finished {
+	margin: 18px 0 0;
+	padding: 16px;
+	border: 1px solid color-mix(in srgb, var(--mm-primary) 36%, var(--mm-border));
+	border-radius: 16px;
+	background: color-mix(in srgb, var(--mm-primary) 10%, var(--mm-surface));
+	color: var(--mm-heading-text);
+	font-weight: 700;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+@keyframes mmsm-countdown-tick {
+	0% {
+		opacity: 0.45;
+		transform: translateY(-4px) scale(0.96);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
 .mmsm-status-chip {
 	display: inline-flex;
 	align-items: center;
@@ -632,6 +728,10 @@ body.mmsm-maintenance-page {
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.mmsm-countdown-value.is-ticking {
+		animation: none;
+	}
+
 	.mmsm-contact-channel-button,
 	.mmsm-contact-channel-trigger {
 		transition: none;
@@ -646,5 +746,10 @@ body.mmsm-maintenance-page {
 
 	.mmsm-hero-title {
 		font-size: clamp(1.9rem, 11vw, 2.7rem);
+	}
+
+	.mmsm-countdown-units-3 .mmsm-countdown-grid,
+	.mmsm-countdown-units-4 .mmsm-countdown-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }

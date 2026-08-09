@@ -66,6 +66,7 @@ require_once MMSM_PLUGIN_PATH . 'includes/Security/Sanitizer.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Security/LoginUrlManager.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/ComponentInterface.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/HeroComponent.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Components/CountdownComponent.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/ContactChannelsComponent.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/SocialLinksComponent.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Components/ContactRevealComponent.php';

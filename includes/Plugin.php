@@ -9,6 +9,7 @@ namespace Maneuvrez\MaintenanceModeStudio;
 
 use Maneuvrez\MaintenanceModeStudio\Admin\Admin;
 use Maneuvrez\MaintenanceModeStudio\Components\ComponentRegistry;
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
 use Maneuvrez\MaintenanceModeStudio\Frontend\ContactChannelsRenderer;
 use Maneuvrez\MaintenanceModeStudio\Frontend\MaintenanceRouter;
 use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRegistry;
@@ -57,8 +58,9 @@ class Plugin {
 	public function __construct() {
 		$settings_repository = new SettingsRepository();
 		$template_registry   = new TemplateRegistry();
-		$component_registry  = new ComponentRegistry();
-		$renderer            = new TemplateRenderer( $template_registry, $component_registry, $settings_repository );
+		$countdown_service   = new CountdownService();
+		$component_registry  = new ComponentRegistry( $countdown_service );
+		$renderer            = new TemplateRenderer( $template_registry, $component_registry, $settings_repository, $countdown_service );
 
 		$this->admin             = new Admin( $settings_repository );
 		$this->router            = new MaintenanceRouter( $renderer, $settings_repository );
