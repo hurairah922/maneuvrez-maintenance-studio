@@ -59,6 +59,7 @@ if ( ! defined( 'MMSM_UNINSTALL_FEEDBACK_OPTION' ) ) {
 
 require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsSchema.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Settings/SettingsRepository.php';
+require_once MMSM_PLUGIN_PATH . 'includes/Countdown/CountdownService.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Support/Escaper.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Support/ContactChannels.php';
 require_once MMSM_PLUGIN_PATH . 'includes/Security/Sanitizer.php';

@@ -9,6 +9,7 @@ specs/
 *prompt-pack/
 mms-contact-channels-prompt-pack/
 README.md
+codex-prompts/
 
 # Repository and development tooling
 .agents/

@@ -123,10 +123,62 @@ class Sanitizer {
 		$settings['progress_value'] = max( 0, min( 100, $progress_value ) );
 		$settings['bypass_urls']    = self::sanitize_bypass_urls( isset( $input['bypass_urls'] ) ? $input['bypass_urls'] : $defaults['bypass_urls'] );
 		$settings['contact_channels_items'] = self::sanitize_contact_channels_items( isset( $input['contact_channels_items'] ) ? $input['contact_channels_items'] : $defaults['contact_channels_items'] );
+		$settings['countdowns']             = self::sanitize_countdowns( isset( $input['countdowns'] ) ? $input['countdowns'] : $defaults['countdowns'] );
 
 		$settings = self::sanitize_social_items( $input, $settings, $defaults );
 
 		return $settings;
+	}
+
+	/**
+	 * Sanitize the allowlisted countdown instance map.
+	 *
+	 * V1 accepts only the maintenance instance. Unknown keys are discarded so
+	 * an instance identifier cannot cross the settings trust boundary merely by
+	 * appearing in a nested request payload.
+	 *
+	 * @param mixed $value Raw countdown instance map.
+	 * @return array<string,array<string,mixed>>
+	 */
+	public static function sanitize_countdowns( $value ) {
+		$instances = is_array( $value ) ? $value : array();
+		$defaults  = SettingsSchema::get_default_countdown_instance();
+		$raw       = isset( $instances['maintenance'] ) && is_array( $instances['maintenance'] ) ? $instances['maintenance'] : $defaults;
+		$target    = isset( $raw['target_timestamp'] ) ? filter_var( $raw['target_timestamp'], FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) : false;
+
+		$instance = array(
+			'enabled'          => ! empty( $raw['enabled'] ) ? 1 : 0,
+			'target_timestamp' => false === $target ? 0 : (int) $target,
+			'heading'          => isset( $raw['heading'] ) ? sanitize_text_field( $raw['heading'] ) : $defaults['heading'],
+			'description'      => isset( $raw['description'] ) ? sanitize_textarea_field( $raw['description'] ) : $defaults['description'],
+			'show_days'        => ! empty( $raw['show_days'] ) ? 1 : 0,
+			'show_hours'       => ! empty( $raw['show_hours'] ) ? 1 : 0,
+			'show_minutes'     => ! empty( $raw['show_minutes'] ) ? 1 : 0,
+			'show_seconds'     => ! empty( $raw['show_seconds'] ) ? 1 : 0,
+			'expiry_action'    => isset( $raw['expiry_action'] ) ? sanitize_key( $raw['expiry_action'] ) : $defaults['expiry_action'],
+			'finished_message' => isset( $raw['finished_message'] ) ? sanitize_textarea_field( $raw['finished_message'] ) : $defaults['finished_message'],
+		);
+
+		if ( ! in_array( $instance['expiry_action'], array( 'hold_zero', 'hide', 'show_message', 'disable_mode' ), true ) ) {
+			$instance['expiry_action'] = $defaults['expiry_action'];
+		}
+
+		if (
+			$instance['enabled'] &&
+			! $instance['show_days'] &&
+			! $instance['show_hours'] &&
+			! $instance['show_minutes'] &&
+			! $instance['show_seconds']
+		) {
+			$instance['show_days']    = 1;
+			$instance['show_hours']   = 1;
+			$instance['show_minutes'] = 1;
+			$instance['show_seconds'] = 1;
+		}
+
+		return array(
+			'maintenance' => $instance,
+		);
 	}
 
 	/**
