@@ -157,10 +157,24 @@ class Sanitizer {
 			'show_seconds'     => ! empty( $raw['show_seconds'] ) ? 1 : 0,
 			'expiry_action'    => isset( $raw['expiry_action'] ) ? sanitize_key( $raw['expiry_action'] ) : $defaults['expiry_action'],
 			'finished_message' => isset( $raw['finished_message'] ) ? sanitize_textarea_field( $raw['finished_message'] ) : $defaults['finished_message'],
+			'animation_style'  => isset( $raw['animation_style'] ) ? sanitize_key( $raw['animation_style'] ) : $defaults['animation_style'],
+			'color_mode'       => isset( $raw['color_mode'] ) ? sanitize_key( $raw['color_mode'] ) : $defaults['color_mode'],
+			'background_color' => self::sanitize_optional_hex_color_setting( $raw, 'background_color' ),
+			'number_color'     => self::sanitize_optional_hex_color_setting( $raw, 'number_color' ),
+			'label_color'      => self::sanitize_optional_hex_color_setting( $raw, 'label_color' ),
+			'border_color'     => self::sanitize_optional_hex_color_setting( $raw, 'border_color' ),
 		);
 
 		if ( ! in_array( $instance['expiry_action'], array( 'hold_zero', 'hide', 'show_message', 'disable_mode' ), true ) ) {
 			$instance['expiry_action'] = $defaults['expiry_action'];
+		}
+
+		if ( ! in_array( $instance['animation_style'], array( 'none', 'pulse', 'slide' ), true ) ) {
+			$instance['animation_style'] = $defaults['animation_style'];
+		}
+
+		if ( ! in_array( $instance['color_mode'], array( 'theme', 'custom' ), true ) ) {
+			$instance['color_mode'] = $defaults['color_mode'];
 		}
 
 		if (
@@ -439,7 +453,8 @@ class Sanitizer {
 	 * @return string
 	 */
 	private static function sanitize_optional_hex_color_setting( array $input, $key ) {
-		$color = isset( $input[ $key ] ) ? sanitize_hex_color( $input[ $key ] ) : '';
+		$raw   = isset( $input[ $key ] ) && is_scalar( $input[ $key ] ) ? (string) $input[ $key ] : '';
+		$color = sanitize_hex_color( $raw );
 
 		return empty( $color ) ? '' : $color;
 	}

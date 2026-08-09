@@ -249,6 +249,189 @@
 	max-width: 120px;
 }
 
+.mmsm-settings-page .mmsm-countdown-admin-preview {
+	max-width: 720px;
+	margin-top: 16px;
+	padding: 16px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #f6f7f7;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview.is-disabled {
+	opacity: 0.68;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-header {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-header span {
+	padding: 3px 9px;
+	border-radius: 999px;
+	background: #dcdcde;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-header span.is-enabled {
+	background: #008a20;
+	color: #fff;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage {
+	padding: 18px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage > strong {
+	display: block;
+	font-size: 18px;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage > p {
+	margin: 6px 0 14px;
+	color: #646970;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage > p.is-hidden,
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid > div.is-hidden {
+	display: none;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid > div {
+	min-width: 0;
+	padding: 12px 5px;
+	border: 1px solid var(--mmsm-countdown-preview-border, #c3c4c7);
+	border-radius: 7px;
+	background: var(--mmsm-countdown-preview-bg, #f0f6fc);
+	text-align: center;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid b,
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid span {
+	display: block;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid b {
+	color: var(--mmsm-countdown-preview-number, #1d2327);
+	font-size: clamp(18px, 3vw, 28px);
+	font-variant-numeric: tabular-nums;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid span {
+	margin-top: 5px;
+	color: var(--mmsm-countdown-preview-label, #646970);
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage.is-animation-slide b.is-previewing {
+	animation: mmsm-admin-countdown-slide 280ms ease-out;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage.is-animation-pulse b.is-previewing {
+	animation: mmsm-admin-countdown-pulse 320ms ease-out;
+}
+
+.mmsm-settings-page .mmsm-countdown-unit-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 18px;
+}
+
+.mmsm-settings-page .mmsm-countdown-expiry-help {
+	max-width: 68ch;
+	margin-bottom: 0;
+	color: #50575e;
+	list-style: disc;
+}
+
+.mmsm-settings-page .mmsm-countdown-custom-colors {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(180px, 1fr));
+	gap: 12px 18px;
+	max-width: 640px;
+	margin: 14px 0;
+	padding: 14px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #f6f7f7;
+}
+
+.mmsm-settings-page .mmsm-countdown-custom-colors label,
+.mmsm-settings-page .mmsm-countdown-custom-colors label > span {
+	display: block;
+}
+
+.mmsm-settings-page .mmsm-countdown-custom-colors label > span {
+	margin-bottom: 6px;
+	font-weight: 600;
+}
+
+.mmsm-settings-page .mmsm-countdown-custom-colors.is-hidden,
+.mmsm-settings-page .mmsm-countdown-finished-dependent.is-hidden {
+	display: none;
+}
+
+@keyframes mmsm-admin-countdown-slide {
+	0% {
+		opacity: 0.45;
+		transform: translateY(-4px);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes mmsm-admin-countdown-pulse {
+	0% {
+		transform: scale(0.9);
+	}
+
+	70% {
+		transform: scale(1.08);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+@media (max-width: 782px) {
+	.mmsm-settings-page .mmsm-countdown-admin-preview-grid,
+	.mmsm-settings-page .mmsm-countdown-custom-colors {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 480px) {
+	.mmsm-settings-page .mmsm-countdown-admin-preview-grid,
+	.mmsm-settings-page .mmsm-countdown-custom-colors {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mmsm-settings-page .mmsm-countdown-admin-preview-stage b.is-previewing {
+		animation: none;
+	}
+}
+
 .mmsm-settings-page .mmsm-contact-channels-builder {
 	max-width: 1280px;
 }

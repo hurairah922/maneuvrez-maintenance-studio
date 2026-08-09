@@ -343,6 +343,12 @@ class SettingsSchema {
 			'show_seconds'     => 1,
 			'expiry_action'    => 'hold_zero',
 			'finished_message' => '',
+			'animation_style'  => 'slide',
+			'color_mode'       => 'theme',
+			'background_color' => '',
+			'number_color'     => '',
+			'label_color'      => '',
+			'border_color'     => '',
 		);
 	}
 

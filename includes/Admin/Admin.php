@@ -8,6 +8,7 @@
 namespace Maneuvrez\MaintenanceModeStudio\Admin;
 
 use Maneuvrez\MaintenanceModeStudio\Components\SocialLinksComponent;
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 use Maneuvrez\MaintenanceModeStudio\Support\ContactChannels;
@@ -24,6 +25,13 @@ class Admin {
 	 * @var SettingsRepository
 	 */
 	private $settings_repository;
+
+	/**
+	 * Countdown domain service.
+	 *
+	 * @var CountdownService
+	 */
+	private $countdown_service;
 
 	/**
 	 * Settings group slug.
@@ -50,9 +58,11 @@ class Admin {
 	 * Constructor.
 	 *
 	 * @param SettingsRepository|null $settings_repository Settings repository.
+	 * @param CountdownService|null    $countdown_service Countdown domain service.
 	 */
-	public function __construct( $settings_repository = null ) {
+	public function __construct( $settings_repository = null, $countdown_service = null ) {
 		$this->settings_repository = $settings_repository instanceof SettingsRepository ? $settings_repository : new SettingsRepository();
+		$this->countdown_service   = $countdown_service instanceof CountdownService ? $countdown_service : new CountdownService();
 	}
 
 	/**
@@ -334,6 +344,72 @@ class Admin {
 			array( $this, 'render_contact_email_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
+		);
+
+		add_settings_section(
+			'mmsm_countdown_section',
+			__( 'Countdown', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_countdown_section' ),
+			$this->page_slug
+		);
+
+		add_settings_field(
+			'mmsm_countdown_enabled',
+			__( 'Enable countdown', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_countdown_enabled_field' ),
+			$this->page_slug,
+			'mmsm_countdown_section'
+		);
+
+		add_settings_field(
+			'mmsm_countdown_target',
+			__( 'Target date and time', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_countdown_target_field' ),
+			$this->page_slug,
+			'mmsm_countdown_section'
+		);
+
+		add_settings_field(
+			'mmsm_countdown_copy',
+			__( 'Display copy', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_countdown_copy_field' ),
+			$this->page_slug,
+			'mmsm_countdown_section'
+		);
+
+		add_settings_field(
+			'mmsm_countdown_units',
+			__( 'Visible time units', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_countdown_units_field' ),
+			$this->page_slug,
+			'mmsm_countdown_section'
+		);
+
+		add_settings_field(
+			'mmsm_countdown_expiry',
+			__( 'When the countdown finishes', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_countdown_expiry_field' ),
+			$this->page_slug,
+			'mmsm_countdown_section'
+		);
+
+		add_settings_field(
+			'mmsm_countdown_finished_message',
+			__( 'Finished message', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_countdown_finished_message_field' ),
+			$this->page_slug,
+			'mmsm_countdown_section',
+			array(
+				'class' => 'mmsm-countdown-finished-dependent',
+			)
+		);
+
+		add_settings_field(
+			'mmsm_countdown_appearance',
+			__( 'Counter appearance', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_countdown_appearance_field' ),
+			$this->page_slug,
+			'mmsm_countdown_section'
 		);
 
 		add_settings_section(
@@ -631,6 +707,11 @@ class Admin {
 		}
 
 		$active_tab = isset( $_POST['mmsm_active_tab'] ) ? sanitize_key( wp_unslash( $_POST['mmsm_active_tab'] ) ) : 'general';
+
+		if ( 'countdown' === $active_tab ) {
+			$input['countdowns'] = $this->prepare_countdowns_for_save( $input, $existing );
+		}
+
 		$tab_keys   = $this->get_tab_field_keys( $active_tab );
 
 		foreach ( $tab_keys as $tab_key ) {
@@ -862,6 +943,205 @@ class Admin {
 	 */
 	public function render_components_section() {
 		echo '<p>' . esc_html__( 'These optional settings feed the hero, status, and contact components rendered by the default template.', 'maneuvrez-maintenance-studio' ) . '</p>';
+	}
+
+	/**
+	 * Render the countdown section description and lightweight preview.
+	 *
+	 * @return void
+	 */
+	public function render_countdown_section() {
+		$countdown = $this->get_maintenance_countdown();
+		$preview_classes = array(
+			'mmsm-countdown-admin-preview',
+			! empty( $countdown['enabled'] ) ? '' : 'is-disabled',
+		);
+		$stage_classes = array(
+			'mmsm-countdown-admin-preview-stage',
+			'is-animation-' . sanitize_html_class( (string) $countdown['animation_style'] ),
+		);
+		?>
+		<p><?php echo esc_html__( 'Schedule one countdown for the maintenance or coming-soon page. The selected time uses the WordPress site timezone.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<div class="<?php echo esc_attr( trim( implode( ' ', $preview_classes ) ) ); ?>" data-countdown-admin-preview>
+			<div class="mmsm-countdown-admin-preview-header">
+				<strong><?php echo esc_html__( 'Live layout preview', 'maneuvrez-maintenance-studio' ); ?></strong>
+				<span class="<?php echo ! empty( $countdown['enabled'] ) ? 'is-enabled' : ''; ?>" data-countdown-preview-status><?php echo ! empty( $countdown['enabled'] ) ? esc_html__( 'Enabled', 'maneuvrez-maintenance-studio' ) : esc_html__( 'Disabled', 'maneuvrez-maintenance-studio' ); ?></span>
+			</div>
+			<div class="<?php echo esc_attr( implode( ' ', $stage_classes ) ); ?>">
+				<strong data-countdown-preview-heading><?php echo esc_html( (string) $countdown['heading'] ); ?></strong>
+				<p class="<?php echo '' === (string) $countdown['description'] ? 'is-hidden' : ''; ?>" data-countdown-preview-description><?php echo esc_html( (string) $countdown['description'] ); ?></p>
+				<div class="mmsm-countdown-admin-preview-grid">
+					<?php
+					$preview_units = array(
+						'days'    => array( 'value' => '12', 'label' => __( 'Days', 'maneuvrez-maintenance-studio' ) ),
+						'hours'   => array( 'value' => '08', 'label' => __( 'Hours', 'maneuvrez-maintenance-studio' ) ),
+						'minutes' => array( 'value' => '34', 'label' => __( 'Minutes', 'maneuvrez-maintenance-studio' ) ),
+						'seconds' => array( 'value' => '56', 'label' => __( 'Seconds', 'maneuvrez-maintenance-studio' ) ),
+					);
+					foreach ( $preview_units as $unit => $preview_unit ) :
+						?>
+						<div class="<?php echo empty( $countdown[ 'show_' . $unit ] ) ? 'is-hidden' : ''; ?>" data-countdown-preview-unit="<?php echo esc_attr( $unit ); ?>">
+							<b><?php echo esc_html( $preview_unit['value'] ); ?></b>
+							<span><?php echo esc_html( $preview_unit['label'] ); ?></span>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the countdown enable control.
+	 *
+	 * @return void
+	 */
+	public function render_countdown_enabled_field() {
+		$countdown = $this->get_maintenance_countdown();
+		?>
+		<label for="mmsm-countdown-enabled">
+			<input type="checkbox" id="mmsm-countdown-enabled" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][enabled]" value="1" <?php checked( 1, (int) $countdown['enabled'] ); ?> />
+			<?php echo esc_html__( 'Show the countdown on the maintenance page.', 'maneuvrez-maintenance-studio' ); ?>
+		</label>
+		<p class="description"><?php echo esc_html__( 'Maintenance mode itself is still controlled from the General tab.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render the site-local countdown target.
+	 *
+	 * @return void
+	 */
+	public function render_countdown_target_field() {
+		$countdown = $this->get_maintenance_countdown();
+		$timezone  = wp_timezone();
+		$local     = $this->countdown_service->format_local_datetime( (int) $countdown['target_timestamp'], $timezone );
+		?>
+		<input type="datetime-local" id="mmsm-countdown-target" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][target_local]" value="<?php echo esc_attr( $local ); ?>" />
+		<p class="description">
+			<?php
+			echo esc_html(
+				sprintf(
+					/* translators: 1: WordPress timezone name, 2: current local site time. */
+					__( 'Timezone: %1$s. Current site time: %2$s. The saved value is converted to a universal timestamp.', 'maneuvrez-maintenance-studio' ),
+					$timezone->getName(),
+					wp_date( 'Y-m-d H:i T', null, $timezone )
+				)
+			);
+			?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render editable heading and description fields.
+	 *
+	 * @return void
+	 */
+	public function render_countdown_copy_field() {
+		$countdown = $this->get_maintenance_countdown();
+		?>
+		<p><label for="mmsm-countdown-heading"><strong><?php echo esc_html__( 'Heading', 'maneuvrez-maintenance-studio' ); ?></strong></label><br />
+		<input type="text" class="regular-text" id="mmsm-countdown-heading" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][heading]" value="<?php echo esc_attr( (string) $countdown['heading'] ); ?>" /></p>
+		<p><label for="mmsm-countdown-description"><strong><?php echo esc_html__( 'Description', 'maneuvrez-maintenance-studio' ); ?></strong></label><br />
+		<textarea class="large-text" rows="3" id="mmsm-countdown-description" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][description]"><?php echo esc_textarea( (string) $countdown['description'] ); ?></textarea></p>
+		<p class="description"><?php echo esc_html__( 'Both fields are optional and accept plain text only.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render independent time-unit controls.
+	 *
+	 * @return void
+	 */
+	public function render_countdown_units_field() {
+		$countdown = $this->get_maintenance_countdown();
+		$units     = array(
+			'days'    => __( 'Days', 'maneuvrez-maintenance-studio' ),
+			'hours'   => __( 'Hours', 'maneuvrez-maintenance-studio' ),
+			'minutes' => __( 'Minutes', 'maneuvrez-maintenance-studio' ),
+			'seconds' => __( 'Seconds', 'maneuvrez-maintenance-studio' ),
+		);
+		?>
+		<div class="mmsm-countdown-unit-controls">
+			<?php foreach ( $units as $unit => $label ) : ?>
+				<label><input type="checkbox" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][show_<?php echo esc_attr( $unit ); ?>]" value="1" <?php checked( 1, (int) $countdown[ 'show_' . $unit ] ); ?> /> <?php echo esc_html( $label ); ?></label>
+			<?php endforeach; ?>
+		</div>
+		<p class="description"><?php echo esc_html__( 'Keep at least one unit visible. Hours use the conventional 0–23 remainder even when days are hidden.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render the expiry-action selector with plain-language explanations.
+	 *
+	 * @return void
+	 */
+	public function render_countdown_expiry_field() {
+		$countdown = $this->get_maintenance_countdown();
+		?>
+		<select id="mmsm-countdown-expiry-action" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][expiry_action]">
+			<option value="hold_zero" <?php selected( $countdown['expiry_action'], 'hold_zero' ); ?>><?php echo esc_html__( 'Keep showing 00:00:00:00', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="hide" <?php selected( $countdown['expiry_action'], 'hide' ); ?>><?php echo esc_html__( 'Hide the countdown', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="show_message" <?php selected( $countdown['expiry_action'], 'show_message' ); ?>><?php echo esc_html__( 'Show a message', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="disable_mode" <?php selected( $countdown['expiry_action'], 'disable_mode' ); ?>><?php echo esc_html__( 'Turn off maintenance mode automatically', 'maneuvrez-maintenance-studio' ); ?></option>
+		</select>
+		<ul class="mmsm-countdown-expiry-help">
+			<li><?php echo esc_html__( 'Keep showing 00:00:00:00 leaves the timer visible at zero.', 'maneuvrez-maintenance-studio' ); ?></li>
+			<li><?php echo esc_html__( 'Hide removes only the countdown; maintenance mode stays on.', 'maneuvrez-maintenance-studio' ); ?></li>
+			<li><?php echo esc_html__( 'Show a message replaces the timer with your finished message.', 'maneuvrez-maintenance-studio' ); ?></li>
+			<li><?php echo esc_html__( 'Turn off maintenance mode publishes the normal site after server-side expiry processing.', 'maneuvrez-maintenance-studio' ); ?></li>
+		</ul>
+		<?php
+	}
+
+	/**
+	 * Render completion copy used by the show-message action.
+	 *
+	 * @return void
+	 */
+	public function render_countdown_finished_message_field() {
+		$countdown = $this->get_maintenance_countdown();
+		?>
+		<textarea class="large-text" rows="3" id="mmsm-countdown-finished-message" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][finished_message]"><?php echo esc_textarea( (string) $countdown['finished_message'] ); ?></textarea>
+		<p class="description"><?php echo esc_html__( 'Required when “Show a message” is selected. Plain text only.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render simple animation and color choices.
+	 *
+	 * @return void
+	 */
+	public function render_countdown_appearance_field() {
+		$countdown = $this->get_maintenance_countdown();
+		?>
+		<p><label for="mmsm-countdown-animation"><strong><?php echo esc_html__( 'Number animation', 'maneuvrez-maintenance-studio' ); ?></strong></label><br />
+		<select id="mmsm-countdown-animation" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][animation_style]">
+			<option value="none" <?php selected( $countdown['animation_style'], 'none' ); ?>><?php echo esc_html__( 'None', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="pulse" <?php selected( $countdown['animation_style'], 'pulse' ); ?>><?php echo esc_html__( 'Pulse', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="slide" <?php selected( $countdown['animation_style'], 'slide' ); ?>><?php echo esc_html__( 'Slide', 'maneuvrez-maintenance-studio' ); ?></option>
+		</select></p>
+		<p><label for="mmsm-countdown-color-mode"><strong><?php echo esc_html__( 'Colors', 'maneuvrez-maintenance-studio' ); ?></strong></label><br />
+		<select id="mmsm-countdown-color-mode" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][color_mode]">
+			<option value="theme" <?php selected( $countdown['color_mode'], 'theme' ); ?>><?php echo esc_html__( 'Follow maintenance-page theme', 'maneuvrez-maintenance-studio' ); ?></option>
+			<option value="custom" <?php selected( $countdown['color_mode'], 'custom' ); ?>><?php echo esc_html__( 'Custom countdown colors', 'maneuvrez-maintenance-studio' ); ?></option>
+		</select></p>
+		<div class="<?php echo esc_attr( 'mmsm-countdown-custom-colors' . ( 'custom' === $countdown['color_mode'] ? '' : ' is-hidden' ) ); ?>">
+			<?php
+			$colors = array(
+				'background_color' => __( 'Cell background', 'maneuvrez-maintenance-studio' ),
+				'number_color'     => __( 'Number color', 'maneuvrez-maintenance-studio' ),
+				'label_color'      => __( 'Unit-label color', 'maneuvrez-maintenance-studio' ),
+				'border_color'     => __( 'Border color', 'maneuvrez-maintenance-studio' ),
+			);
+			foreach ( $colors as $key => $label ) :
+				?>
+				<label><span><?php echo esc_html( $label ); ?></span><input type="text" class="mmsm-color-picker" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( (string) $countdown[ $key ] ); ?>" data-default-color="" /></label>
+			<?php endforeach; ?>
+		</div>
+		<p class="description"><?php echo esc_html__( 'Theme colors are the recommended default. Decorative motion is automatically disabled when a visitor prefers reduced motion.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<?php
 	}
 
 	/**
@@ -2402,6 +2682,97 @@ class Admin {
 	}
 
 	/**
+	 * Return the normalized maintenance countdown instance.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_maintenance_countdown() {
+		return $this->countdown_service->get_instance( $this->get_settings(), CountdownService::INSTANCE_MAINTENANCE );
+	}
+
+	/**
+	 * Convert and validate the site-local countdown submission before sanitizing.
+	 *
+	 * @param array<string,mixed> $input Submitted settings payload.
+	 * @param array<string,mixed> $existing Existing normalized settings.
+	 * @return array<string,array<string,mixed>>
+	 */
+	private function prepare_countdowns_for_save( array $input, array $existing ) {
+		$existing_countdowns = isset( $existing['countdowns'] ) && is_array( $existing['countdowns'] ) ? $existing['countdowns'] : array();
+		$existing_instance   = $this->countdown_service->get_instance( $existing, CountdownService::INSTANCE_MAINTENANCE );
+		$submitted_map       = isset( $input['countdowns'] ) && is_array( $input['countdowns'] ) ? $input['countdowns'] : array();
+		$submitted           = isset( $submitted_map['maintenance'] ) && is_array( $submitted_map['maintenance'] ) ? $submitted_map['maintenance'] : array();
+		$enabled             = ! empty( $submitted['enabled'] );
+		$target_local        = isset( $submitted['target_local'] ) ? sanitize_text_field( wp_unslash( $submitted['target_local'] ) ) : '';
+		$target_timestamp    = '' === $target_local ? 0 : $this->countdown_service->parse_local_datetime( $target_local );
+		$old_target          = (int) $existing_instance['target_timestamp'];
+		$old_enabled         = ! empty( $existing_instance['enabled'] );
+
+		if ( $enabled && $target_timestamp <= 0 ) {
+			add_settings_error(
+				MMSM_SETTINGS_OPTION,
+				'mmsm_countdown_target_required',
+				esc_html__( 'Choose a valid future target date and time before enabling the countdown.', 'maneuvrez-maintenance-studio' ),
+				'error'
+			);
+
+			return $existing_countdowns;
+		}
+
+		if (
+			$enabled &&
+			$target_timestamp <= current_datetime()->getTimestamp() &&
+			( ! $old_enabled || $target_timestamp !== $old_target )
+		) {
+			add_settings_error(
+				MMSM_SETTINGS_OPTION,
+				'mmsm_countdown_target_future',
+				esc_html__( 'The countdown target must be in the future. Your previous countdown settings were kept.', 'maneuvrez-maintenance-studio' ),
+				'error'
+			);
+
+			return $existing_countdowns;
+		}
+
+		if ( $enabled && 'show_message' === ( $submitted['expiry_action'] ?? '' ) && '' === trim( (string) ( $submitted['finished_message'] ?? '' ) ) ) {
+			add_settings_error(
+				MMSM_SETTINGS_OPTION,
+				'mmsm_countdown_finished_message_required',
+				esc_html__( 'Enter a finished message when “Show a message” is selected. Your previous countdown settings were kept.', 'maneuvrez-maintenance-studio' ),
+				'error'
+			);
+
+			return $existing_countdowns;
+		}
+
+		if (
+			$enabled &&
+			empty( $submitted['show_days'] ) &&
+			empty( $submitted['show_hours'] ) &&
+			empty( $submitted['show_minutes'] ) &&
+			empty( $submitted['show_seconds'] )
+		) {
+			add_settings_error(
+				MMSM_SETTINGS_OPTION,
+				'mmsm_countdown_unit_required',
+				esc_html__( 'At least one time unit must remain visible. All four units were restored.', 'maneuvrez-maintenance-studio' ),
+				'error'
+			);
+			$submitted['show_days']    = 1;
+			$submitted['show_hours']   = 1;
+			$submitted['show_minutes'] = 1;
+			$submitted['show_seconds'] = 1;
+		}
+
+		$submitted['target_timestamp'] = $target_timestamp;
+		unset( $submitted['target_local'] );
+
+		return array(
+			CountdownService::INSTANCE_MAINTENANCE => $submitted,
+		);
+	}
+
+	/**
 	 * Return available settings tabs.
 	 *
 	 * @return array<string,array<string,string>>
@@ -2427,6 +2798,11 @@ class Admin {
 				'label'   => __( 'Components', 'maneuvrez-maintenance-studio' ),
 				'section' => 'mmsm_components_section',
 				'icon'    => 'dashicons-screenoptions',
+			),
+			'countdown'    => array(
+				'label'   => __( 'Countdown', 'maneuvrez-maintenance-studio' ),
+				'section' => 'mmsm_countdown_section',
+				'icon'    => 'dashicons-clock',
 			),
 			'contact_channels' => array(
 				'label'   => __( 'Contact Channels', 'maneuvrez-maintenance-studio' ),
@@ -2667,6 +3043,9 @@ class Admin {
 				'contact_label',
 				'contact_message',
 				'contact_email',
+			),
+			'countdown'    => array(
+				'countdowns',
 			),
 			'contact_channels' => array(
 				'contact_channels_enabled',

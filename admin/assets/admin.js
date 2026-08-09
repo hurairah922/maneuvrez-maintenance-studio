@@ -58,6 +58,72 @@ jQuery(document).ready(($) => {
 		updatePreview();
 	};
 
+	const initializeCountdownAdmin = () => {
+		const panel = $('.mmsm-settings-panel-countdown');
+		const preview = panel.find('[data-countdown-admin-preview]');
+
+		if (!panel.length || !preview.length) {
+			return;
+		}
+
+		const stage = preview.find('.mmsm-countdown-admin-preview-stage');
+		const enabledField = $('#mmsm-countdown-enabled');
+		const headingField = $('#mmsm-countdown-heading');
+		const descriptionField = $('#mmsm-countdown-description');
+		const expiryField = $('#mmsm-countdown-expiry-action');
+		const animationField = $('#mmsm-countdown-animation');
+		const colorModeField = $('#mmsm-countdown-color-mode');
+
+		const updatePreview = () => {
+			const enabled = enabledField.prop('checked');
+			const heading = String(headingField.val() || '').trim() || __('Launching in', 'maneuvrez-maintenance-studio');
+			const description = String(descriptionField.val() || '').trim();
+			const animation = String(animationField.val() || 'slide');
+			const customColors = colorModeField.val() === 'custom';
+
+			preview.toggleClass('is-disabled', !enabled);
+			preview.find('[data-countdown-preview-status]')
+				.toggleClass('is-enabled', enabled)
+				.text(enabled ? __('Enabled', 'maneuvrez-maintenance-studio') : __('Disabled', 'maneuvrez-maintenance-studio'));
+			preview.find('[data-countdown-preview-heading]').text(heading);
+			preview.find('[data-countdown-preview-description]').text(description).toggleClass('is-hidden', !description);
+
+			['days', 'hours', 'minutes', 'seconds'].forEach((unit) => {
+				const visible = panel.find(`input[name$="[show_${unit}]"]`).prop('checked');
+				preview.find(`[data-countdown-preview-unit="${unit}"]`).toggleClass('is-hidden', !visible);
+			});
+
+			panel.find('.mmsm-countdown-finished-dependent').toggleClass('is-hidden', expiryField.val() !== 'show_message');
+			panel.find('.mmsm-countdown-custom-colors').toggleClass('is-hidden', !customColors);
+			stage.removeClass('is-animation-none is-animation-pulse is-animation-slide').addClass(`is-animation-${animation}`);
+
+			if (customColors) {
+				stage.css({
+					'--mmsm-countdown-preview-bg': panel.find('input[name$="[background_color]"]').val() || '#f0f6fc',
+					'--mmsm-countdown-preview-number': panel.find('input[name$="[number_color]"]').val() || '#1d2327',
+					'--mmsm-countdown-preview-label': panel.find('input[name$="[label_color]"]').val() || '#646970',
+					'--mmsm-countdown-preview-border': panel.find('input[name$="[border_color]"]').val() || '#c3c4c7',
+				});
+			} else {
+				stage.css({
+					'--mmsm-countdown-preview-bg': '',
+					'--mmsm-countdown-preview-number': '',
+					'--mmsm-countdown-preview-label': '',
+					'--mmsm-countdown-preview-border': '',
+				});
+			}
+		};
+
+		panel.on('input change', 'input, textarea, select', updatePreview);
+		animationField.on('change', () => {
+			const values = preview.find('.mmsm-countdown-admin-preview-grid b');
+			values.removeClass('is-previewing');
+			window.requestAnimationFrame(() => values.addClass('is-previewing'));
+		});
+
+		updatePreview();
+	};
+
 	const bypassBuilder = $('.mmsm-bypass-query-builder');
 
 	const initializeBypassPreview = () => {
@@ -202,6 +268,7 @@ jQuery(document).ready(($) => {
 	initializeAdvancedVisibility();
 	initializeCustomLoginPreview();
 	initializeDesignPreview();
+	initializeCountdownAdmin();
 
 	const builder = $('.mmsm-social-links-builder');
 

@@ -265,9 +265,9 @@ body.mmsm-maintenance-page {
 	min-width: 0;
 	padding: clamp(10px, 2vw, 16px) 6px;
 	overflow-wrap: anywhere;
-	border: 1px solid var(--mm-border);
+	border: 1px solid var(--mmsm-countdown-border, var(--mm-border));
 	border-radius: 16px;
-	background: color-mix(in srgb, var(--mm-primary) 8%, var(--mm-surface));
+	background: var(--mmsm-countdown-bg, color-mix(in srgb, var(--mm-primary) 8%, var(--mm-surface)));
 	text-align: center;
 }
 
@@ -277,7 +277,7 @@ body.mmsm-maintenance-page {
 }
 
 .mmsm-countdown-value {
-	color: var(--mm-heading-text);
+	color: var(--mmsm-countdown-number, var(--mm-heading-text));
 	font-size: clamp(1.45rem, 5vw, 2.5rem);
 	font-variant-numeric: tabular-nums;
 	font-weight: 750;
@@ -285,13 +285,17 @@ body.mmsm-maintenance-page {
 	line-height: 1;
 }
 
-.mmsm-countdown-value.is-ticking {
-	animation: mmsm-countdown-tick 280ms ease-out;
+.mmsm-countdown-animation-slide .mmsm-countdown-value.is-ticking {
+	animation: mmsm-countdown-slide 280ms ease-out;
+}
+
+.mmsm-countdown-animation-pulse .mmsm-countdown-value.is-ticking {
+	animation: mmsm-countdown-pulse 320ms ease-out;
 }
 
 .mmsm-countdown-label {
 	margin-top: 8px;
-	color: var(--mm-muted-text);
+	color: var(--mmsm-countdown-label, var(--mm-muted-text));
 	font-size: clamp(0.68rem, 2vw, 0.78rem);
 	font-weight: 700;
 	letter-spacing: 0.06em;
@@ -311,7 +315,7 @@ body.mmsm-maintenance-page {
 	overflow-wrap: anywhere;
 }
 
-@keyframes mmsm-countdown-tick {
+@keyframes mmsm-countdown-slide {
 	0% {
 		opacity: 0.45;
 		transform: translateY(-4px) scale(0.96);
@@ -320,6 +324,22 @@ body.mmsm-maintenance-page {
 	100% {
 		opacity: 1;
 		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes mmsm-countdown-pulse {
+	0% {
+		filter: brightness(1.25);
+		transform: scale(0.9);
+	}
+
+	70% {
+		transform: scale(1.08);
+	}
+
+	100% {
+		filter: none;
+		transform: scale(1);
 	}
 }
 
@@ -728,7 +748,8 @@ body.mmsm-maintenance-page {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.mmsm-countdown-value.is-ticking {
+	.mmsm-countdown-animation-slide .mmsm-countdown-value.is-ticking,
+	.mmsm-countdown-animation-pulse .mmsm-countdown-value.is-ticking {
 		animation: none;
 	}
 

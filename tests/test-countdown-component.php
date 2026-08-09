@@ -143,6 +143,30 @@ class Test_MMSM_Countdown_Component extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Appearance choices produce scoped classes and sanitized CSS variables.
+	 *
+	 * @return void
+	 */
+	public function test_custom_appearance_is_scoped_to_countdown_markup() {
+		$settings = $this->get_settings(
+			array(
+				'enabled'          => 1,
+				'target_timestamp' => 2000,
+				'animation_style'  => 'pulse',
+				'color_mode'       => 'custom',
+				'background_color' => '#123abc',
+				'number_color'     => '#ffffff',
+			)
+		);
+		$markup = $this->component->render( $settings, array( 'current_timestamp' => 1000 ) );
+
+		$this->assertStringContainsString( 'mmsm-countdown-animation-pulse', $markup );
+		$this->assertStringContainsString( 'mmsm-countdown-color-custom', $markup );
+		$this->assertStringContainsString( '--mmsm-countdown-bg: #123abc', $markup );
+		$this->assertStringContainsString( '--mmsm-countdown-number: #ffffff', $markup );
+	}
+
+	/**
 	 * Build normalized settings with a maintenance countdown override.
 	 *
 	 * @param array<string,mixed> $instance Countdown instance values.

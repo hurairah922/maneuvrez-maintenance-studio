@@ -83,6 +83,9 @@ class CountdownComponent implements ComponentInterface {
 		$is_message       = CountdownService::STATE_EXPIRED === $state && 'show_message' === $action;
 		$remaining        = CountdownService::STATE_SCHEDULED === $state ? (int) $public_state['remaining_seconds'] : 0;
 		$units            = $this->get_visible_units( $instance, $remaining );
+		$animation_style  = in_array( $instance['animation_style'], array( 'none', 'pulse', 'slide' ), true ) ? (string) $instance['animation_style'] : 'slide';
+		$color_mode       = 'custom' === $instance['color_mode'] ? 'custom' : 'theme';
+		$component_style  = 'custom' === $color_mode ? $this->get_custom_style( $instance ) : '';
 
 		if ( '' === $finished_message ) {
 			$finished_message = __( "We're live.", 'maneuvrez-maintenance-studio' );
@@ -91,8 +94,9 @@ class CountdownComponent implements ComponentInterface {
 		ob_start();
 		?>
 		<section
-			class="<?php echo esc_attr( 'mmsm-component mmsm-component-countdown mmsm-countdown-units-' . count( $units ) ); ?>"
+			class="<?php echo esc_attr( 'mmsm-component mmsm-component-countdown mmsm-countdown-units-' . count( $units ) . ' mmsm-countdown-animation-' . $animation_style . ' mmsm-countdown-color-' . $color_mode ); ?>"
 			aria-label="<?php echo esc_attr( '' !== $heading ? $heading : __( 'Countdown', 'maneuvrez-maintenance-studio' ) ); ?>"
+			<?php if ( '' !== $component_style ) : ?>style="<?php echo esc_attr( $component_style ); ?>"<?php endif; ?>
 			data-mmsm-countdown
 			data-instance="<?php echo esc_attr( CountdownService::INSTANCE_MAINTENANCE ); ?>"
 			data-target-timestamp="<?php echo esc_attr( (string) $public_state['target_timestamp'] ); ?>"
@@ -165,5 +169,31 @@ class CountdownComponent implements ComponentInterface {
 	 */
 	private function format_value( $value ) {
 		return str_pad( (string) max( 0, (int) $value ), 2, '0', STR_PAD_LEFT );
+	}
+
+	/**
+	 * Build scoped CSS variables for optional custom countdown colors.
+	 *
+	 * @param array<string,mixed> $instance Normalized countdown instance.
+	 * @return string
+	 */
+	private function get_custom_style( array $instance ) {
+		$map = array(
+			'background_color' => '--mmsm-countdown-bg',
+			'number_color'     => '--mmsm-countdown-number',
+			'label_color'      => '--mmsm-countdown-label',
+			'border_color'     => '--mmsm-countdown-border',
+		);
+		$declarations = array();
+
+		foreach ( $map as $setting_key => $css_variable ) {
+			$color = isset( $instance[ $setting_key ] ) ? sanitize_hex_color( (string) $instance[ $setting_key ] ) : '';
+
+			if ( $color ) {
+				$declarations[] = $css_variable . ': ' . $color;
+			}
+		}
+
+		return implode( '; ', $declarations );
 	}
 }

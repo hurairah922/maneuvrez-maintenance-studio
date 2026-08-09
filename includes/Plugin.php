@@ -62,7 +62,7 @@ class Plugin {
 		$component_registry  = new ComponentRegistry( $countdown_service );
 		$renderer            = new TemplateRenderer( $template_registry, $component_registry, $settings_repository, $countdown_service );
 
-		$this->admin             = new Admin( $settings_repository );
+		$this->admin             = new Admin( $settings_repository, $countdown_service );
 		$this->router            = new MaintenanceRouter( $renderer, $settings_repository );
 		$this->login_url_manager = new LoginUrlManager( $settings_repository );
 		$this->contact_channels_renderer = new ContactChannelsRenderer( $settings_repository );
