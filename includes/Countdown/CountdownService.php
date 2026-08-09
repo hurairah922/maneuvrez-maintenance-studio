@@ -10,6 +10,7 @@ namespace Maneuvrez\MaintenanceModeStudio\Countdown;
 use DateTimeImmutable;
 use DateTimeZone;
 use InvalidArgumentException;
+use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsSchema;
 
 defined( 'ABSPATH' ) || exit;
@@ -24,6 +25,22 @@ class CountdownService {
 	const STATE_DISABLED     = 'disabled';
 	const STATE_SCHEDULED    = 'scheduled';
 	const STATE_EXPIRED      = 'expired';
+
+	/**
+	 * Settings repository.
+	 *
+	 * @var SettingsRepository
+	 */
+	private $settings_repository;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param SettingsRepository|null $settings_repository Settings repository.
+	 */
+	public function __construct( $settings_repository = null ) {
+		$this->settings_repository = $settings_repository instanceof SettingsRepository ? $settings_repository : new SettingsRepository();
+	}
 
 	/**
 	 * Return supported internal instance identifiers.
@@ -205,6 +222,71 @@ class CountdownService {
 		$timezone = $timezone instanceof DateTimeZone ? $timezone : wp_timezone();
 
 		return wp_date( 'Y-m-d\\TH:i', $timestamp, $timezone );
+	}
+
+	/**
+	 * Reconcile a named instance against freshly loaded settings.
+	 *
+	 * Only disable_mode has a persistent side effect. The current settings are
+	 * re-read on every call so an obsolete cron event cannot apply stale state.
+	 *
+	 * @param string   $instance_key Countdown instance identifier.
+	 * @param int|null $now Current Unix timestamp override.
+	 * @return bool Whether maintenance mode was disabled by this call.
+	 */
+	public function reconcile_instance( $instance_key, $now = null ) {
+		$this->assert_supported_instance( $instance_key );
+
+		$settings = $this->settings_repository->get_settings();
+		$instance = $this->get_instance( $settings, $instance_key );
+		$now      = null === $now ? time() : (int) $now;
+
+		if (
+			empty( $settings['enabled'] ) ||
+			'disable_mode' !== (string) $instance['expiry_action'] ||
+			! $this->is_expired( $instance, $now )
+		) {
+			return false;
+		}
+
+		// Re-read immediately before writing to narrow cron/request race windows.
+		$current          = $this->settings_repository->get_settings();
+		$current_instance = $this->get_instance( $current, $instance_key );
+
+		if (
+			empty( $current['enabled'] ) ||
+			'disable_mode' !== (string) $current_instance['expiry_action'] ||
+			! $this->is_expired( $current_instance, $now )
+		) {
+			return false;
+		}
+
+		$current['enabled'] = 0;
+		$updated            = update_option( MMSM_SETTINGS_OPTION, $current, false );
+
+		if ( $updated ) {
+			do_action( 'mmsm_countdown_reconciled', $instance_key );
+		}
+
+		return $updated;
+	}
+
+	/**
+	 * Reconcile every supported instance through the same domain path.
+	 *
+	 * @param int|null $now Current Unix timestamp override.
+	 * @return array<int,string> Instances that disabled maintenance mode.
+	 */
+	public function reconcile_due_instances( $now = null ) {
+		$reconciled = array();
+
+		foreach ( $this->get_supported_instance_keys() as $instance_key ) {
+			if ( $this->reconcile_instance( $instance_key, $now ) ) {
+				$reconciled[] = $instance_key;
+			}
+		}
+
+		return $reconciled;
 	}
 
 	/**

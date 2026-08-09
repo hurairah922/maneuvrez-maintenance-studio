@@ -73,6 +73,8 @@ jQuery(document).ready(($) => {
 		const expiryField = $('#mmsm-countdown-expiry-action');
 		const animationField = $('#mmsm-countdown-animation');
 		const colorModeField = $('#mmsm-countdown-color-mode');
+		const scheduleButton = panel.find('[data-countdown-schedule-check]');
+		const scheduleResult = panel.find('[data-countdown-schedule-result]');
 
 		const updatePreview = () => {
 			const enabled = enabledField.prop('checked');
@@ -119,6 +121,31 @@ jQuery(document).ready(($) => {
 			const values = preview.find('.mmsm-countdown-admin-preview-grid b');
 			values.removeClass('is-previewing');
 			window.requestAnimationFrame(() => values.addClass('is-previewing'));
+		});
+
+		scheduleButton.on('click', () => {
+			if (typeof mmsmCountdownAdmin === 'undefined') {
+				return;
+			}
+
+			scheduleButton.prop('disabled', true);
+			scheduleResult.text(__('Checking the one-time event…', 'maneuvrez-maintenance-studio'));
+
+			$.post(mmsmCountdownAdmin.ajaxUrl, {
+				action: 'mmsm_countdown_schedule_check',
+				nonce: mmsmCountdownAdmin.nonce,
+			})
+				.done((response) => {
+					const message = response && response.data && response.data.message
+						? response.data.message
+						: __('The scheduling check did not return a result.', 'maneuvrez-maintenance-studio');
+
+					scheduleResult.text(message);
+				})
+				.fail(() => {
+					scheduleResult.text(__('The scheduling check failed. Please reload the page and try again.', 'maneuvrez-maintenance-studio'));
+				})
+				.always(() => scheduleButton.prop('disabled', false));
 		});
 
 		updatePreview();

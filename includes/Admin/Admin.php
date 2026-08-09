@@ -8,6 +8,7 @@
 namespace Maneuvrez\MaintenanceModeStudio\Admin;
 
 use Maneuvrez\MaintenanceModeStudio\Components\SocialLinksComponent;
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownScheduler;
 use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
@@ -32,6 +33,13 @@ class Admin {
 	 * @var CountdownService
 	 */
 	private $countdown_service;
+
+	/**
+	 * Countdown lifecycle scheduler.
+	 *
+	 * @var CountdownScheduler
+	 */
+	private $countdown_scheduler;
 
 	/**
 	 * Settings group slug.
@@ -59,10 +67,12 @@ class Admin {
 	 *
 	 * @param SettingsRepository|null $settings_repository Settings repository.
 	 * @param CountdownService|null    $countdown_service Countdown domain service.
+	 * @param CountdownScheduler|null  $countdown_scheduler Countdown scheduler.
 	 */
-	public function __construct( $settings_repository = null, $countdown_service = null ) {
+	public function __construct( $settings_repository = null, $countdown_service = null, $countdown_scheduler = null ) {
 		$this->settings_repository = $settings_repository instanceof SettingsRepository ? $settings_repository : new SettingsRepository();
-		$this->countdown_service   = $countdown_service instanceof CountdownService ? $countdown_service : new CountdownService();
+		$this->countdown_service   = $countdown_service instanceof CountdownService ? $countdown_service : new CountdownService( $this->settings_repository );
+		$this->countdown_scheduler = $countdown_scheduler instanceof CountdownScheduler ? $countdown_scheduler : new CountdownScheduler( $this->settings_repository, $this->countdown_service );
 	}
 
 	/**
@@ -76,6 +86,7 @@ class Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_footer-plugins.php', array( $this, 'render_uninstall_feedback_modal' ) );
 		add_action( 'wp_ajax_mmsm_capture_uninstall_feedback', array( $this, 'handle_uninstall_feedback_request' ) );
+		add_action( 'wp_ajax_mmsm_countdown_schedule_check', array( $this, 'handle_countdown_schedule_check' ) );
 		add_filter( 'plugin_action_links_' . MMSM_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
 	}
 
@@ -639,6 +650,15 @@ class Admin {
 				'maneuvrez-maintenance-studio'
 			);
 
+			wp_localize_script(
+				'mmsm-admin-settings-script',
+				'mmsmCountdownAdmin',
+				array(
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+					'nonce'   => wp_create_nonce( 'mmsm_countdown_schedule_check' ),
+				)
+			);
+
 			return;
 		}
 
@@ -952,6 +972,7 @@ class Admin {
 	 */
 	public function render_countdown_section() {
 		$countdown = $this->get_maintenance_countdown();
+		$schedule  = $this->countdown_scheduler->get_status( CountdownService::INSTANCE_MAINTENANCE );
 		$preview_classes = array(
 			'mmsm-countdown-admin-preview',
 			! empty( $countdown['enabled'] ) ? '' : 'is-disabled',
@@ -988,7 +1009,53 @@ class Admin {
 				</div>
 			</div>
 		</div>
+		<div class="mmsm-countdown-schedule-check">
+			<strong><?php echo esc_html__( 'Server scheduling check', 'maneuvrez-maintenance-studio' ); ?></strong>
+			<p data-countdown-schedule-result>
+				<?php
+				if ( 'healthy' === $schedule['status'] ) {
+					echo esc_html__( 'The one-time expiry event is scheduled correctly.', 'maneuvrez-maintenance-studio' );
+				} elseif ( 'missing' === $schedule['status'] ) {
+					echo esc_html__( 'The countdown needs a scheduling repair.', 'maneuvrez-maintenance-studio' );
+				} else {
+					echo esc_html__( 'No future expiry event is currently required.', 'maneuvrez-maintenance-studio' );
+				}
+				?>
+			</p>
+			<button type="button" class="button" data-countdown-schedule-check><?php echo esc_html__( 'Check expiry scheduling', 'maneuvrez-maintenance-studio' ); ?></button>
+			<p class="description"><?php echo esc_html__( 'This safely verifies and repairs the one-time event. It does not fast-forward the countdown or turn off maintenance mode.', 'maneuvrez-maintenance-studio' ); ?></p>
+		</div>
 		<?php
+	}
+
+	/**
+	 * Verify and repair the one-time countdown event for an administrator.
+	 *
+	 * @return void
+	 */
+	public function handle_countdown_schedule_check() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => esc_html__( 'You are not allowed to check countdown scheduling.', 'maneuvrez-maintenance-studio' ) ), 403 );
+		}
+
+		check_ajax_referer( 'mmsm_countdown_schedule_check', 'nonce' );
+
+		$this->countdown_scheduler->sync_instance( CountdownService::INSTANCE_MAINTENANCE );
+		$status = $this->countdown_scheduler->get_status( CountdownService::INSTANCE_MAINTENANCE );
+
+		if ( 'healthy' === $status['status'] ) {
+			$message = sprintf(
+				/* translators: %s: scheduled date and time in the WordPress site timezone. */
+				esc_html__( 'Scheduling is healthy. The one-time event is set for %s.', 'maneuvrez-maintenance-studio' ),
+				wp_date( 'Y-m-d H:i:s T', (int) $status['scheduled_timestamp'], wp_timezone() )
+			);
+		} elseif ( 'not_required' === $status['status'] ) {
+			$message = esc_html__( 'Scheduling is healthy. No future expiry event is required for the current countdown settings.', 'maneuvrez-maintenance-studio' );
+		} else {
+			$message = esc_html__( 'WordPress could not schedule the expiry event. Check that WP-Cron is available, then try again.', 'maneuvrez-maintenance-studio' );
+		}
+
+		wp_send_json_success( array( 'message' => $message ) );
 	}
 
 	/**

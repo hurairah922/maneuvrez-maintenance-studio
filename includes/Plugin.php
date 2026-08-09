@@ -9,6 +9,7 @@ namespace Maneuvrez\MaintenanceModeStudio;
 
 use Maneuvrez\MaintenanceModeStudio\Admin\Admin;
 use Maneuvrez\MaintenanceModeStudio\Components\ComponentRegistry;
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownScheduler;
 use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
 use Maneuvrez\MaintenanceModeStudio\Frontend\ContactChannelsRenderer;
 use Maneuvrez\MaintenanceModeStudio\Frontend\MaintenanceRouter;
@@ -53,19 +54,28 @@ class Plugin {
 	private $contact_channels_renderer;
 
 	/**
+	 * Countdown lifecycle scheduler.
+	 *
+	 * @var CountdownScheduler
+	 */
+	private $countdown_scheduler;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$settings_repository = new SettingsRepository();
 		$template_registry   = new TemplateRegistry();
-		$countdown_service   = new CountdownService();
+		$countdown_service   = new CountdownService( $settings_repository );
+		$countdown_scheduler = new CountdownScheduler( $settings_repository, $countdown_service );
 		$component_registry  = new ComponentRegistry( $countdown_service );
 		$renderer            = new TemplateRenderer( $template_registry, $component_registry, $settings_repository, $countdown_service );
 
-		$this->admin             = new Admin( $settings_repository, $countdown_service );
+		$this->admin             = new Admin( $settings_repository, $countdown_service, $countdown_scheduler );
 		$this->router            = new MaintenanceRouter( $renderer, $settings_repository );
 		$this->login_url_manager = new LoginUrlManager( $settings_repository );
 		$this->contact_channels_renderer = new ContactChannelsRenderer( $settings_repository );
+		$this->countdown_scheduler = $countdown_scheduler;
 	}
 
 	/**
@@ -78,6 +88,7 @@ class Plugin {
 
 		$this->admin->register();
 		$this->login_url_manager->register();
+		$this->countdown_scheduler->register();
 		$this->router->register();
 		$this->contact_channels_renderer->register();
 	}

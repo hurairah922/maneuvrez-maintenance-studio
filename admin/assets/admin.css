@@ -262,6 +262,22 @@
 	opacity: 0.68;
 }
 
+.mmsm-settings-page .mmsm-countdown-schedule-check {
+	max-width: 720px;
+	margin-top: 12px;
+	padding: 14px 16px;
+	border-left: 4px solid #2271b1;
+	background: #f0f6fc;
+}
+
+.mmsm-settings-page .mmsm-countdown-schedule-check p {
+	margin: 6px 0 10px;
+}
+
+.mmsm-settings-page .mmsm-countdown-schedule-check .description {
+	margin-bottom: 0;
+}
+
 .mmsm-settings-page .mmsm-countdown-admin-preview-header {
 	display: flex;
 	justify-content: space-between;

@@ -52,6 +52,25 @@ document.addEventListener('DOMContentLoaded', () => {
 			countdown.dataset.completed = 'true';
 			countdown.dataset.state = 'expired';
 
+			if (countdown.dataset.expiryAction === 'disable_mode') {
+				const instance = countdown.dataset.instance || 'maintenance';
+				const reloadKey = `mmsm-countdown-reloaded:${instance}:${target}`;
+
+				try {
+					if (window.sessionStorage.getItem(reloadKey) === '1') {
+						return;
+					}
+
+					window.sessionStorage.setItem(reloadKey, '1');
+				} catch (error) {
+					// Avoid an uncontrolled reload loop when browser storage is unavailable.
+					return;
+				}
+
+				window.location.reload();
+				return;
+			}
+
 			if (countdown.dataset.expiryAction === 'hide') {
 				countdown.hidden = true;
 				return;
