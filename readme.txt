@@ -3,7 +3,7 @@ Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page, contact buttons, social links
 Requires at least: 6.4
 Tested up to: 7.0
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -60,6 +60,17 @@ Choose whether the countdown stays at zero, hides, shows a completion message, o
 Save the generated login URL somewhere safe first. If you lose it, disable the plugin through FTP or WP-CLI to restore the default WordPress login entry points.
 
 == Changelog ==
+
+= 1.3.0 =
+
+* reorganize settings into Maintenance Page, Design, Access & Visibility, and Advanced task areas
+* place page type, title, message, and the grouped primary action first in the Maintenance Page editor
+* present optional page sections as compact, accessible cards with live configuration summaries
+* add an accurate public-template preview with desktop, tablet, mobile, and custom viewport sizes
+* show saved maintenance status and unsaved editor changes clearly, with a warning before leaving unsaved work
+* preserve configured values when optional sections are collapsed or disabled
+* reject incomplete action label and URL pairs without overwriting previously saved actions
+* keep existing settings keys, legacy settings links, frontend rendering, and access behavior compatible
 
 = 1.2.2 =
 
