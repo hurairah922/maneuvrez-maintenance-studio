@@ -3,7 +3,7 @@ Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page, contact buttons, social links
 Requires at least: 6.4
 Tested up to: 7.0
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -60,6 +60,11 @@ Choose whether the countdown stays at zero, hides, shows a completion message, o
 Save the generated login URL somewhere safe first. If you lose it, disable the plugin through FTP or WP-CLI to restore the default WordPress login entry points.
 
 == Changelog ==
+
+= 1.2.2 =
+
+* prevent an expired auto-disable countdown from turning off maintenance mode after it is reactivated
+* clarify how administrators can preview the maintenance page while their normal site access is preserved
 
 = 1.2.1 =
 

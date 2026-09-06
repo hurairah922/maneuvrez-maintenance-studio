@@ -10,6 +10,8 @@ namespace Maneuvrez\MaintenanceModeStudio\Admin;
 use Maneuvrez\MaintenanceModeStudio\Components\SocialLinksComponent;
 use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownScheduler;
 use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
+use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRegistry;
+use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRenderer;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 use Maneuvrez\MaintenanceModeStudio\Support\ContactChannels;
@@ -87,6 +89,7 @@ class Admin {
 		add_action( 'admin_footer-plugins.php', array( $this, 'render_uninstall_feedback_modal' ) );
 		add_action( 'wp_ajax_mmsm_capture_uninstall_feedback', array( $this, 'handle_uninstall_feedback_request' ) );
 		add_action( 'wp_ajax_mmsm_countdown_schedule_check', array( $this, 'handle_countdown_schedule_check' ) );
+		add_action( 'wp_ajax_mmsm_render_page_preview', array( $this, 'handle_page_preview_request' ) );
 		add_filter( 'plugin_action_links_' . MMSM_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
 	}
 
@@ -138,7 +141,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_page_title',
-			__( 'Page Title', 'maneuvrez-maintenance-studio' ),
+			__( 'Page title', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_page_title_field' ),
 			$this->page_slug,
 			'mmsm_general_section'
@@ -161,7 +164,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_mode_type',
-			__( 'Mode Type', 'maneuvrez-maintenance-studio' ),
+			__( 'Page type', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_mode_type_field' ),
 			$this->page_slug,
 			'mmsm_template_section'
@@ -271,7 +274,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_hero_eyebrow',
-			__( 'Hero Eyebrow', 'maneuvrez-maintenance-studio' ),
+			__( 'Text above heading', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_hero_eyebrow_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -279,7 +282,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_primary_action_label',
-			__( 'Primary Action Label', 'maneuvrez-maintenance-studio' ),
+			__( 'Button label', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_primary_action_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -287,7 +290,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_primary_action_url',
-			__( 'Primary Action URL', 'maneuvrez-maintenance-studio' ),
+			__( 'Button URL', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_primary_action_url_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -295,7 +298,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_secondary_action_label',
-			__( 'Secondary Action Label', 'maneuvrez-maintenance-studio' ),
+			__( 'Button label', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_secondary_action_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -303,7 +306,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_secondary_action_url',
-			__( 'Secondary Action URL', 'maneuvrez-maintenance-studio' ),
+			__( 'Button URL', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_secondary_action_url_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -311,7 +314,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_status_label',
-			__( 'Status Label', 'maneuvrez-maintenance-studio' ),
+			__( 'Status text', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_status_label_field' ),
 			$this->page_slug,
 			'mmsm_components_section'
@@ -327,10 +330,13 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_progress_value',
-			__( 'Progress Value', 'maneuvrez-maintenance-studio' ),
+			__( 'Progress percentage', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_progress_value_field' ),
 			$this->page_slug,
-			'mmsm_components_section'
+			'mmsm_components_section',
+			array(
+				'class' => 'mmsm-progress-value-dependent',
+			)
 		);
 
 		add_settings_field(
@@ -398,7 +404,7 @@ class Admin {
 
 		add_settings_field(
 			'mmsm_countdown_expiry',
-			__( 'When the countdown finishes', 'maneuvrez-maintenance-studio' ),
+			__( 'When the countdown ends', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_countdown_expiry_field' ),
 			$this->page_slug,
 			'mmsm_countdown_section'
@@ -428,6 +434,14 @@ class Admin {
 			__( 'Contact Channels', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_contact_channels_section' ),
 			$this->page_slug
+		);
+
+		add_settings_field(
+			'mmsm_contact_channels_enabled',
+			__( 'Enable Contact Channels', 'maneuvrez-maintenance-studio' ),
+			array( $this, 'render_contact_channels_enabled_field' ),
+			$this->page_slug,
+			'mmsm_contact_channels_section'
 		);
 
 		add_settings_field(
@@ -560,7 +574,10 @@ class Admin {
 			__( 'Login Label', 'maneuvrez-maintenance-studio' ),
 			array( $this, 'render_login_label_field' ),
 			$this->page_slug,
-			'mmsm_advanced_section'
+			'mmsm_advanced_section',
+			array(
+				'class' => 'mmsm-login-label-dependent',
+			)
 		);
 	}
 
@@ -575,6 +592,10 @@ class Admin {
 		}
 
 		$active_tab = $this->get_active_tab();
+		$settings   = $this->settings_repository->get_settings();
+		$is_enabled = ! empty( $settings['enabled'] );
+		$status_text = $is_enabled ? __( 'On', 'maneuvrez-maintenance-studio' ) : __( 'Off', 'maneuvrez-maintenance-studio' );
+		$status_help = $is_enabled ? __( 'Logged-out visitors see the maintenance page.', 'maneuvrez-maintenance-studio' ) : __( 'Your normal site is visible to visitors.', 'maneuvrez-maintenance-studio' );
 		?>
 		<div class="wrap mmsm-settings-page">
 			<div class="mmsm-settings-header">
@@ -584,6 +605,12 @@ class Admin {
 					<p class="mmsm-settings-intro">
 						<?php echo esc_html__( 'Configure the maintenance page template, core copy, and reusable visitor components without editing code.', 'maneuvrez-maintenance-studio' ); ?>
 					</p>
+				</div>
+				<div class="<?php echo esc_attr( 'mmsm-saved-status ' . ( $is_enabled ? 'is-on' : 'is-off' ) ); ?>" role="status" aria-label="<?php echo esc_attr__( 'Saved maintenance mode and editor status', 'maneuvrez-maintenance-studio' ); ?>">
+					<span><?php echo esc_html__( 'Saved status', 'maneuvrez-maintenance-studio' ); ?></span>
+					<strong><?php echo esc_html( $status_text ); ?></strong>
+					<small><?php echo esc_html( $status_help ); ?></small>
+					<span class="mmsm-edit-status" data-settings-edit-status aria-live="polite"><?php echo esc_html__( 'All editor changes are saved.', 'maneuvrez-maintenance-studio' ); ?></span>
 				</div>
 			</div>
 
@@ -595,6 +622,7 @@ class Admin {
 						<a
 							href="<?php echo esc_url( $this->get_tab_url( $tab_key ) ); ?>"
 							class="<?php echo esc_attr( 'mmsm-settings-nav-item' . ( $active_tab === $tab_key ? ' is-active' : '' ) ); ?>"
+							<?php if ( $active_tab === $tab_key ) : ?>aria-current="page"<?php endif; ?>
 						>
 							<span class="<?php echo esc_attr( 'dashicons ' . $tab['icon'] ); ?>" aria-hidden="true"></span>
 							<span><?php echo esc_html( $tab['label'] ); ?></span>
@@ -609,8 +637,23 @@ class Admin {
 						?>
 						<input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( $this->get_tab_url( $active_tab ) ); ?>" />
 						<input type="hidden" name="mmsm_active_tab" value="<?php echo esc_attr( $active_tab ); ?>" />
+						<input type="hidden" name="mmsm_navigation_version" value="areas" />
+						<?php if ( 'advanced' === $active_tab ) : ?>
+							<input type="hidden" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[template_key]" value="<?php echo esc_attr( (string) $settings['template_key'] ); ?>" />
+						<?php endif; ?>
 						<?php
-						$this->render_active_tab();
+						if ( in_array( $active_tab, array( 'maintenance_page', 'design' ), true ) ) {
+							?>
+							<div class="mmsm-editor-workspace">
+								<div class="mmsm-settings-stack">
+									<?php $this->render_active_tab(); ?>
+								</div>
+								<?php $this->render_full_page_preview( $active_tab ); ?>
+							</div>
+							<?php
+						} else {
+							$this->render_active_tab();
+						}
 					submit_button( __( 'Save Settings', 'maneuvrez-maintenance-studio' ), 'primary', 'submit', true, array( 'class' => 'mmsm-settings-save-button' ) );
 					?>
 				</form>
@@ -726,29 +769,36 @@ class Admin {
 			return $existing;
 		}
 
-		$active_tab = isset( $_POST['mmsm_active_tab'] ) ? sanitize_key( wp_unslash( $_POST['mmsm_active_tab'] ) ) : 'general';
+		$requested_tab = isset( $_POST['mmsm_active_tab'] ) ? sanitize_key( wp_unslash( $_POST['mmsm_active_tab'] ) ) : 'maintenance_page';
+		$area_request  = isset( $_POST['mmsm_navigation_version'] ) && 'areas' === sanitize_key( wp_unslash( $_POST['mmsm_navigation_version'] ) );
+		$active_tab    = $area_request ? $this->normalize_area_key( $requested_tab ) : $requested_tab;
+		$tab_keys      = $area_request ? $this->get_tab_field_keys( $active_tab ) : $this->get_legacy_tab_field_keys( $active_tab );
 
-		if ( 'countdown' === $active_tab ) {
+		if ( ( $area_request && 'maintenance_page' === $active_tab ) || ( ! $area_request && 'countdown' === $active_tab ) ) {
 			$input['countdowns'] = $this->prepare_countdowns_for_save( $input, $existing );
 		}
 
-		if ( 'general' === $active_tab ) {
-			$existing = $this->prepare_maintenance_activation( $input, $existing );
+		if ( $area_request && 'maintenance_page' === $active_tab ) {
+			$input = $this->prepare_action_pairs_for_save( $input, $existing );
 		}
 
-		$tab_keys   = $this->get_tab_field_keys( $active_tab );
+		if ( ( $area_request && 'access_visibility' === $active_tab ) || ( ! $area_request && 'general' === $active_tab ) ) {
+			$existing = $this->prepare_maintenance_activation( $input, $existing );
+		}
 
 		foreach ( $tab_keys as $tab_key ) {
 			unset( $existing[ $tab_key ] );
 		}
 
-		if ( 'social_links' === $active_tab && isset( $_POST['mmsm_social_links_present'] ) && ! isset( $input['social_links'] ) ) {
+		if ( ( 'maintenance_page' === $active_tab || 'social_links' === $active_tab ) && isset( $_POST['mmsm_social_links_present'] ) && ! isset( $input['social_links'] ) ) {
 			$input['social_links'] = array();
 		}
 
-		if ( 'contact_channels' === $active_tab && isset( $_POST['mmsm_contact_channels_present'] ) && ! isset( $input['contact_channels_items'] ) ) {
+		if ( ( 'maintenance_page' === $active_tab || 'contact_channels' === $active_tab ) && isset( $_POST['mmsm_contact_channels_present'] ) && ! isset( $input['contact_channels_items'] ) ) {
 			$input['contact_channels_items'] = array();
 		}
+
+		$input = array_intersect_key( $input, array_flip( $tab_keys ) );
 
 		$mmsm_sanitized_settings = Sanitizer::sanitize_settings( array_merge( $existing, $input ) );
 		update_option( MMSM_REMOVE_DATA_OPTION, ! empty( $mmsm_sanitized_settings['delete_data_on_uninstall'] ) ? 1 : 0, false );
@@ -925,39 +975,114 @@ class Admin {
 	 * @return void
 	 */
 	public function render_design_section() {
-		$settings = $this->get_settings();
-		$style    = sprintf(
-			'--mmsm-design-preview-bg:%1$s;--mmsm-design-preview-surface:%2$s;--mmsm-design-preview-primary:%3$s;--mmsm-design-preview-heading:%4$s;--mmsm-design-preview-body:%5$s;--mmsm-design-preview-muted:%6$s;--mmsm-design-preview-link:%7$s;--mmsm-design-preview-button-text:%8$s;--mmsm-design-preview-border:%9$s;',
-			esc_attr( (string) $settings['background_color'] ),
-			esc_attr( (string) $settings['surface_color'] ),
-			esc_attr( (string) $settings['primary_color'] ),
-			esc_attr( (string) $settings['heading_text_color'] ),
-			esc_attr( (string) $settings['body_text_color'] ),
-			esc_attr( (string) $settings['muted_text_color'] ),
-			esc_attr( (string) $settings['link_text_color'] ),
-			esc_attr( (string) $settings['button_text_color'] ),
-			esc_attr( (string) $settings['border_color'] )
+		echo '<p>' . esc_html__( 'Use the full-page preview to check every color role and appearance mode together.', 'maneuvrez-maintenance-studio' ) . '</p>';
+	}
+
+	/**
+	 * Render the shared real-template maintenance-page preview.
+	 *
+	 * @param string $active_tab Active task area.
+	 * @return void
+	 */
+	private function render_full_page_preview( $active_tab ) {
+		$preview_nonce = wp_create_nonce( 'mmsm_render_page_preview' );
+		$preview_url   = add_query_arg(
+			array(
+				'action' => 'mmsm_render_page_preview',
+				'nonce'  => $preview_nonce,
+			),
+			admin_url( 'admin-ajax.php' )
 		);
 		?>
-		<p><?php echo esc_html__( 'Use WordPress color pickers for the safe theme color roles that drive light, dark, and system modes.', 'maneuvrez-maintenance-studio' ); ?></p>
-		<div class="mmsm-design-preview" data-design-preview style="<?php echo esc_attr( $style ); ?>">
-			<div class="mmsm-design-preview-canvas">
-				<div class="mmsm-design-preview-card">
-					<span class="mmsm-design-preview-kicker"><?php echo esc_html__( 'Maintenance preview', 'maneuvrez-maintenance-studio' ); ?></span>
-					<strong><?php echo esc_html__( "We'll be back soon", 'maneuvrez-maintenance-studio' ); ?></strong>
-					<p><?php echo esc_html__( 'A compact live sample of your background, surface, text, border, link, and button colors.', 'maneuvrez-maintenance-studio' ); ?></p>
-					<div class="mmsm-design-preview-actions">
-						<span class="mmsm-design-preview-button"><?php echo esc_html__( 'Notify me', 'maneuvrez-maintenance-studio' ); ?></span>
-						<span class="mmsm-design-preview-link"><?php echo esc_html__( 'Contact support', 'maneuvrez-maintenance-studio' ); ?></span>
-					</div>
+		<aside class="mmsm-full-page-preview" data-page-preview data-preview-area="<?php echo esc_attr( $active_tab ); ?>" data-preview-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" data-preview-nonce="<?php echo esc_attr( $preview_nonce ); ?>" aria-labelledby="mmsm-full-page-preview-title">
+			<div class="mmsm-full-page-preview-header">
+				<div>
+					<strong id="mmsm-full-page-preview-title"><?php echo esc_html__( 'Full page preview', 'maneuvrez-maintenance-studio' ); ?></strong>
+					<span><?php echo esc_html__( 'Rendered with the public template and updated as you edit', 'maneuvrez-maintenance-studio' ); ?></span>
 				</div>
-				<div class="mmsm-design-preview-panel">
-					<span><?php echo esc_html__( 'Progress', 'maneuvrez-maintenance-studio' ); ?></span>
-					<div><i></i></div>
+				<div class="mmsm-full-page-preview-actions">
+					<button type="button" class="button button-secondary" data-preview-expand aria-expanded="false">
+						<?php echo esc_html__( 'Expand preview', 'maneuvrez-maintenance-studio' ); ?>
+					</button>
+					<button type="button" class="button button-secondary" data-preview-close hidden>
+						<?php echo esc_html__( 'Close preview', 'maneuvrez-maintenance-studio' ); ?>
+					</button>
 				</div>
 			</div>
-		</div>
+			<div class="mmsm-preview-responsive-toolbar" data-preview-responsive-toolbar hidden>
+				<div class="mmsm-preview-presets" role="group" aria-label="<?php echo esc_attr__( 'Preview size presets', 'maneuvrez-maintenance-studio' ); ?>">
+					<button type="button" class="button" data-preview-preset="desktop" aria-pressed="true"><?php echo esc_html__( 'Desktop', 'maneuvrez-maintenance-studio' ); ?></button>
+					<button type="button" class="button" data-preview-preset="tablet" aria-pressed="false"><?php echo esc_html__( 'Tablet', 'maneuvrez-maintenance-studio' ); ?></button>
+					<button type="button" class="button" data-preview-preset="mobile" aria-pressed="false"><?php echo esc_html__( 'Mobile', 'maneuvrez-maintenance-studio' ); ?></button>
+				</div>
+				<label>
+					<span><?php echo esc_html__( 'Width', 'maneuvrez-maintenance-studio' ); ?></span>
+					<input type="number" min="320" max="2560" step="1" value="1440" data-preview-width aria-label="<?php echo esc_attr__( 'Preview width in pixels', 'maneuvrez-maintenance-studio' ); ?>" />
+				</label>
+				<label>
+					<span><?php echo esc_html__( 'Height', 'maneuvrez-maintenance-studio' ); ?></span>
+					<input type="number" min="400" max="1600" step="1" value="900" data-preview-height aria-label="<?php echo esc_attr__( 'Preview height in pixels', 'maneuvrez-maintenance-studio' ); ?>" />
+				</label>
+				<span class="mmsm-preview-resize-help"><?php echo esc_html__( 'Drag any edge or corner to resize.', 'maneuvrez-maintenance-studio' ); ?></span>
+			</div>
+			<div class="mmsm-preview-canvas" data-preview-canvas>
+				<div class="mmsm-preview-device-frame" data-preview-device-frame>
+					<iframe class="mmsm-public-preview-frame" data-public-preview-frame src="<?php echo esc_url( $preview_url ); ?>" title="<?php echo esc_attr__( 'Rendered maintenance page preview', 'maneuvrez-maintenance-studio' ); ?>" sandbox="allow-scripts" referrerpolicy="same-origin"></iframe>
+					<?php foreach ( array( 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw' ) as $resize_direction ) : ?>
+						<span class="mmsm-preview-resize-handle is-<?php echo esc_attr( $resize_direction ); ?>" data-preview-resize="<?php echo esc_attr( $resize_direction ); ?>" aria-hidden="true"></span>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</aside>
 		<?php
+	}
+
+	/**
+	 * Render the real public template in an authenticated preview response.
+	 *
+	 * Posted settings are merged only into the active area's saved values and
+	 * are never persisted by this endpoint.
+	 *
+	 * @return void
+	 */
+	public function handle_page_preview_request() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			status_header( 403 );
+			wp_die( esc_html__( 'You are not allowed to preview this page.', 'maneuvrez-maintenance-studio' ) );
+		}
+
+		check_ajax_referer( 'mmsm_render_page_preview', 'nonce' );
+		$settings = $this->settings_repository->get_settings();
+
+		if ( 'POST' === ( isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '' ) ) {
+			$input      = isset( $_POST[ MMSM_SETTINGS_OPTION ] ) && is_array( $_POST[ MMSM_SETTINGS_OPTION ] ) ? wp_unslash( $_POST[ MMSM_SETTINGS_OPTION ] ) : array();
+			$active_tab = isset( $_POST['mmsm_active_tab'] ) ? $this->normalize_area_key( sanitize_key( wp_unslash( $_POST['mmsm_active_tab'] ) ) ) : 'maintenance_page';
+			$area_keys  = $this->get_tab_field_keys( $active_tab );
+
+			if ( 'maintenance_page' === $active_tab && isset( $input['countdowns'] ) ) {
+				$input['countdowns'] = $this->prepare_countdowns_for_save( $input, $settings );
+			}
+
+			if ( 'maintenance_page' === $active_tab && isset( $_POST['mmsm_social_links_present'] ) && ! isset( $input['social_links'] ) ) {
+				$input['social_links'] = array();
+			}
+
+			if ( 'maintenance_page' === $active_tab && isset( $_POST['mmsm_contact_channels_present'] ) && ! isset( $input['contact_channels_items'] ) ) {
+				$input['contact_channels_items'] = array();
+			}
+
+			foreach ( $area_keys as $area_key ) {
+				unset( $settings[ $area_key ] );
+			}
+
+			$input    = array_intersect_key( $input, array_flip( $area_keys ) );
+			$settings = Sanitizer::sanitize_settings( array_merge( $settings, $input ) );
+		}
+
+		nocache_headers();
+		header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+		( new TemplateRenderer() )->render( $settings );
+		wp_die();
 	}
 
 	/**
@@ -970,51 +1095,14 @@ class Admin {
 	}
 
 	/**
-	 * Render the countdown section description and lightweight preview.
+	 * Render the countdown section description and scheduling health controls.
 	 *
 	 * @return void
 	 */
 	public function render_countdown_section() {
-		$countdown = $this->get_maintenance_countdown();
-		$schedule  = $this->countdown_scheduler->get_status( CountdownService::INSTANCE_MAINTENANCE );
-		$remaining = $this->countdown_service->get_remaining_seconds( $countdown );
-		$preview_classes = array(
-			'mmsm-countdown-admin-preview',
-			! empty( $countdown['enabled'] ) ? '' : 'is-disabled',
-		);
-		$stage_classes = array(
-			'mmsm-countdown-admin-preview-stage',
-			'is-animation-' . sanitize_html_class( (string) $countdown['animation_style'] ),
-			'is-scope-' . sanitize_html_class( (string) $countdown['animation_scope'] ),
-		);
+		$schedule = $this->countdown_scheduler->get_status( CountdownService::INSTANCE_MAINTENANCE );
 		?>
 		<p><?php echo esc_html__( 'Schedule one countdown for the maintenance or coming-soon page. The selected time uses the WordPress site timezone.', 'maneuvrez-maintenance-studio' ); ?></p>
-		<div class="<?php echo esc_attr( trim( implode( ' ', $preview_classes ) ) ); ?>" data-countdown-admin-preview>
-			<div class="mmsm-countdown-admin-preview-header">
-				<strong><?php echo esc_html__( 'Live layout preview', 'maneuvrez-maintenance-studio' ); ?></strong>
-				<span class="<?php echo ! empty( $countdown['enabled'] ) ? 'is-enabled' : ''; ?>" data-countdown-preview-status><?php echo ! empty( $countdown['enabled'] ) ? esc_html__( 'Enabled', 'maneuvrez-maintenance-studio' ) : esc_html__( 'Disabled', 'maneuvrez-maintenance-studio' ); ?></span>
-			</div>
-			<div class="<?php echo esc_attr( implode( ' ', $stage_classes ) ); ?>">
-				<strong data-countdown-preview-heading><?php echo esc_html( (string) $countdown['heading'] ); ?></strong>
-				<p class="<?php echo '' === (string) $countdown['description'] ? 'is-hidden' : ''; ?>" data-countdown-preview-description><?php echo esc_html( (string) $countdown['description'] ); ?></p>
-				<div class="mmsm-countdown-admin-preview-grid">
-					<?php
-					$preview_units = array(
-						'days'    => array( 'value' => floor( $remaining / DAY_IN_SECONDS ), 'label' => __( 'Days', 'maneuvrez-maintenance-studio' ) ),
-						'hours'   => array( 'value' => floor( ( $remaining % DAY_IN_SECONDS ) / HOUR_IN_SECONDS ), 'label' => __( 'Hours', 'maneuvrez-maintenance-studio' ) ),
-						'minutes' => array( 'value' => floor( ( $remaining % HOUR_IN_SECONDS ) / MINUTE_IN_SECONDS ), 'label' => __( 'Minutes', 'maneuvrez-maintenance-studio' ) ),
-						'seconds' => array( 'value' => $remaining % MINUTE_IN_SECONDS, 'label' => __( 'Seconds', 'maneuvrez-maintenance-studio' ) ),
-					);
-					foreach ( $preview_units as $unit => $preview_unit ) :
-						?>
-						<div class="<?php echo empty( $countdown[ 'show_' . $unit ] ) ? 'is-hidden' : ''; ?>" data-countdown-preview-unit="<?php echo esc_attr( $unit ); ?>">
-							<b data-countdown-preview-value="<?php echo esc_attr( $unit ); ?>"><?php echo esc_html( str_pad( (string) $preview_unit['value'], 2, '0', STR_PAD_LEFT ) ); ?></b>
-							<span><?php echo esc_html( $preview_unit['label'] ); ?></span>
-						</div>
-					<?php endforeach; ?>
-				</div>
-			</div>
-		</div>
 		<div class="mmsm-countdown-schedule-check">
 			<strong><?php echo esc_html__( 'Server scheduling check', 'maneuvrez-maintenance-studio' ); ?></strong>
 			<p data-countdown-schedule-result>
@@ -1076,7 +1164,7 @@ class Admin {
 			<input type="checkbox" id="mmsm-countdown-enabled" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][enabled]" value="1" <?php checked( 1, (int) $countdown['enabled'] ); ?> />
 			<?php echo esc_html__( 'Show the countdown on the maintenance page.', 'maneuvrez-maintenance-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Maintenance mode itself is still controlled from the General tab.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Maintenance mode itself is controlled in Access & Visibility.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -1237,6 +1325,27 @@ class Admin {
 	public function render_contact_channels_section() {
 		echo '<p>' . esc_html__( 'Let visitors contact you while your site is being updated, with an optional live-site floating button after maintenance mode is off.', 'maneuvrez-maintenance-studio' ) . '</p>';
 		echo '<p class="description">' . esc_html__( 'These links open visitor apps or pages such as WhatsApp, Messenger, phone, email, or directions. No chat scripts, SDKs, or tracking pixels are loaded by the plugin.', 'maneuvrez-maintenance-studio' ) . '</p>';
+	}
+
+	/**
+	 * Render the Contact Channels master visibility control.
+	 *
+	 * @return void
+	 */
+	public function render_contact_channels_enabled_field() {
+		$settings = $this->get_settings();
+		?>
+		<label for="mmsm-contact-channels-enabled">
+			<input
+				type="checkbox"
+				id="mmsm-contact-channels-enabled"
+				name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_enabled]"
+				value="1"
+				<?php checked( 1, (int) $settings['contact_channels_enabled'] ); ?>
+			/>
+			<?php echo esc_html__( 'Show configured contact buttons.', 'maneuvrez-maintenance-studio' ); ?>
+		</label>
+		<?php
 	}
 
 	/**
@@ -2019,20 +2128,8 @@ class Admin {
 			<div class="mmsm-contact-channels-workspace">
 				<div class="mmsm-contact-channels-main">
 					<div class="mmsm-contact-channels-grid">
-						<div class="mmsm-contact-channels-panel mmsm-contact-channels-panel-visibility">
+					<div class="mmsm-contact-channels-panel mmsm-contact-channels-panel-visibility">
 					<h3><?php echo esc_html__( 'Visibility', 'maneuvrez-maintenance-studio' ); ?></h3>
-					<p>
-						<label for="mmsm-contact-channels-enabled">
-							<input
-								type="checkbox"
-								id="mmsm-contact-channels-enabled"
-								name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[contact_channels_enabled]"
-								value="1"
-								<?php checked( 1, (int) $settings['contact_channels_enabled'] ); ?>
-							/>
-							<?php echo esc_html__( 'Enable Contact Channels', 'maneuvrez-maintenance-studio' ); ?>
-						</label>
-					</p>
 					<div class="mmsm-contact-channels-enabled-fields">
 						<?php
 						$this->render_select_field(
@@ -2220,27 +2317,6 @@ class Admin {
 						</script>
 					</div>
 				</div>
-				<aside class="mmsm-contact-channels-preview" aria-live="polite">
-					<div class="mmsm-contact-channels-preview-header">
-						<div>
-							<span class="mmsm-contact-channels-eyebrow"><?php echo esc_html__( 'Live preview', 'maneuvrez-maintenance-studio' ); ?></span>
-							<h3><?php echo esc_html__( 'Visitor view', 'maneuvrez-maintenance-studio' ); ?></h3>
-						</div>
-						<span class="mmsm-contact-channels-preview-count" data-contact-preview-count><?php echo esc_html__( '0 ready', 'maneuvrez-maintenance-studio' ); ?></span>
-					</div>
-					<div class="mmsm-contact-channels-preview-stage" data-contact-preview-stage>
-						<div class="mmsm-contact-channels-preview-card">
-							<strong data-contact-preview-heading><?php echo esc_html( (string) $settings['contact_channels_heading'] ); ?></strong>
-							<p data-contact-preview-description><?php echo esc_html( (string) $settings['contact_channels_description'] ); ?></p>
-							<div class="mmsm-contact-channels-preview-buttons" data-contact-preview-buttons></div>
-						</div>
-						<button type="button" class="mmsm-contact-channels-preview-floating" data-contact-preview-floating>
-							<span class="dashicons dashicons-format-chat" aria-hidden="true"></span>
-							<span data-contact-preview-floating-label><?php echo esc_html( (string) $settings['contact_channels_primary_label'] ); ?></span>
-						</button>
-					</div>
-					<p class="description" data-contact-preview-note><?php echo esc_html__( 'Preview updates as you choose placement, labels, colors, and destinations.', 'maneuvrez-maintenance-studio' ); ?></p>
-				</aside>
 			</div>
 		</div>
 		<?php
@@ -2862,9 +2938,9 @@ class Admin {
 	 *
 	 * An expired countdown can remain enabled after maintenance mode has already
 	 * been turned off. If an administrator later enables maintenance again from
-	 * the General tab, request reconciliation would otherwise turn it straight
+	 * Access & Visibility, request reconciliation would otherwise turn it straight
 	 * back off. Disable only that expired countdown instance and preserve its
-	 * configuration so it can be given a new target from the Countdown tab.
+	 * configuration so it can be given a new target from the Countdown section.
 	 *
 	 * @param array<string,mixed> $input Submitted settings payload.
 	 * @param array<string,mixed> $existing Existing normalized settings.
@@ -2889,11 +2965,48 @@ class Admin {
 		add_settings_error(
 			MMSM_SETTINGS_OPTION,
 			'mmsm_expired_countdown_disabled',
-			esc_html__( 'Maintenance mode was enabled. Its expired auto-disable countdown was turned off; set a new future target on the Countdown tab before enabling it again.', 'maneuvrez-maintenance-studio' ),
+			esc_html__( 'Maintenance mode was enabled. Its expired auto-disable countdown was turned off; set a new future target in the Countdown section before enabling it again.', 'maneuvrez-maintenance-studio' ),
 			'warning'
 		);
 
 		return $existing;
+	}
+
+	/**
+	 * Reject incomplete action pairs without discarding their saved values.
+	 *
+	 * @param array<string,mixed> $input Submitted settings.
+	 * @param array<string,mixed> $existing Existing normalized settings.
+	 * @return array<string,mixed>
+	 */
+	private function prepare_action_pairs_for_save( array $input, array $existing ) {
+		foreach ( array( 'primary', 'secondary' ) as $action ) {
+			$label_key  = $action . '_action_label';
+			$url_key    = $action . '_action_url';
+			$label      = isset( $input[ $label_key ] ) ? trim( (string) $input[ $label_key ] ) : '';
+			$url        = isset( $input[ $url_key ] ) ? trim( (string) $input[ $url_key ] ) : '';
+			$url_scheme = wp_parse_url( $url, PHP_URL_SCHEME );
+			$url_host   = wp_parse_url( $url, PHP_URL_HOST );
+			$valid_url  = '' === $url || ( in_array( $url_scheme, array( 'http', 'https' ), true ) && ! empty( $url_host ) && '' !== esc_url_raw( $url, array( 'http', 'https' ) ) );
+
+			if ( ( '' === $label ) === ( '' === $url ) && $valid_url ) {
+				continue;
+			}
+
+			$input[ $label_key ] = isset( $existing[ $label_key ] ) ? $existing[ $label_key ] : '';
+			$input[ $url_key ]   = isset( $existing[ $url_key ] ) ? $existing[ $url_key ] : '';
+
+			add_settings_error(
+				MMSM_SETTINGS_OPTION,
+				'mmsm_' . $action . '_action_pair',
+				'primary' === $action
+					? esc_html__( 'The primary action needs both a label and a valid full URL. Its previously saved values were kept.', 'maneuvrez-maintenance-studio' )
+					: esc_html__( 'The secondary action needs both a label and a valid full URL. Its previously saved values were kept.', 'maneuvrez-maintenance-studio' ),
+				'error'
+			);
+		}
+
+		return $input;
 	}
 
 	/**
@@ -2903,45 +3016,21 @@ class Admin {
 	 */
 	private function get_tabs() {
 		return array(
-			'general'      => array(
-				'label'   => __( 'General', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_general_section',
-				'icon'    => 'dashicons-admin-settings',
+			'maintenance_page' => array(
+				'label' => __( 'Maintenance Page', 'maneuvrez-maintenance-studio' ),
+				'icon'  => 'dashicons-welcome-write-blog',
 			),
-			'template'     => array(
-				'label'   => __( 'Template', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_template_section',
-				'icon'    => 'dashicons-layout',
+			'design'           => array(
+				'label' => __( 'Design', 'maneuvrez-maintenance-studio' ),
+				'icon'  => 'dashicons-admin-appearance',
 			),
-			'design'       => array(
-				'label'   => __( 'Design', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_design_section',
-				'icon'    => 'dashicons-admin-appearance',
+			'access_visibility' => array(
+				'label' => __( 'Access & Visibility', 'maneuvrez-maintenance-studio' ),
+				'icon'  => 'dashicons-visibility',
 			),
-			'components'   => array(
-				'label'   => __( 'Components', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_components_section',
-				'icon'    => 'dashicons-screenoptions',
-			),
-			'countdown'    => array(
-				'label'   => __( 'Countdown', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_countdown_section',
-				'icon'    => 'dashicons-clock',
-			),
-			'contact_channels' => array(
-				'label'   => __( 'Contact Channels', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_contact_channels_section',
-				'icon'    => 'dashicons-format-chat',
-			),
-			'social_links' => array(
-				'label'   => __( 'Social Links', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_social_links_section',
-				'icon'    => 'dashicons-share',
-			),
-			'advanced'     => array(
-				'label'   => __( 'Advanced', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_advanced_section',
-				'icon'    => 'dashicons-admin-tools',
+			'advanced'          => array(
+				'label' => __( 'Advanced', 'maneuvrez-maintenance-studio' ),
+				'icon'  => 'dashicons-admin-tools',
 			),
 		);
 	}
@@ -2952,14 +3041,32 @@ class Admin {
 	 * @return string
 	 */
 	private function get_active_tab() {
-		$tabs = $this->get_tabs();
-		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only tab selection for admin UI state, sanitized and not persisted.
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'maintenance_page'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only tab selection for admin UI state, sanitized and not persisted.
 
-		if ( ! isset( $tabs[ $tab ] ) ) {
-			return 'general';
+		return $this->normalize_area_key( $tab );
+	}
+
+	/**
+	 * Map current and legacy query values to one of the four task areas.
+	 *
+	 * @param string $tab Requested tab key.
+	 * @return string
+	 */
+	private function normalize_area_key( $tab ) {
+		$legacy_destinations = array(
+			'general'          => 'maintenance_page',
+			'template'         => 'maintenance_page',
+			'components'       => 'maintenance_page',
+			'countdown'        => 'maintenance_page',
+			'contact_channels' => 'maintenance_page',
+			'social_links'     => 'maintenance_page',
+		);
+
+		if ( isset( $legacy_destinations[ $tab ] ) ) {
+			return $legacy_destinations[ $tab ];
 		}
 
-		return $tab;
+		return isset( $this->get_tabs()[ $tab ] ) ? $tab : 'maintenance_page';
 	}
 
 	/**
@@ -2968,48 +3075,462 @@ class Admin {
 	 * @return void
 	 */
 	private function render_active_tab() {
-		$tabs       = $this->get_tabs();
 		$active_tab = $this->get_active_tab();
-		$section_id = $tabs[ $active_tab ]['section'];
 
-		$this->render_section_fields( $section_id, $active_tab );
+		if ( 'maintenance_page' === $active_tab ) {
+			$this->render_maintenance_page_editor();
+			return;
+		}
+
+		foreach ( $this->get_area_sections( $active_tab ) as $area_section ) {
+			$this->render_section_fields( $area_section, $active_tab );
+		}
+	}
+
+	/**
+	 * Render the essential page fields followed by compact optional cards.
+	 *
+	 * Native details elements keep every field submittable when collapsed and
+	 * remain usable when JavaScript is unavailable.
+	 *
+	 * @return void
+	 */
+	private function render_maintenance_page_editor() {
+		$settings               = $this->get_settings();
+		$countdown              = $this->get_maintenance_countdown();
+		$primary_action_error   = $this->get_settings_error_message( 'mmsm_primary_action_pair' );
+		$secondary_action_error = $this->get_settings_error_message( 'mmsm_secondary_action_pair' );
+		?>
+		<div class="mmsm-settings-panel mmsm-settings-panel-maintenance_page mmsm-editor-essential" id="page-essentials">
+			<span class="mmsm-settings-kicker"><?php echo esc_html__( 'Start here', 'maneuvrez-maintenance-studio' ); ?></span>
+			<h2 class="title"><?php echo esc_html__( 'Page essentials', 'maneuvrez-maintenance-studio' ); ?></h2>
+			<p class="description"><?php echo esc_html__( 'Choose the page type and write the main message visitors will see.', 'maneuvrez-maintenance-studio' ); ?></p>
+			<?php $this->render_editor_fields( 'mmsm_template_section', array( 'mmsm_mode_type' ) ); ?>
+			<?php $this->render_editor_fields( 'mmsm_general_section', array( 'mmsm_page_title', 'mmsm_message' ) ); ?>
+		</div>
+
+		<div class="mmsm-settings-panel mmsm-settings-panel-maintenance_page mmsm-editor-essential" id="primary-action" data-action-group="primary">
+			<h2 class="title"><?php echo esc_html__( 'Primary action', 'maneuvrez-maintenance-studio' ); ?></h2>
+			<p class="description"><?php echo esc_html__( 'Add both a button label and destination, or leave both blank to hide the button.', 'maneuvrez-maintenance-studio' ); ?></p>
+			<?php $this->render_editor_fields( 'mmsm_components_section', array( 'mmsm_primary_action_label', 'mmsm_primary_action_url' ) ); ?>
+			<p class="<?php echo esc_attr( 'mmsm-inline-validation' . ( '' !== $primary_action_error ? ' is-error' : '' ) ); ?>" data-action-validation data-server-error="<?php echo esc_attr( $primary_action_error ); ?>" role="status" aria-live="polite"><?php echo esc_html( $primary_action_error ); ?></p>
+			<details class="mmsm-local-disclosure">
+				<summary aria-expanded="false" aria-controls="mmsm-heading-detail-fields"><?php echo esc_html__( 'Additional heading text', 'maneuvrez-maintenance-studio' ); ?></summary>
+				<div id="mmsm-heading-detail-fields" class="mmsm-local-disclosure-body">
+					<?php $this->render_editor_fields( 'mmsm_components_section', array( 'mmsm_hero_eyebrow' ) ); ?>
+				</div>
+			</details>
+		</div>
+
+		<div class="mmsm-optional-sections" aria-labelledby="mmsm-optional-sections-title">
+			<div class="mmsm-optional-sections-heading">
+				<h2 id="mmsm-optional-sections-title"><?php echo esc_html__( 'Optional page sections', 'maneuvrez-maintenance-studio' ); ?></h2>
+				<p><?php echo esc_html__( 'Review the summary, then open only the sections you want to change.', 'maneuvrez-maintenance-studio' ); ?></p>
+			</div>
+
+			<?php
+			$this->render_optional_card_start(
+				'secondary-action',
+				__( 'Secondary action', 'maneuvrez-maintenance-studio' ),
+				$this->get_action_summary( (string) $settings['secondary_action_label'], (string) $settings['secondary_action_url'] ),
+				__( 'Edit action', 'maneuvrez-maintenance-studio' ),
+				'secondary-action'
+			);
+			?>
+			<div data-action-group="secondary">
+				<?php $this->render_editor_fields( 'mmsm_components_section', array( 'mmsm_secondary_action_label', 'mmsm_secondary_action_url' ) ); ?>
+				<p class="<?php echo esc_attr( 'mmsm-inline-validation' . ( '' !== $secondary_action_error ? ' is-error' : '' ) ); ?>" data-action-validation data-server-error="<?php echo esc_attr( $secondary_action_error ); ?>" role="status" aria-live="polite"><?php echo esc_html( $secondary_action_error ); ?></p>
+			</div>
+			<?php $this->render_optional_card_end(); ?>
+
+			<?php
+			$progress_summary = ! empty( $settings['show_progress'] )
+				? sprintf( /* translators: %d: progress percentage. */ __( 'Progress is on at %d%%.', 'maneuvrez-maintenance-studio' ), (int) $settings['progress_value'] )
+				: __( 'Progress is off; status text remains available.', 'maneuvrez-maintenance-studio' );
+			$this->render_optional_card_start( 'status-progress', __( 'Status and progress', 'maneuvrez-maintenance-studio' ), $progress_summary, __( 'Customize', 'maneuvrez-maintenance-studio' ), 'status-progress', 'mmsm_components_section', array( 'mmsm_show_progress' ) );
+			$this->render_editor_fields( 'mmsm_components_section', array( 'mmsm_status_label', 'mmsm_progress_value' ) );
+			?>
+			<details class="mmsm-local-disclosure">
+				<summary aria-expanded="false" aria-controls="mmsm-simple-email-fields"><?php echo esc_html__( 'Simple email contact', 'maneuvrez-maintenance-studio' ); ?></summary>
+				<div id="mmsm-simple-email-fields" class="mmsm-local-disclosure-body">
+					<p class="description"><?php echo esc_html__( 'This is the existing email contact block. It is separate from Contact Channels.', 'maneuvrez-maintenance-studio' ); ?></p>
+					<?php $this->render_editor_fields( 'mmsm_components_section', array( 'mmsm_contact_label', 'mmsm_contact_message', 'mmsm_contact_email' ) ); ?>
+				</div>
+			</details>
+			<?php $this->render_optional_card_end(); ?>
+
+			<?php
+			$countdown_summary = ! empty( $countdown['enabled'] ) ? __( 'On', 'maneuvrez-maintenance-studio' ) : __( 'Off', 'maneuvrez-maintenance-studio' );
+			if ( ! empty( $countdown['target_timestamp'] ) ) {
+				$countdown_summary .= ' · ' . wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $countdown['target_timestamp'], wp_timezone() );
+			}
+			$countdown_actions = array(
+				'hold_zero'    => __( 'Keep showing zero', 'maneuvrez-maintenance-studio' ),
+				'hide'         => __( 'Hide the countdown', 'maneuvrez-maintenance-studio' ),
+				'show_message' => __( 'Show a message', 'maneuvrez-maintenance-studio' ),
+				'disable_mode' => __( 'Turn off maintenance mode', 'maneuvrez-maintenance-studio' ),
+			);
+			if ( isset( $countdown_actions[ $countdown['expiry_action'] ] ) ) {
+				$countdown_summary .= ' · ' . $countdown_actions[ $countdown['expiry_action'] ];
+			}
+			$this->render_optional_card_start( 'countdown', __( 'Countdown', 'maneuvrez-maintenance-studio' ), $countdown_summary, __( 'Edit countdown', 'maneuvrez-maintenance-studio' ), 'countdown', 'mmsm_countdown_section', array( 'mmsm_countdown_enabled' ) );
+			$this->render_editor_fields( 'mmsm_countdown_section', array( 'mmsm_countdown_target', 'mmsm_countdown_expiry', 'mmsm_countdown_finished_message' ) );
+			?>
+			<details class="mmsm-local-disclosure">
+				<summary aria-expanded="false" aria-controls="mmsm-countdown-customization"><?php echo esc_html__( 'Customize countdown', 'maneuvrez-maintenance-studio' ); ?></summary>
+				<div id="mmsm-countdown-customization" class="mmsm-local-disclosure-body">
+					<?php $this->render_editor_fields( 'mmsm_countdown_section', array( 'mmsm_countdown_copy', 'mmsm_countdown_units', 'mmsm_countdown_appearance' ) ); ?>
+					<?php $this->render_countdown_section(); ?>
+				</div>
+			</details>
+			<?php $this->render_optional_card_end(); ?>
+
+			<?php
+			$contact_count   = count( array_filter( (array) $settings['contact_channels_items'], static fn( $item ) => is_array( $item ) && ! empty( $item['value'] ) ) );
+			$contact_summary = sprintf(
+				/* translators: 1: enabled state, 2: number of configured contact channels. */
+				_n( '%1$s · %2$d configured channel', '%1$s · %2$d configured channels', $contact_count, 'maneuvrez-maintenance-studio' ),
+				! empty( $settings['contact_channels_enabled'] ) ? __( 'On', 'maneuvrez-maintenance-studio' ) : __( 'Off', 'maneuvrez-maintenance-studio' ),
+				$contact_count
+			);
+			$this->render_optional_card_start( 'contact-channels', __( 'Contact Channels', 'maneuvrez-maintenance-studio' ), $contact_summary, __( 'Edit channels', 'maneuvrez-maintenance-studio' ), 'contact-channels', 'mmsm_contact_channels_section', array( 'mmsm_contact_channels_enabled' ) );
+			$this->render_contact_channels_section();
+			$this->render_editor_fields( 'mmsm_contact_channels_section', array( 'mmsm_contact_channels' ) );
+			$this->render_optional_card_end();
+
+			$social_count   = count( array_filter( (array) $settings['social_links'], static fn( $item ) => is_array( $item ) && ! empty( $item['url'] ) ) );
+			$social_summary = sprintf(
+				/* translators: %d: number of configured social links. */
+				_n( '%d configured link', '%d configured links', $social_count, 'maneuvrez-maintenance-studio' ),
+				$social_count
+			);
+			if ( empty( $settings['show_footer_section'] ) ) {
+				$social_summary .= ' · ' . __( 'Hidden while the footer is off', 'maneuvrez-maintenance-studio' );
+			}
+			$this->render_optional_card_start( 'social-links', __( 'Social Links', 'maneuvrez-maintenance-studio' ), $social_summary, __( 'Edit links', 'maneuvrez-maintenance-studio' ), 'social-links' );
+			$this->render_social_links_section();
+			$this->render_editor_fields( 'mmsm_social_links_section', array( 'mmsm_social_links' ) );
+			$this->render_optional_card_end();
+
+			$footer_summary = ! empty( $settings['show_footer_section'] )
+				? ( ! empty( $settings['show_login_button'] ) ? __( 'Footer and login link are shown.', 'maneuvrez-maintenance-studio' ) : __( 'Footer is shown without a login link.', 'maneuvrez-maintenance-studio' ) )
+				: __( 'Footer is hidden; saved footer settings are retained.', 'maneuvrez-maintenance-studio' );
+			$this->render_optional_card_start( 'footer-login', __( 'Footer and login link', 'maneuvrez-maintenance-studio' ), $footer_summary, __( 'Customize', 'maneuvrez-maintenance-studio' ), 'footer-login', 'mmsm_advanced_section', array( 'mmsm_show_footer_section' ) );
+			$this->render_editor_fields( 'mmsm_advanced_section', array( 'mmsm_show_login_button', 'mmsm_login_label' ) );
+			$this->render_optional_card_end();
+			?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the start of an optional editor card and its disclosure body.
+	 *
+	 * @param string            $id Card identifier.
+	 * @param string            $title Card title.
+	 * @param string            $summary Saved configuration summary.
+	 * @param string            $action Disclosure action label.
+	 * @param string            $summary_type JavaScript summary type.
+	 * @param string            $toggle_section Registered section for header toggles.
+	 * @param array<int,string> $toggle_fields Registered toggle field IDs.
+	 * @return void
+	 */
+	private function render_optional_card_start( $id, $title, $summary, $action, $summary_type, $toggle_section = '', array $toggle_fields = array() ) {
+		$body_id = 'mmsm-' . sanitize_html_class( $id ) . '-editor';
+		$is_open = $this->has_card_settings_error( $summary_type );
+		?>
+		<section class="mmsm-settings-panel mmsm-settings-panel-maintenance_page mmsm-optional-card" id="<?php echo esc_attr( $id ); ?>" data-optional-card="<?php echo esc_attr( $summary_type ); ?>">
+			<div class="mmsm-optional-card-header">
+				<div>
+					<h2 class="title"><?php echo esc_html( $title ); ?></h2>
+					<p class="mmsm-optional-card-summary" data-card-summary><?php echo esc_html( $summary ); ?></p>
+				</div>
+				<?php if ( '' !== $toggle_section && ! empty( $toggle_fields ) ) : ?>
+					<div class="mmsm-optional-card-toggle"><?php $this->render_editor_fields( $toggle_section, $toggle_fields, false ); ?></div>
+				<?php endif; ?>
+			</div>
+			<details class="mmsm-card-disclosure"<?php echo $is_open ? ' open' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static boolean attribute. ?>>
+				<summary aria-expanded="<?php echo esc_attr( $is_open ? 'true' : 'false' ); ?>" aria-controls="<?php echo esc_attr( $body_id ); ?>"><?php echo esc_html( $action ); ?></summary>
+				<div class="mmsm-card-disclosure-body" id="<?php echo esc_attr( $body_id ); ?>">
+		<?php
+	}
+
+	/**
+	 * Close an optional editor card.
+	 *
+	 * @return void
+	 */
+	private function render_optional_card_end() {
+		?>
+				</div>
+			</details>
+		</section>
+		<?php
+	}
+
+	/**
+	 * Render selected registered fields in an editor table.
+	 *
+	 * @param string            $section_id Registered settings section.
+	 * @param array<int,string> $field_ids Registered field IDs.
+	 * @param bool              $table Whether to include a form table wrapper.
+	 * @return void
+	 */
+	private function render_editor_fields( $section_id, array $field_ids, $table = true ) {
+		global $wp_settings_fields;
+
+		$registered_fields = ! empty( $wp_settings_fields[ $this->page_slug ][ $section_id ] ) ? $wp_settings_fields[ $this->page_slug ][ $section_id ] : array();
+
+		if ( $table ) {
+			echo '<table class="form-table" role="presentation">';
+		}
+
+		$this->render_registered_fields( $registered_fields, $field_ids, $table );
+
+		if ( $table ) {
+			echo '</table>';
+		}
+	}
+
+	/**
+	 * Return a truthful action-pair summary.
+	 *
+	 * @param string $label Action label.
+	 * @param string $url Action URL.
+	 * @return string
+	 */
+	private function get_action_summary( $label, $url ) {
+		if ( '' === $label && '' === $url ) {
+			return __( 'Not configured.', 'maneuvrez-maintenance-studio' );
+		}
+
+		if ( '' === $label ) {
+			return __( 'Needs a label before it can be shown.', 'maneuvrez-maintenance-studio' );
+		}
+
+		if ( '' === $url ) {
+			return __( 'Needs a destination before it can be shown.', 'maneuvrez-maintenance-studio' );
+		}
+
+		return sprintf( /* translators: %s: configured action label. */ __( 'Configured as “%s”.', 'maneuvrez-maintenance-studio' ), $label );
+	}
+
+	/**
+	 * Return one settings error message by code.
+	 *
+	 * @param string $code Settings error code.
+	 * @return string
+	 */
+	private function get_settings_error_message( $code ) {
+		foreach ( get_settings_errors( MMSM_SETTINGS_OPTION ) as $error ) {
+			if ( isset( $error['code'], $error['message'] ) && $code === $error['code'] ) {
+				return (string) $error['message'];
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Determine whether a card contains a field with a server-side error.
+	 *
+	 * @param string $summary_type Card summary type.
+	 * @return bool
+	 */
+	private function has_card_settings_error( $summary_type ) {
+		$error_prefix = 'countdown' === $summary_type ? 'mmsm_countdown_' : ( 'secondary-action' === $summary_type ? 'mmsm_secondary_action_' : '' );
+
+		if ( '' === $error_prefix ) {
+			return false;
+		}
+
+		foreach ( get_settings_errors( MMSM_SETTINGS_OPTION ) as $error ) {
+			if ( isset( $error['code'] ) && str_starts_with( (string) $error['code'], $error_prefix ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Return the semantic cards rendered within a task area.
+	 *
+	 * @param string $area_key Area key.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function get_area_sections( $area_key ) {
+		$areas = array(
+			'maintenance_page' => array(
+				array(
+					'id'      => 'page-type',
+					'section' => 'mmsm_template_section',
+					'title'   => __( 'Page type', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_mode_type' ),
+				),
+				array(
+					'id'      => 'main-copy',
+					'section' => 'mmsm_general_section',
+					'title'   => __( 'Main copy', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_page_title', 'mmsm_message' ),
+				),
+				array(
+					'id'      => 'actions',
+					'section' => 'mmsm_components_section',
+					'title'   => __( 'Page content and actions', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_hero_eyebrow', 'mmsm_primary_action_label', 'mmsm_primary_action_url', 'mmsm_secondary_action_label', 'mmsm_secondary_action_url' ),
+				),
+				array(
+					'id'      => 'status-progress',
+					'section' => 'mmsm_components_section',
+					'title'   => __( 'Status, progress, and email contact', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_status_label', 'mmsm_show_progress', 'mmsm_progress_value', 'mmsm_contact_label', 'mmsm_contact_message', 'mmsm_contact_email' ),
+				),
+				array(
+					'section'  => 'mmsm_countdown_section',
+					'title'    => __( 'Countdown', 'maneuvrez-maintenance-studio' ),
+					'callback' => true,
+				),
+				array(
+					'section'  => 'mmsm_contact_channels_section',
+					'title'    => __( 'Contact channels', 'maneuvrez-maintenance-studio' ),
+					'callback' => true,
+				),
+				array(
+					'section'  => 'mmsm_social_links_section',
+					'title'    => __( 'Social links', 'maneuvrez-maintenance-studio' ),
+					'callback' => true,
+				),
+				array(
+					'id'      => 'footer-login',
+					'section' => 'mmsm_advanced_section',
+					'title'   => __( 'Footer and login presentation', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_show_footer_section', 'mmsm_show_login_button', 'mmsm_login_label' ),
+				),
+			),
+			'design' => array(
+				array(
+					'section'  => 'mmsm_design_section',
+					'title'    => __( 'Design', 'maneuvrez-maintenance-studio' ),
+					'callback' => true,
+				),
+			),
+			'access_visibility' => array(
+				array(
+					'id'      => 'maintenance-status',
+					'section' => 'mmsm_general_section',
+					'title'   => __( 'Maintenance status', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_enabled' ),
+				),
+				array(
+					'id'      => 'login-access',
+					'section' => 'mmsm_advanced_section',
+					'title'   => __( 'Login access', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_custom_login_enabled', 'mmsm_custom_login_slug', 'mmsm_custom_login_block_mode' ),
+				),
+				array(
+					'id'      => 'testing-bypass',
+					'section' => 'mmsm_advanced_section',
+					'title'   => __( 'Temporary testing bypass', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_bypass_query_enabled', 'mmsm_bypass_query_settings' ),
+				),
+				array(
+					'id'      => 'public-urls',
+					'section' => 'mmsm_advanced_section',
+					'title'   => __( 'Always-public pages', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_bypass_urls_enabled', 'mmsm_bypass_urls' ),
+				),
+			),
+			'advanced' => array(),
+		);
+
+		if ( count( ( new TemplateRegistry() )->all() ) > 1 ) {
+			$areas['advanced'][] = array(
+				'section' => 'mmsm_template_section',
+				'title'   => __( 'Template', 'maneuvrez-maintenance-studio' ),
+				'fields'  => array( 'mmsm_template_key' ),
+			);
+		}
+
+		$areas['advanced'][] = array(
+			'section' => 'mmsm_advanced_section',
+			'title'   => __( 'Data removal', 'maneuvrez-maintenance-studio' ),
+			'fields'  => array( 'mmsm_delete_data_on_uninstall' ),
+		);
+
+		return isset( $areas[ $area_key ] ) ? $areas[ $area_key ] : $areas['maintenance_page'];
 	}
 
 	/**
 	 * Render a registered section title, description, and fields.
 	 *
-	 * @param string $section_id Settings section id.
+	 * @param array<string,mixed> $area_section Area section definition.
 	 * @param string $active_tab Active tab key.
 	 * @return void
 	 */
-	private function render_section_fields( $section_id, $active_tab ) {
+	private function render_section_fields( array $area_section, $active_tab ) {
 		global $wp_settings_sections, $wp_settings_fields;
+		$section_id = $area_section['section'];
 
 		if ( ! isset( $wp_settings_sections[ $this->page_slug ][ $section_id ] ) ) {
 			return;
 		}
 
 		$section = $wp_settings_sections[ $this->page_slug ][ $section_id ];
-		$has_fields = ! empty( $wp_settings_fields[ $this->page_slug ][ $section_id ] );
+		$registered_fields = ! empty( $wp_settings_fields[ $this->page_slug ][ $section_id ] ) ? $wp_settings_fields[ $this->page_slug ][ $section_id ] : array();
+		$field_ids         = isset( $area_section['fields'] ) ? $area_section['fields'] : array_keys( $registered_fields );
+		$has_fields        = ! empty( $field_ids );
+		$section_slug      = isset( $area_section['id'] ) ? sanitize_html_class( $area_section['id'] ) : str_replace( array( 'mmsm_', '_section' ), '', $section_id );
 		?>
-		<div class="<?php echo esc_attr( 'mmsm-settings-panel mmsm-settings-panel-' . $active_tab ); ?>">
-			<?php if ( ! empty( $section['title'] ) ) : ?>
-				<h2 class="title"><?php echo esc_html( $section['title'] ); ?></h2>
+		<div id="<?php echo esc_attr( $section_slug ); ?>" class="<?php echo esc_attr( 'mmsm-settings-panel mmsm-settings-panel-' . $active_tab . ' mmsm-settings-panel-' . $section_slug ); ?>">
+			<?php if ( ! empty( $area_section['title'] ) ) : ?>
+				<h2 class="title"><?php echo esc_html( $area_section['title'] ); ?></h2>
 			<?php endif; ?>
 			<?php
-			if ( ! empty( $section['callback'] ) ) {
+			if ( ! empty( $area_section['callback'] ) && ! empty( $section['callback'] ) ) {
 				call_user_func( $section['callback'], $section );
 			}
 			?>
 			<?php if ( $has_fields ) : ?>
 				<table class="form-table" role="presentation">
-					<?php do_settings_fields( $this->page_slug, $section_id ); ?>
+					<?php $this->render_registered_fields( $registered_fields, $field_ids ); ?>
 				</table>
 			<?php else : ?>
 				<p class="description"><?php echo esc_html__( 'No extra settings are available in this tab yet.', 'maneuvrez-maintenance-studio' ); ?></p>
 			<?php endif; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render a selected subset of registered WordPress settings fields.
+	 *
+	 * @param array<string,array<string,mixed>> $registered_fields Registered fields keyed by id.
+	 * @param array<int,string>                 $field_ids Field ids to render.
+	 * @param bool                              $table_rows Whether to render table-row markup.
+	 * @return void
+	 */
+	private function render_registered_fields( array $registered_fields, array $field_ids, $table_rows = true ) {
+		foreach ( $field_ids as $field_id ) {
+			if ( ! isset( $registered_fields[ $field_id ] ) ) {
+				continue;
+			}
+
+			$field = $registered_fields[ $field_id ];
+
+			if ( ! $table_rows ) {
+				call_user_func( $field['callback'], $field['args'] );
+				continue;
+			}
+
+			$class = ! empty( $field['args']['class'] ) ? ' class="' . esc_attr( $field['args']['class'] ) . '"' : '';
+			?>
+			<tr<?php echo $class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Constructed from an escaped class attribute above. ?>>
+				<th scope="row"><?php echo esc_html( $field['title'] ); ?></th>
+				<td><?php call_user_func( $field['callback'], $field['args'] ); ?></td>
+			</tr>
+			<?php
+		}
 	}
 
 	/**
@@ -3134,28 +3655,10 @@ class Admin {
 	 */
 	private function get_tab_field_keys( $tab_key ) {
 		$map = array(
-			'general'      => array(
-				'enabled',
+			'maintenance_page' => array(
+				'mode_type',
 				'page_title',
 				'message',
-			),
-			'template'     => array(
-				'mode_type',
-				'template_key',
-			),
-			'design'       => array(
-				'theme_mode',
-				'primary_color',
-				'background_color',
-				'surface_color',
-				'heading_text_color',
-				'body_text_color',
-				'muted_text_color',
-				'link_text_color',
-				'button_text_color',
-				'border_color',
-			),
-			'components'   => array(
 				'hero_eyebrow',
 				'primary_action_label',
 				'primary_action_url',
@@ -3167,11 +3670,7 @@ class Admin {
 				'contact_label',
 				'contact_message',
 				'contact_email',
-			),
-			'countdown'    => array(
 				'countdowns',
-			),
-			'contact_channels' => array(
 				'contact_channels_enabled',
 				'contact_channels_maintenance_display',
 				'contact_channels_live_display',
@@ -3190,8 +3689,6 @@ class Admin {
 				'contact_channels_hover_background_color',
 				'contact_channels_hover_text_color',
 				'contact_channels_items',
-			),
-			'social_links' => array(
 				'social_links_display',
 				'social_links',
 				'social_x_url',
@@ -3214,10 +3711,24 @@ class Admin {
 				'social_item_4_label',
 				'social_item_4_url',
 				'social_item_4_new_tab',
-			),
-			'advanced'     => array(
-				'show_login_button',
 				'show_footer_section',
+				'show_login_button',
+				'login_label',
+			),
+			'design' => array(
+				'theme_mode',
+				'primary_color',
+				'background_color',
+				'surface_color',
+				'heading_text_color',
+				'body_text_color',
+				'muted_text_color',
+				'link_text_color',
+				'button_text_color',
+				'border_color',
+			),
+			'access_visibility' => array(
+				'enabled',
 				'custom_login_enabled',
 				'custom_login_slug',
 				'custom_login_block_mode',
@@ -3226,11 +3737,34 @@ class Admin {
 				'bypass_query_value',
 				'bypass_urls_enabled',
 				'bypass_urls',
+			),
+			'advanced' => array(
+				'template_key',
 				'delete_data_on_uninstall',
-				'login_label',
 			),
 		);
 
 		return isset( $map[ $tab_key ] ) ? $map[ $tab_key ] : array();
+	}
+
+	/**
+	 * Return ownership used by an already-open legacy eight-tab form.
+	 *
+	 * @param string $tab_key Legacy tab key.
+	 * @return array<int,string>
+	 */
+	private function get_legacy_tab_field_keys( $tab_key ) {
+		$legacy_map = array(
+			'general' => array( 'enabled', 'page_title', 'message' ),
+			'template' => array( 'mode_type', 'template_key' ),
+			'design' => $this->get_tab_field_keys( 'design' ),
+			'components' => array( 'hero_eyebrow', 'primary_action_label', 'primary_action_url', 'secondary_action_label', 'secondary_action_url', 'status_label', 'show_progress', 'progress_value', 'contact_label', 'contact_message', 'contact_email' ),
+			'countdown' => array( 'countdowns' ),
+			'contact_channels' => array( 'contact_channels_enabled', 'contact_channels_maintenance_display', 'contact_channels_live_display', 'contact_channels_logged_in_visibility', 'contact_channels_display_style', 'contact_channels_heading', 'contact_channels_description', 'contact_channels_primary_label', 'contact_channels_position', 'contact_channels_button_shape', 'contact_channels_button_display', 'contact_channels_color_mode', 'contact_channels_background_color', 'contact_channels_text_color', 'contact_channels_icon_color', 'contact_channels_hover_background_color', 'contact_channels_hover_text_color', 'contact_channels_items' ),
+			'social_links' => array( 'social_links_display', 'social_links', 'social_x_url', 'social_instagram_url', 'social_facebook_url', 'social_linkedin_url', 'social_item_1_platform', 'social_item_1_label', 'social_item_1_url', 'social_item_1_new_tab', 'social_item_2_platform', 'social_item_2_label', 'social_item_2_url', 'social_item_2_new_tab', 'social_item_3_platform', 'social_item_3_label', 'social_item_3_url', 'social_item_3_new_tab', 'social_item_4_platform', 'social_item_4_label', 'social_item_4_url', 'social_item_4_new_tab' ),
+			'advanced' => array( 'show_login_button', 'show_footer_section', 'custom_login_enabled', 'custom_login_slug', 'custom_login_block_mode', 'bypass_query_enabled', 'bypass_query_key', 'bypass_query_value', 'bypass_urls_enabled', 'bypass_urls', 'delete_data_on_uninstall', 'login_label' ),
+		);
+
+		return isset( $legacy_map[ $tab_key ] ) ? $legacy_map[ $tab_key ] : array();
 	}
 }
