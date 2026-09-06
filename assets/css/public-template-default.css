@@ -227,6 +227,324 @@ body.mmsm-maintenance-page {
 	transform: translateY(-1px);
 }
 
+.mmsm-countdown-heading {
+	margin: 0;
+	color: var(--mm-heading-text);
+	font-size: clamp(1rem, 2vw, 1.25rem);
+	letter-spacing: 0.02em;
+}
+
+.mmsm-countdown-description {
+	margin: 8px 0 0;
+	color: var(--mm-body-text);
+	line-height: 1.6;
+}
+
+.mmsm-countdown-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 18px;
+}
+
+.mmsm-countdown-units-1 .mmsm-countdown-grid {
+	grid-template-columns: minmax(0, 1fr);
+	max-width: 150px;
+}
+
+.mmsm-countdown-units-2 .mmsm-countdown-grid {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	max-width: 310px;
+}
+
+.mmsm-countdown-units-3 .mmsm-countdown-grid {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mmsm-countdown-unit {
+	min-width: 0;
+	padding: clamp(10px, 2vw, 16px) 6px;
+	overflow-wrap: anywhere;
+	border: 1px solid var(--mmsm-countdown-border, var(--mm-border));
+	border-radius: 16px;
+	background: var(--mmsm-countdown-bg, color-mix(in srgb, var(--mm-primary) 8%, var(--mm-surface)));
+	text-align: center;
+	transform-origin: center;
+	will-change: opacity, transform;
+}
+
+.mmsm-countdown-animation-fade .mmsm-countdown-unit.is-ticking-card { animation: mmsm-countdown-card-fade 480ms ease-out; }
+.mmsm-countdown-animation-slide .mmsm-countdown-unit.is-ticking-card { animation: mmsm-countdown-card-slide 560ms cubic-bezier(0.16, 1, 0.3, 1); }
+.mmsm-countdown-animation-flip .mmsm-countdown-unit.is-ticking-card { animation: mmsm-countdown-card-flip 620ms cubic-bezier(0.2, 0.75, 0.25, 1); }
+.mmsm-countdown-animation-pulse .mmsm-countdown-unit.is-ticking-card { animation: mmsm-countdown-card-pulse 540ms cubic-bezier(0.22, 1, 0.36, 1); }
+.mmsm-countdown-animation-bounce .mmsm-countdown-unit.is-ticking-card { animation: mmsm-countdown-card-bounce 660ms cubic-bezier(0.2, 0.8, 0.25, 1); }
+.mmsm-countdown-animation-roll .mmsm-countdown-unit.is-ticking-card { animation: mmsm-countdown-card-roll 600ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+.mmsm-countdown-value,
+.mmsm-countdown-label {
+	display: block;
+}
+
+.mmsm-countdown-value {
+	color: var(--mmsm-countdown-number, var(--mm-heading-text));
+	font-size: clamp(1.45rem, 5vw, 2.5rem);
+	font-variant-numeric: tabular-nums;
+	font-weight: 750;
+	letter-spacing: -0.03em;
+	line-height: 1;
+	position: relative;
+	isolation: isolate;
+	transform-origin: center;
+}
+
+.mmsm-countdown-value [data-mmsm-countdown-current] {
+	backface-visibility: hidden;
+	display: block;
+	transform-origin: center;
+	will-change: opacity, transform;
+}
+
+.mmsm-countdown-value.is-ticking::before {
+	content: attr(data-previous-value);
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	color: inherit;
+	pointer-events: none;
+	will-change: opacity, transform;
+}
+
+.mmsm-countdown-animation-fade .mmsm-countdown-value.is-ticking [data-mmsm-countdown-current] {
+	animation: mmsm-countdown-fade 440ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mmsm-countdown-animation-fade .mmsm-countdown-value.is-ticking::before {
+	animation: mmsm-countdown-fade-out 300ms ease-out forwards;
+}
+
+.mmsm-countdown-animation-slide .mmsm-countdown-value.is-ticking [data-mmsm-countdown-current] {
+	animation: mmsm-countdown-slide 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mmsm-countdown-animation-slide .mmsm-countdown-value.is-ticking::before {
+	animation: mmsm-countdown-slide-out 340ms ease-in forwards;
+}
+
+.mmsm-countdown-animation-flip .mmsm-countdown-value.is-ticking [data-mmsm-countdown-current] {
+	animation: mmsm-countdown-flip 560ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.mmsm-countdown-animation-flip .mmsm-countdown-value.is-ticking::before {
+	animation: mmsm-countdown-flip-out 300ms ease-in forwards;
+}
+
+.mmsm-countdown-animation-pulse .mmsm-countdown-value.is-ticking [data-mmsm-countdown-current] {
+	animation: mmsm-countdown-pulse 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mmsm-countdown-animation-pulse .mmsm-countdown-value.is-ticking::before {
+	animation: mmsm-countdown-pulse-out 280ms ease-out forwards;
+}
+
+.mmsm-countdown-animation-bounce .mmsm-countdown-value.is-ticking [data-mmsm-countdown-current] {
+	animation: mmsm-countdown-bounce 620ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+.mmsm-countdown-animation-bounce .mmsm-countdown-value.is-ticking::before {
+	animation: mmsm-countdown-bounce-out 320ms ease-in forwards;
+}
+
+.mmsm-countdown-animation-roll .mmsm-countdown-value.is-ticking [data-mmsm-countdown-current] {
+	animation: mmsm-countdown-roll 560ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mmsm-countdown-animation-roll .mmsm-countdown-value.is-ticking::before {
+	animation: mmsm-countdown-roll-out 340ms ease-in forwards;
+}
+
+.mmsm-countdown-label {
+	margin-top: 8px;
+	color: var(--mmsm-countdown-label, var(--mm-muted-text));
+	font-size: clamp(0.68rem, 2vw, 0.78rem);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	line-height: 1.25;
+	text-transform: uppercase;
+}
+
+.mmsm-countdown-finished {
+	margin: 18px 0 0;
+	padding: 16px;
+	border: 1px solid color-mix(in srgb, var(--mm-primary) 36%, var(--mm-border));
+	border-radius: 16px;
+	background: color-mix(in srgb, var(--mm-primary) 10%, var(--mm-surface));
+	color: var(--mm-heading-text);
+	font-weight: 700;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+@keyframes mmsm-countdown-fade {
+	0% {
+		opacity: 0;
+		filter: blur(3px);
+	}
+
+	100% {
+		opacity: 1;
+		filter: blur(0);
+	}
+}
+
+@keyframes mmsm-countdown-fade-out {
+	to { opacity: 0; filter: blur(2px); }
+}
+
+@keyframes mmsm-countdown-slide {
+	0% {
+		opacity: 0;
+		transform: translateY(-0.55em);
+	}
+
+	60% {
+		opacity: 1;
+		transform: translateY(0.08em);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes mmsm-countdown-slide-out {
+	to { opacity: 0; transform: translateY(0.5em); }
+}
+
+@keyframes mmsm-countdown-flip {
+	0% {
+		opacity: 0;
+		transform: perspective(280px) rotateX(-88deg) scale(0.96);
+	}
+
+	65% {
+		opacity: 1;
+		transform: perspective(280px) rotateX(10deg) scale(1);
+	}
+
+	100% {
+		opacity: 1;
+		transform: perspective(280px) rotateX(0);
+	}
+}
+
+@keyframes mmsm-countdown-flip-out {
+	to { opacity: 0; transform: perspective(280px) rotateX(88deg) scale(0.96); }
+}
+
+@keyframes mmsm-countdown-pulse {
+	0% {
+		opacity: 0.35;
+		transform: scale(0.72);
+	}
+
+	60% {
+		opacity: 1;
+		transform: scale(1.12);
+	}
+
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes mmsm-countdown-pulse-out {
+	to { opacity: 0; transform: scale(1.25); }
+}
+
+@keyframes mmsm-countdown-bounce {
+	0% {
+		opacity: 0;
+		transform: translateY(-0.7em) scaleY(0.85);
+	}
+
+	45% {
+		opacity: 1;
+		transform: translateY(0.16em) scaleY(1.04);
+	}
+
+	72% {
+		transform: translateY(-0.07em) scaleY(0.98);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateY(0) scaleY(1);
+	}
+}
+
+@keyframes mmsm-countdown-bounce-out {
+	to { opacity: 0; transform: translateY(0.45em) scaleY(0.85); }
+}
+
+@keyframes mmsm-countdown-roll {
+	0% {
+		opacity: 0;
+		transform: translateY(-0.55em) rotate(-12deg) scale(0.9);
+	}
+
+	65% {
+		opacity: 1;
+		transform: translateY(0.08em) rotate(2deg) scale(1.03);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateY(0) rotate(0) scale(1);
+	}
+}
+
+@keyframes mmsm-countdown-roll-out {
+	to { opacity: 0; transform: translateY(0.5em) rotate(12deg) scale(0.9); }
+}
+
+@keyframes mmsm-countdown-card-fade {
+	0% { opacity: 0.45; }
+	100% { opacity: 1; }
+}
+
+@keyframes mmsm-countdown-card-slide {
+	0% { opacity: 0.5; transform: translateY(-10px); }
+	65% { opacity: 1; transform: translateY(2px); }
+	100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mmsm-countdown-card-flip {
+	0% { opacity: 0.5; transform: perspective(500px) rotateX(-18deg) scale(0.97); }
+	65% { opacity: 1; transform: perspective(500px) rotateX(4deg) scale(1.01); }
+	100% { opacity: 1; transform: perspective(500px) rotateX(0) scale(1); }
+}
+
+@keyframes mmsm-countdown-card-pulse {
+	0% { transform: scale(0.94); }
+	60% { transform: scale(1.035); }
+	100% { transform: scale(1); }
+}
+
+@keyframes mmsm-countdown-card-bounce {
+	0% { opacity: 0.6; transform: translateY(-12px) scaleY(0.96); }
+	48% { opacity: 1; transform: translateY(3px) scaleY(1.02); }
+	75% { transform: translateY(-1px) scaleY(0.99); }
+	100% { transform: translateY(0) scaleY(1); }
+}
+
+@keyframes mmsm-countdown-card-roll {
+	0% { opacity: 0.55; transform: translateY(-9px) rotate(-2.5deg) scale(0.97); }
+	65% { opacity: 1; transform: translateY(2px) rotate(0.7deg) scale(1.01); }
+	100% { transform: translateY(0) rotate(0) scale(1); }
+}
+
 .mmsm-status-chip {
 	display: inline-flex;
 	align-items: center;
@@ -632,6 +950,18 @@ body.mmsm-maintenance-page {
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.mmsm-component-countdown .mmsm-countdown-value.is-ticking [data-mmsm-countdown-current] {
+		animation: none;
+	}
+
+	.mmsm-component-countdown .mmsm-countdown-value.is-ticking::before {
+		content: none;
+	}
+
+	.mmsm-component-countdown .mmsm-countdown-unit.is-ticking-card {
+		animation: none;
+	}
+
 	.mmsm-contact-channel-button,
 	.mmsm-contact-channel-trigger {
 		transition: none;
@@ -646,5 +976,10 @@ body.mmsm-maintenance-page {
 
 	.mmsm-hero-title {
 		font-size: clamp(1.9rem, 11vw, 2.7rem);
+	}
+
+	.mmsm-countdown-units-3 .mmsm-countdown-grid,
+	.mmsm-countdown-units-4 .mmsm-countdown-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }

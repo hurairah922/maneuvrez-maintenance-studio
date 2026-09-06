@@ -7,6 +7,8 @@
 
 namespace Maneuvrez\MaintenanceModeStudio;
 
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownScheduler;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -19,6 +21,6 @@ class Deactivator {
 	 * @return void
 	 */
 	public static function deactivate() {
-		// Reserved for future cleanup hooks that should not delete user settings.
+		( new CountdownScheduler() )->clear_all();
 	}
 }

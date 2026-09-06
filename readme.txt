@@ -3,7 +3,7 @@ Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page, contact buttons, social links
 Requires at least: 6.4
 Tested up to: 7.0
-Stable tag: 1.1.1
+Stable tag: 1.2.2
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -24,6 +24,7 @@ Core features include:
 * social links with platform defaults, WordPress Dashicons, uploads, and icon-only display
 * login access controls, optional testing bypasses, and an optional custom login URL
 * administrator bypass behavior for logged-in site managers
+* a configurable launch countdown with theme-aware or custom colors, motion choices, and completion actions
 * a responsive default public template
 
 == Installation ==
@@ -50,15 +51,33 @@ No. Contact Channels render normal links for services such as WhatsApp, Messenge
 
 Yes. You can show an optional floating contact button on the live site, and choose whether logged-in users or administrators should see it.
 
+= What happens when the countdown finishes? =
+
+Choose whether the countdown stays at zero, hides, shows a completion message, or turns off maintenance mode. WordPress schedules a one-time expiry event, and the first normal site request after the target also applies the selected action if WP-Cron has not run yet.
+
 = What should I do before enabling a custom login URL? =
 
 Save the generated login URL somewhere safe first. If you lose it, disable the plugin through FTP or WP-CLI to restore the default WordPress login entry points.
 
 == Changelog ==
 
-= 1.1.1 =
+= 1.2.2 =
 
-* correct plugin author information
+* prevent an expired auto-disable countdown from turning off maintenance mode after it is reactivated
+* clarify how administrators can preview the maintenance page while their normal site access is preserved
+
+= 1.2.1 =
+
+* update public plugin author branding to Maneuvrez
+
+= 1.2.0 =
+
+* add a configurable maintenance-page countdown using the WordPress site timezone
+* add selectable days, hours, minutes, and seconds with responsive, accessible output
+* add theme-aligned colors, optional custom countdown colors, and reduced-motion-aware digit or timer-card animations
+* add completion actions to hold at zero, hide the countdown, show a message, or turn off maintenance mode
+* add one-time expiry scheduling, stale-event cleanup, request-time fallback, and a simple admin scheduling health check
+* add a live countdown settings preview that follows the entered target time and remains visible beside the settings on wide screens
 
 = 1.1.0 =
 

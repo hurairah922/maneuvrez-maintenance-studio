@@ -7,6 +7,8 @@
 
 namespace Maneuvrez\MaintenanceModeStudio\Components;
 
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -22,9 +24,12 @@ class ComponentRegistry {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param CountdownService|null $countdown_service Countdown domain service.
 	 */
-	public function __construct() {
+	public function __construct( $countdown_service = null ) {
 		$this->register( new HeroComponent() );
+		$this->register( new CountdownComponent( $countdown_service ) );
 		$this->register( new StatusProgressComponent() );
 		$this->register( new ContactRevealComponent() );
 		$this->register( new ContactChannelsComponent() );

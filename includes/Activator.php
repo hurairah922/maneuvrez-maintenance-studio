@@ -7,7 +7,10 @@
 
 namespace Maneuvrez\MaintenanceModeStudio;
 
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownScheduler;
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
+use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -31,5 +34,9 @@ class Activator {
 		}
 
 		update_option( MMSM_VERSION_OPTION, MMSM_VERSION );
+
+		$settings_repository = new SettingsRepository();
+		$countdown_service   = new CountdownService( $settings_repository );
+		( new CountdownScheduler( $settings_repository, $countdown_service ) )->sync_all();
 	}
 }

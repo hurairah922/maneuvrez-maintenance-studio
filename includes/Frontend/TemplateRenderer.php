@@ -8,6 +8,7 @@
 namespace Maneuvrez\MaintenanceModeStudio\Frontend;
 
 use Maneuvrez\MaintenanceModeStudio\Components\ComponentRegistry;
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 use Maneuvrez\MaintenanceModeStudio\Support\ContactChannels;
@@ -41,15 +42,24 @@ class TemplateRenderer {
 	private $settings_repository;
 
 	/**
+	 * Countdown domain service.
+	 *
+	 * @var CountdownService
+	 */
+	private $countdown_service;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param TemplateRegistry|null   $template_registry Template registry.
 	 * @param ComponentRegistry|null  $component_registry Component registry.
 	 * @param SettingsRepository|null $settings_repository Settings repository.
+	 * @param CountdownService|null    $countdown_service Countdown domain service.
 	 */
-	public function __construct( $template_registry = null, $component_registry = null, $settings_repository = null ) {
+	public function __construct( $template_registry = null, $component_registry = null, $settings_repository = null, $countdown_service = null ) {
+		$this->countdown_service   = $countdown_service instanceof CountdownService ? $countdown_service : new CountdownService();
 		$this->template_registry   = $template_registry instanceof TemplateRegistry ? $template_registry : new TemplateRegistry();
-		$this->component_registry  = $component_registry instanceof ComponentRegistry ? $component_registry : new ComponentRegistry();
+		$this->component_registry  = $component_registry instanceof ComponentRegistry ? $component_registry : new ComponentRegistry( $this->countdown_service );
 		$this->settings_repository = $settings_repository instanceof SettingsRepository ? $settings_repository : new SettingsRepository();
 	}
 
@@ -167,7 +177,26 @@ class TemplateRenderer {
 			}
 		}
 
+		if ( $this->should_enqueue_countdown( $settings ) && isset( $asset_sources['scripts']['mmsm-countdown'] ) ) {
+			wp_enqueue_script( 'mmsm-countdown' );
+			$assets['scripts'][] = 'mmsm-countdown';
+		}
+
 		return $assets;
+	}
+
+	/**
+	 * Determine whether a ticking countdown needs the public countdown script.
+	 *
+	 * Expired presentations are fully server-rendered and require no timer.
+	 *
+	 * @param array<string,mixed> $settings Sanitized settings.
+	 * @return bool
+	 */
+	private function should_enqueue_countdown( array $settings ) {
+		$instance = $this->countdown_service->get_instance( $settings, CountdownService::INSTANCE_MAINTENANCE );
+
+		return $this->countdown_service->is_scheduled( $instance );
 	}
 
 	/**

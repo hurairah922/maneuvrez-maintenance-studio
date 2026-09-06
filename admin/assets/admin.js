@@ -52,10 +52,568 @@ jQuery(document).ready(($) => {
 					preview.css(variable, color);
 				}
 			});
+
+			const themeField = $('#mmsm-theme-mode');
+			if (themeField.length) {
+				const theme = String(themeField.val() || 'light');
+				const themeLabels = {
+					dark: __('Dark', 'maneuvrez-maintenance-studio'),
+					light: __('Light', 'maneuvrez-maintenance-studio'),
+					system: __('System', 'maneuvrez-maintenance-studio'),
+				};
+
+				preview.attr('data-preview-theme', theme);
+				preview.find('[data-preview-theme-label]').text(themeLabels[theme] || themeLabels.light);
+			}
 		};
 
-		$(document.body).on('input change', Object.keys(colorMap).map((key) => `input[name$="[${key}]"]`).join(','), updatePreview);
+		$(document.body).on('input change', `${Object.keys(colorMap).map((key) => `input[name$="[${key}]"]`).join(',')}, #mmsm-theme-mode`, updatePreview);
 		updatePreview();
+	};
+
+	const initializeFullPagePreview = () => {
+		const preview = $('[data-page-preview]');
+
+		if (!preview.length) {
+			return;
+		}
+
+		const expandButton = preview.find('[data-preview-expand]');
+		const closeButton = preview.find('[data-preview-close]');
+		const responsiveToolbar = preview.find('[data-preview-responsive-toolbar]');
+		const deviceFrame = preview.find('[data-preview-device-frame]');
+		const publicPreviewFrame = preview.find('[data-public-preview-frame]');
+		const widthField = preview.find('[data-preview-width]');
+		const heightField = preview.find('[data-preview-height]');
+		const viewportPresets = {
+			desktop: { width: 1440, height: 900 },
+			tablet: { width: 768, height: 1024 },
+			mobile: { width: 390, height: 844 },
+		};
+		let previewWidth = 1440;
+		let previewHeight = 900;
+		let previouslyFocused = null;
+		let previewRequest = null;
+		let previewRefreshTimer = null;
+
+		const clamp = (number, minimum, maximum) => Math.min(maximum, Math.max(minimum, number));
+		const updateDeviceFrame = () => {
+			previewWidth = clamp(Number.parseInt(widthField.val(), 10) || previewWidth, 320, 2560);
+			previewHeight = clamp(Number.parseInt(heightField.val(), 10) || previewHeight, 400, 1600);
+
+			widthField.val(previewWidth);
+			heightField.val(previewHeight);
+			preview.find('[data-preview-preset]').each(function updatePresetState() {
+				const preset = viewportPresets[String($(this).data('previewPreset'))];
+				const isActive = preset && preset.width === previewWidth && preset.height === previewHeight;
+				$(this).toggleClass('is-active', isActive).attr('aria-pressed', isActive ? 'true' : 'false');
+			});
+			deviceFrame.css({ width: `${previewWidth}px`, height: `${previewHeight}px` });
+		};
+
+		const closeExpandedPreview = () => {
+			if (!preview.hasClass('is-expanded')) {
+				return;
+			}
+
+			preview.removeClass('is-expanded').removeAttr('role aria-modal');
+			expandButton.attr('aria-expanded', 'false').prop('hidden', false);
+			closeButton.prop('hidden', true);
+			responsiveToolbar.prop('hidden', true);
+			deviceFrame.css({ width: '', height: '' });
+			$(document.body).removeClass('mmsm-preview-is-expanded');
+			$(document).off('keydown.mmsmPreviewDialog');
+
+			if (previouslyFocused && document.contains(previouslyFocused)) {
+				previouslyFocused.focus();
+			}
+		};
+
+		const handleDialogKeydown = (event) => {
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				closeExpandedPreview();
+				return;
+			}
+
+			if (event.key === 'Tab') {
+				const focusable = preview.find('button:not([hidden]):not(:disabled), input:not([hidden]):not(:disabled)').filter(':visible');
+				const first = focusable.first()[0];
+				const last = focusable.last()[0];
+
+				if (event.shiftKey && document.activeElement === first) {
+					event.preventDefault();
+					last.focus();
+				} else if (!event.shiftKey && document.activeElement === last) {
+					event.preventDefault();
+					first.focus();
+				}
+			}
+		};
+
+		const openExpandedPreview = () => {
+			previouslyFocused = document.activeElement;
+			preview.addClass('is-expanded').attr({
+				role: 'dialog',
+				'aria-modal': 'true',
+			});
+			expandButton.attr('aria-expanded', 'true').prop('hidden', true);
+			closeButton.prop('hidden', false);
+			responsiveToolbar.prop('hidden', false);
+			$(document.body).addClass('mmsm-preview-is-expanded');
+			$(document).on('keydown.mmsmPreviewDialog', handleDialogKeydown);
+			updateDeviceFrame();
+			closeButton.trigger('focus');
+		};
+
+		expandButton.on('click', openExpandedPreview);
+		closeButton.on('click', closeExpandedPreview);
+		preview.find('[data-preview-preset]').on('click', function applyPreviewPreset() {
+			const preset = viewportPresets[String($(this).data('previewPreset'))];
+
+			if (!preset) {
+				return;
+			}
+
+			widthField.val(preset.width);
+			heightField.val(preset.height);
+			updateDeviceFrame();
+		});
+		widthField.add(heightField).on('change', updateDeviceFrame);
+		preview.find('[data-preview-resize]').on('pointerdown', function beginFrameResize(event) {
+			if (!preview.hasClass('is-expanded')) {
+				return;
+			}
+
+			event.preventDefault();
+			const handle = this;
+			const direction = String($(handle).data('previewResize') || '');
+			const startX = event.clientX;
+			const startY = event.clientY;
+			const startWidth = previewWidth;
+			const startHeight = previewHeight;
+			const changesWidth = direction.includes('e') || direction.includes('w');
+			const changesHeight = direction.includes('n') || direction.includes('s');
+			const resizeCursors = {
+				n: 'ns-resize',
+				ne: 'nesw-resize',
+				e: 'ew-resize',
+				se: 'nwse-resize',
+				s: 'ns-resize',
+				sw: 'nesw-resize',
+				w: 'ew-resize',
+				nw: 'nwse-resize',
+			};
+
+			handle.setPointerCapture(event.pointerId);
+			deviceFrame.addClass('is-resizing').css('cursor', resizeCursors[direction] || 'nwse-resize');
+
+			const resizeFrame = (moveEvent) => {
+				const horizontalChange = moveEvent.clientX - startX;
+				const verticalChange = moveEvent.clientY - startY;
+
+				if (changesWidth) {
+					widthField.val(startWidth + (direction.includes('w') ? -horizontalChange : horizontalChange));
+				}
+				if (changesHeight) {
+					heightField.val(startHeight + (direction.includes('n') ? -verticalChange : verticalChange));
+				}
+
+				updateDeviceFrame();
+			};
+
+			const finishFrameResize = (endEvent) => {
+				if (handle.hasPointerCapture(endEvent.pointerId)) {
+					handle.releasePointerCapture(endEvent.pointerId);
+				}
+				handle.removeEventListener('pointermove', resizeFrame);
+				handle.removeEventListener('pointerup', finishFrameResize);
+				handle.removeEventListener('pointercancel', finishFrameResize);
+				deviceFrame.removeClass('is-resizing').css('cursor', '');
+			};
+
+			handle.addEventListener('pointermove', resizeFrame);
+			handle.addEventListener('pointerup', finishFrameResize);
+			handle.addEventListener('pointercancel', finishFrameResize);
+		});
+
+		if (typeof window.ResizeObserver !== 'undefined') {
+			const frameObserver = new window.ResizeObserver((entries) => {
+				if (!preview.hasClass('is-expanded') || !entries.length) {
+					return;
+				}
+
+				const dimensions = entries[0].contentRect;
+				previewWidth = clamp(Math.round(dimensions.width), 320, 2560);
+				previewHeight = clamp(Math.round(dimensions.height), 400, 1600);
+				widthField.val(previewWidth);
+				heightField.val(previewHeight);
+				preview.find('[data-preview-preset]').each(function updateResizedPresetState() {
+					const preset = viewportPresets[String($(this).data('previewPreset'))];
+					const isActive = preset && preset.width === previewWidth && preset.height === previewHeight;
+					$(this).toggleClass('is-active', isActive).attr('aria-pressed', isActive ? 'true' : 'false');
+				});
+			});
+
+			frameObserver.observe(deviceFrame[0]);
+		}
+
+		const refreshRenderedPreview = () => {
+			const settingsForm = preview.closest('form');
+			const requestData = settingsForm.serializeArray().filter((field) => field.name !== 'action' && field.name !== '_wpnonce');
+			requestData.push({ name: 'action', value: 'mmsm_render_page_preview' });
+			requestData.push({ name: 'nonce', value: String(preview.data('previewNonce') || '') });
+
+			if (previewRequest) {
+				previewRequest.abort();
+			}
+
+			preview.addClass('is-loading');
+			previewRequest = $.ajax({
+				url: String(preview.data('previewUrl') || ''),
+				method: 'POST',
+				data: requestData,
+				dataType: 'html',
+			})
+				.done((markup) => {
+					if (publicPreviewFrame.length) {
+						publicPreviewFrame[0].srcdoc = markup;
+					}
+				})
+				.always(() => {
+					preview.removeClass('is-loading');
+					previewRequest = null;
+				});
+		};
+
+		const scheduleRenderedPreviewRefresh = () => {
+			window.clearTimeout(previewRefreshTimer);
+			previewRefreshTimer = window.setTimeout(refreshRenderedPreview, 350);
+		};
+
+		preview.closest('form').on('input change', 'input, textarea, select', function onPreviewSettingChange(event) {
+			if ($(event.target).closest('[data-page-preview]').length) {
+				return;
+			}
+
+			scheduleRenderedPreviewRefresh();
+		});
+		if (typeof window.MutationObserver !== 'undefined') {
+			const formObserver = new window.MutationObserver(scheduleRenderedPreviewRefresh);
+			const settingsStack = preview.closest('form').find('.mmsm-settings-stack')[0];
+
+			if (settingsStack) {
+				formObserver.observe(settingsStack, { childList: true, subtree: true });
+			}
+		}
+
+	};
+
+	const initializeCountdownAdmin = () => {
+		const panel = $('.mmsm-settings-panel-countdown');
+		const preview = $('[data-countdown-admin-preview]');
+
+		if (!panel.length) {
+			return;
+		}
+
+		const stage = preview.find('.mmsm-countdown-admin-preview-stage');
+		const enabledField = $('#mmsm-countdown-enabled');
+		const headingField = $('#mmsm-countdown-heading');
+		const descriptionField = $('#mmsm-countdown-description');
+		const targetField = $('#mmsm-countdown-target');
+		const expiryField = $('#mmsm-countdown-expiry-action');
+		const animationField = $('#mmsm-countdown-animation');
+		const animationScopeField = $('#mmsm-countdown-animation-scope');
+		const colorModeField = $('#mmsm-countdown-color-mode');
+		const scheduleButton = panel.find('[data-countdown-schedule-check]');
+		const scheduleResult = panel.find('[data-countdown-schedule-result]');
+
+		const replayPreviewAnimation = (elements, className) => {
+			elements.removeClass(className);
+			if (elements.length) {
+				void elements[0].offsetWidth;
+			}
+			elements.addClass(className);
+		};
+
+		const parseSiteLocalTarget = () => {
+			const value = String(targetField.val() || '');
+			const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+
+			if (!match) {
+				return 0;
+			}
+
+			if (value === String(targetField.data('savedLocal') || '')) {
+				return Number.parseInt(targetField.data('savedTimestamp'), 10) * 1000;
+			}
+
+			const localAsUtc = Date.UTC(
+				Number(match[1]),
+				Number(match[2]) - 1,
+				Number(match[3]),
+				Number(match[4]),
+				Number(match[5]),
+				Number(match[6] || 0),
+			);
+			const timezone = String(targetField.data('siteTimezone') || '');
+
+			try {
+				const formatter = new Intl.DateTimeFormat('en-CA', {
+					timeZone: timezone,
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit',
+					hour: '2-digit',
+					minute: '2-digit',
+					second: '2-digit',
+					hourCycle: 'h23',
+				});
+				let timestamp = localAsUtc;
+
+				for (let iteration = 0; iteration < 2; iteration += 1) {
+					const parts = formatter.formatToParts(new Date(timestamp)).reduce((result, part) => {
+						if (part.type !== 'literal') {
+							result[part.type] = Number(part.value);
+						}
+						return result;
+					}, {});
+					const representedAsUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+					timestamp = localAsUtc - (representedAsUtc - timestamp);
+				}
+
+				return timestamp;
+			} catch (error) {
+				const offsetSeconds = Number.parseInt(targetField.data('siteOffset'), 10) || 0;
+				return localAsUtc - (offsetSeconds * 1000);
+			}
+		};
+
+		const updatePreviewTime = () => {
+			const target = parseSiteLocalTarget();
+			const remaining = target > 0 ? Math.max(0, Math.ceil((target - Date.now()) / 1000)) : 0;
+			const nextValues = {
+				days: Math.floor(remaining / 86400),
+				hours: Math.floor((remaining % 86400) / 3600),
+				minutes: Math.floor((remaining % 3600) / 60),
+				seconds: remaining % 60,
+			};
+			const scope = String(animationScopeField.val() || 'digits');
+
+			Object.entries(nextValues).forEach(([unit, value]) => {
+				const valueElement = preview.find(`[data-countdown-preview-value="${unit}"]`);
+				const nextValue = String(value).padStart(2, '0');
+
+				if (valueElement.text() === nextValue) {
+					return;
+				}
+
+				valueElement.text(nextValue);
+				if (scope === 'digits' || scope === 'both') {
+					replayPreviewAnimation(valueElement, 'is-previewing');
+				}
+				if (scope === 'cards' || scope === 'both') {
+					replayPreviewAnimation(valueElement.closest('[data-countdown-preview-unit]'), 'is-previewing-card');
+				}
+			});
+		};
+
+		const updatePreview = () => {
+			const enabled = enabledField.prop('checked');
+			const heading = String(headingField.val() || '').trim() || __('Launching in', 'maneuvrez-maintenance-studio');
+			const description = String(descriptionField.val() || '').trim();
+			const animation = String(animationField.val() || 'slide');
+			const animationScope = String(animationScopeField.val() || 'digits');
+			const customColors = colorModeField.val() === 'custom';
+
+			preview.toggleClass('is-disabled', !enabled);
+			preview.toggleClass('is-hidden', !enabled);
+			preview.find('[data-countdown-preview-status]')
+				.toggleClass('is-enabled', enabled)
+				.text(enabled ? __('Enabled', 'maneuvrez-maintenance-studio') : __('Disabled', 'maneuvrez-maintenance-studio'));
+			preview.find('[data-countdown-preview-heading]').text(heading);
+			preview.find('[data-countdown-preview-description]').text(description).toggleClass('is-hidden', !description);
+
+			['days', 'hours', 'minutes', 'seconds'].forEach((unit) => {
+				const visible = panel.find(`input[name$="[show_${unit}]"]`).prop('checked');
+				preview.find(`[data-countdown-preview-unit="${unit}"]`).toggleClass('is-hidden', !visible);
+			});
+
+			panel.find('.mmsm-countdown-finished-dependent').toggleClass('is-hidden', expiryField.val() !== 'show_message');
+			panel.find('.mmsm-countdown-custom-colors').toggleClass('is-hidden', !customColors);
+			stage.removeClass('is-animation-none is-animation-fade is-animation-slide is-animation-flip is-animation-pulse is-animation-bounce is-animation-roll').addClass(`is-animation-${animation}`);
+			stage.removeClass('is-scope-digits is-scope-cards is-scope-both').addClass(`is-scope-${animationScope}`);
+			updatePreviewTime();
+
+			if (customColors) {
+				stage.css({
+					'--mmsm-countdown-preview-bg': panel.find('input[name$="[background_color]"]').val() || '#f0f6fc',
+					'--mmsm-countdown-preview-number': panel.find('input[name$="[number_color]"]').val() || '#1d2327',
+					'--mmsm-countdown-preview-label': panel.find('input[name$="[label_color]"]').val() || '#646970',
+					'--mmsm-countdown-preview-border': panel.find('input[name$="[border_color]"]').val() || '#c3c4c7',
+				});
+			} else {
+				stage.css({
+					'--mmsm-countdown-preview-bg': '',
+					'--mmsm-countdown-preview-number': '',
+					'--mmsm-countdown-preview-label': '',
+					'--mmsm-countdown-preview-border': '',
+				});
+			}
+		};
+
+		panel.on('input change', 'input, textarea, select', updatePreview);
+		animationField.add(animationScopeField).on('change', () => {
+			const scope = String(animationScopeField.val() || 'digits');
+			if (scope === 'digits' || scope === 'both') {
+				replayPreviewAnimation(preview.find('.mmsm-countdown-admin-preview-grid b'), 'is-previewing');
+			}
+			if (scope === 'cards' || scope === 'both') {
+				replayPreviewAnimation(preview.find('[data-countdown-preview-unit]:not(.is-hidden)'), 'is-previewing-card');
+			}
+		});
+
+		const tickPreview = () => {
+			updatePreviewTime();
+			window.setTimeout(tickPreview, 1000 - (Date.now() % 1000) + 20);
+		};
+
+		scheduleButton.on('click', () => {
+			if (typeof mmsmCountdownAdmin === 'undefined') {
+				return;
+			}
+
+			scheduleButton.prop('disabled', true);
+			scheduleResult.text(__('Checking the one-time event…', 'maneuvrez-maintenance-studio'));
+
+			$.post(mmsmCountdownAdmin.ajaxUrl, {
+				action: 'mmsm_countdown_schedule_check',
+				nonce: mmsmCountdownAdmin.nonce,
+			})
+				.done((response) => {
+					const message = response && response.data && response.data.message
+						? response.data.message
+						: __('The scheduling check did not return a result.', 'maneuvrez-maintenance-studio');
+
+					scheduleResult.text(message);
+				})
+				.fail(() => {
+					scheduleResult.text(__('The scheduling check failed. Please reload the page and try again.', 'maneuvrez-maintenance-studio'));
+				})
+				.always(() => scheduleButton.prop('disabled', false));
+		});
+
+		updatePreview();
+		if (preview.length) {
+			window.setTimeout(tickPreview, 1000);
+		}
+	};
+
+	const initializeMaintenanceEditor = () => {
+		const editor = $('.mmsm-optional-sections');
+
+		if (!editor.length) {
+			return;
+		}
+
+		const updateDisclosureState = (details) => {
+			$(details).children('summary').first().attr('aria-expanded', details.open ? 'true' : 'false');
+		};
+
+		$('.mmsm-card-disclosure, .mmsm-local-disclosure').each(function initializeDisclosure() {
+			updateDisclosureState(this);
+		}).on('toggle', function onDisclosureToggle() {
+			updateDisclosureState(this);
+		});
+
+		const setCardSummary = (type, message) => {
+			editor.find(`[data-optional-card="${type}"] [data-card-summary]`).first().text(message);
+		};
+
+		const updateActionGroup = (type) => {
+			const group = $(`[data-action-group="${type}"]`);
+			const labelField = group.find(`input[name$="[${type}_action_label]"]`);
+			const urlField = group.find(`input[name$="[${type}_action_url]"]`);
+			const validation = group.find('[data-action-validation]');
+			const label = String(labelField.val() || '').trim();
+			const url = String(urlField.val() || '').trim();
+			const serverMessage = String(validation.attr('data-server-error') || '');
+			let message = '';
+
+			if (urlField.length) {
+				urlField[0].setCustomValidity('');
+			}
+
+			if (url && !label) {
+				message = __('Add a label or remove the URL. An action needs both values.', 'maneuvrez-maintenance-studio');
+			} else if (label && !url) {
+				message = __('Add a full URL or remove the label. An action needs both values.', 'maneuvrez-maintenance-studio');
+			} else if (url && urlField.length && urlField[0].validity.typeMismatch) {
+				message = __('Enter a valid full URL beginning with http:// or https://.', 'maneuvrez-maintenance-studio');
+			}
+
+			if (labelField.length) {
+				labelField[0].setCustomValidity(message);
+			}
+			if (urlField.length) {
+				urlField[0].setCustomValidity(message);
+			}
+			validation.text(message || serverMessage).toggleClass('is-error', !!(message || serverMessage));
+
+			if (type === 'secondary') {
+				if (!label && !url) {
+					setCardSummary(type, __('Not configured.', 'maneuvrez-maintenance-studio'));
+				} else if (message) {
+					setCardSummary(type, message);
+				} else {
+					setCardSummary(type, `${__('Configured', 'maneuvrez-maintenance-studio')}: ${label}`);
+				}
+			}
+		};
+
+		const updateCardSummaries = () => {
+			updateActionGroup('primary');
+			updateActionGroup('secondary');
+
+			const progressEnabled = $('#mmsm-show-progress').prop('checked');
+			const progressValue = String($('#mmsm-progress-value').val() || '0');
+			$('.mmsm-progress-value-dependent').toggleClass('is-hidden', !progressEnabled).attr('aria-hidden', progressEnabled ? 'false' : 'true');
+			setCardSummary('status-progress', progressEnabled
+				? `${__('Progress is on at', 'maneuvrez-maintenance-studio')} ${progressValue}%.`
+				: __('Progress is off; status text remains available.', 'maneuvrez-maintenance-studio'));
+
+			const countdownEnabled = $('#mmsm-countdown-enabled').prop('checked');
+			const countdownTarget = String($('#mmsm-countdown-target').val() || '').replace('T', ' ');
+			const expiryLabel = String($('#mmsm-countdown-expiry-action option:selected').text() || '').trim();
+			setCardSummary('countdown', `${countdownEnabled ? __('On', 'maneuvrez-maintenance-studio') : __('Off', 'maneuvrez-maintenance-studio')} · ${countdownTarget || __('No target time', 'maneuvrez-maintenance-studio')} · ${expiryLabel}`);
+
+			const contactEnabled = $('#mmsm-contact-channels-enabled').prop('checked');
+			const contactCount = $('.mmsm-contact-channel-list [data-contact-channel-item]').filter(function configuredContact() {
+				return String($(this).find('.mmsm-contact-channel-value').val() || '').trim() !== '';
+			}).length;
+			setCardSummary('contact-channels', `${contactEnabled ? __('On', 'maneuvrez-maintenance-studio') : __('Off', 'maneuvrez-maintenance-studio')} · ${contactCount} ${contactCount === 1 ? __('configured channel', 'maneuvrez-maintenance-studio') : __('configured channels', 'maneuvrez-maintenance-studio')}`);
+
+			const socialCount = $('.mmsm-social-links-list [data-social-item]').filter(function configuredSocialLink() {
+				return String($(this).find('.mmsm-social-url-input').val() || '').trim() !== '';
+			}).length;
+			const footerEnabled = $('#mmsm-show-footer-section').prop('checked');
+			const loginEnabled = $('#mmsm-show-login-button').prop('checked');
+			setCardSummary('social-links', `${socialCount} ${socialCount === 1 ? __('configured link', 'maneuvrez-maintenance-studio') : __('configured links', 'maneuvrez-maintenance-studio')}${footerEnabled ? '' : ` · ${__('Hidden while the footer is off', 'maneuvrez-maintenance-studio')}`}`);
+			$('.mmsm-login-label-dependent').toggleClass('is-hidden', !loginEnabled).attr('aria-hidden', loginEnabled ? 'false' : 'true');
+			setCardSummary('footer-login', footerEnabled
+				? (loginEnabled ? __('Footer and login link are shown.', 'maneuvrez-maintenance-studio') : __('Footer is shown without a login link.', 'maneuvrez-maintenance-studio'))
+				: __('Footer is hidden; saved footer settings are retained.', 'maneuvrez-maintenance-studio'));
+		};
+
+		$('.mmsm-settings-content').on('input change', 'input, textarea, select', function onMaintenanceFieldChange() {
+			$(this).closest('[data-action-group]').find('[data-action-validation]').attr('data-server-error', '');
+			updateCardSummaries();
+		});
+		$('.mmsm-settings-content').on('click', '.mmsm-add-social-item, .mmsm-remove-social-item, .mmsm-add-contact-channel, .mmsm-remove-contact-channel', () => {
+			window.setTimeout(updateCardSummaries, 0);
+		});
+		updateCardSummaries();
 	};
 
 	const bypassBuilder = $('.mmsm-bypass-query-builder');
@@ -202,6 +760,9 @@ jQuery(document).ready(($) => {
 	initializeAdvancedVisibility();
 	initializeCustomLoginPreview();
 	initializeDesignPreview();
+	initializeFullPagePreview();
+	initializeCountdownAdmin();
+	initializeMaintenanceEditor();
 
 	const builder = $('.mmsm-social-links-builder');
 
@@ -282,6 +843,36 @@ jQuery(document).ready(($) => {
 			});
 		};
 
+		const updateFullPageSocialPreview = () => {
+			const previewList = $('[data-preview-social-list]');
+
+			if (!previewList.length) {
+				return;
+			}
+
+			const display = String(builder.find('select[name$="[social_links_display]"]').val() || 'icon_label');
+			previewList.empty();
+
+			list.children('[data-social-item]').each(function collectSocialPreview() {
+				const row = $(this);
+				const url = String(row.find('.mmsm-social-url-input').val() || '').trim();
+
+				if (!url) {
+					return;
+				}
+
+				const chip = $('<span />');
+				const icon = getSocialRowIconMarkup(row);
+				const color = String(row.find('.mmsm-social-icon-color-picker').val() || '').trim();
+				icon.css('color', color || '');
+				chip.append(icon);
+				if (display !== 'icon_only') {
+					chip.append($('<b />', { text: getSocialRowLabel(row) }));
+				}
+				previewList.append(chip);
+			});
+		};
+
 		const updateSocialRowPreview = (row) => {
 			const platform = row.find('.mmsm-social-platform-select').val();
 			const url = String(row.find('.mmsm-social-url-input').val() || '').trim();
@@ -298,6 +889,7 @@ jQuery(document).ready(($) => {
 			row.find('[data-social-item-state]')
 				.toggleClass('is-ready', !!url)
 				.text(url ? __('Ready', 'maneuvrez-maintenance-studio') : __('Needs URL', 'maneuvrez-maintenance-studio'));
+			updateFullPageSocialPreview();
 		};
 
 		const toggleCustomFields = (row) => {
@@ -335,6 +927,7 @@ jQuery(document).ready(($) => {
 			row.on('click', '.mmsm-remove-social-item', function onRemoveItem() {
 				$(this).closest('[data-social-item]').remove();
 				ensureOneRow();
+				updateFullPageSocialPreview();
 			});
 
 			row.on('click', '.mmsm-upload-social-icon', function onUploadIcon(event) {
@@ -365,7 +958,7 @@ jQuery(document).ready(($) => {
 						return;
 					}
 
-					currentRow.find('.mmsm-social-icon-id').val(attachment.id);
+					currentRow.find('.mmsm-social-icon-id').val(attachment.id).trigger('change');
 					currentRow.find('.mmsm-social-icon-preview').attr('src', attachment.url).removeClass('is-hidden');
 					currentRow.find('.mmsm-remove-social-icon').removeClass('is-hidden');
 					updateSocialRowPreview(currentRow);
@@ -378,7 +971,7 @@ jQuery(document).ready(($) => {
 				event.preventDefault();
 
 				const currentRow = $(this).closest('[data-social-item]');
-				currentRow.find('.mmsm-social-icon-id').val('0');
+				currentRow.find('.mmsm-social-icon-id').val('0').trigger('change');
 				currentRow.find('.mmsm-social-icon-preview').attr('src', '').addClass('is-hidden');
 				$(this).addClass('is-hidden');
 				updateSocialRowPreview(currentRow);
@@ -404,6 +997,8 @@ jQuery(document).ready(($) => {
 			event.preventDefault();
 			addRow();
 		});
+		builder.on('change', 'select[name$="[social_links_display]"]', updateFullPageSocialPreview);
+		updateFullPageSocialPreview();
 	}
 
 	const contactBuilder = $('.mmsm-contact-channels-builder');
@@ -484,7 +1079,7 @@ jQuery(document).ready(($) => {
 		};
 
 		const updateContactStatus = () => {
-			const enabled = contactBuilder.find('input[name$="[contact_channels_enabled]"]').prop('checked');
+			const enabled = $('#mmsm-contact-channels-enabled').prop('checked');
 			const maintenance = contactBuilder.find('select[name$="[contact_channels_maintenance_display]"]').val();
 			const live = contactBuilder.find('select[name$="[contact_channels_live_display]"]').val();
 			const displayStyle = contactBuilder.find('select[name$="[contact_channels_display_style]"]').val();
@@ -557,9 +1152,8 @@ jQuery(document).ready(($) => {
 		};
 
 		const updateContactPreview = () => {
-			const enabled = contactBuilder.find('input[name$="[contact_channels_enabled]"]').prop('checked');
+			const enabled = $('#mmsm-contact-channels-enabled').prop('checked');
 			const maintenance = contactBuilder.find('select[name$="[contact_channels_maintenance_display]"]').val();
-			const live = contactBuilder.find('select[name$="[contact_channels_live_display]"]').val();
 			const shape = contactBuilder.find('select[name$="[contact_channels_button_shape]"]').val() || 'rounded';
 			const display = contactBuilder.find('select[name$="[contact_channels_button_display]"]').val() || 'icon_label';
 			const colorMode = contactBuilder.find('select[name$="[contact_channels_color_mode]"]').val() || 'theme';
@@ -569,80 +1163,44 @@ jQuery(document).ready(($) => {
 			const floatingLabel = String(contactBuilder.find('input[name$="[contact_channels_primary_label]"]').val() || '').trim() || __('Contact Us', 'maneuvrez-maintenance-studio');
 			const rows = getContactRowsForPreview();
 			const hasInsideMaintenance = enabled && (maintenance === 'inside' || maintenance === 'both');
-			const hasFloating = enabled && (live === 'floating' || maintenance === 'floating' || maintenance === 'both');
-			const hasPublicDisplay = hasInsideMaintenance || hasFloating;
-			const stage = contactBuilder.find('[data-contact-preview-stage]');
-			const buttons = contactBuilder.find('[data-contact-preview-buttons]');
-			const previewCard = contactBuilder.find('.mmsm-contact-channels-preview-card');
-			const floating = contactBuilder.find('[data-contact-preview-floating]');
-			const previewNote = contactBuilder.find('[data-contact-preview-note]');
-
-			stage
-				.removeClass('is-shape-rounded is-shape-pill is-shape-circle is-shape-square is-display-icon_label is-display-icon_only is-display-label_only is-color-theme is-color-brand is-color-custom is-position-bottom_left is-position-bottom_right is-position-top_left is-position-top_right is-empty is-disabled')
-				.addClass(`is-shape-${shape}`)
-				.addClass(`is-display-${display}`)
-				.addClass(`is-color-${colorMode}`)
-				.addClass(`is-position-${position}`)
-				.toggleClass('is-empty', rows.length === 0)
-				.toggleClass('is-disabled', !enabled || !hasPublicDisplay);
-
-			stage.css({
+			const hasMaintenanceFloating = enabled && (maintenance === 'floating' || maintenance === 'both');
+			const fullPreviewChannels = $('[data-preview-contact-channels]');
+			const fullPreviewList = $('[data-preview-contact-channel-list]');
+			const fullPreviewFloating = $('[data-preview-contact-floating]');
+			const previewStyles = {
 				'--mmsm-contact-preview-bg': contactBuilder.find('input[name$="[contact_channels_background_color]"]').val() || '#2271b1',
 				'--mmsm-contact-preview-text': contactBuilder.find('input[name$="[contact_channels_text_color]"]').val() || '#ffffff',
 				'--mmsm-contact-preview-icon': contactBuilder.find('input[name$="[contact_channels_icon_color]"]').val() || contactBuilder.find('input[name$="[contact_channels_text_color]"]').val() || '#ffffff',
 				'--mmsm-contact-preview-hover-bg': contactBuilder.find('input[name$="[contact_channels_hover_background_color]"]').val() || contactBuilder.find('input[name$="[contact_channels_background_color]"]').val() || '#135e96',
 				'--mmsm-contact-preview-hover-text': contactBuilder.find('input[name$="[contact_channels_hover_text_color]"]').val() || contactBuilder.find('input[name$="[contact_channels_text_color]"]').val() || '#ffffff',
-			});
+			};
 
-			contactBuilder.find('[data-contact-preview-heading]').text(heading);
-			contactBuilder.find('[data-contact-preview-description]').text(
-				description || (
-					enabled
-						? __('Contact buttons will appear here with the selected display style.', 'maneuvrez-maintenance-studio')
-						: __('Turn on Contact Channels to publish this visitor contact path.', 'maneuvrez-maintenance-studio')
-				)
-			);
-			contactBuilder.find('[data-contact-preview-floating-label]').text(floatingLabel);
-			contactBuilder.find('[data-contact-preview-count]').text(
-				rows.length
-					? `${rows.length} ${__('ready', 'maneuvrez-maintenance-studio')}`
-					: __('Preview', 'maneuvrez-maintenance-studio')
-			);
-
-			buttons.empty();
+			fullPreviewChannels.toggleClass('is-hidden', !hasInsideMaintenance || rows.length === 0);
+			fullPreviewChannels.find('[data-preview-contact-channels-heading]').text(heading);
+			fullPreviewChannels.find('[data-preview-contact-channels-description]').text(description);
+			fullPreviewList
+				.removeClass('is-shape-rounded is-shape-pill is-shape-circle is-shape-square is-display-icon_label is-display-icon_only is-display-label_only is-color-theme is-color-brand is-color-custom')
+				.addClass(`is-shape-${shape} is-display-${display} is-color-${colorMode}`)
+				.css(previewStyles)
+				.empty();
 			rows.forEach((row) => {
-				const button = $('<span />', {
-					class: `mmsm-contact-preview-button is-${row.type}`,
-				});
-				if (row.icon) {
-					button.append($('<span />', {
-						class: `dashicons ${row.icon}`,
-						'aria-hidden': 'true',
-					}));
+				const chip = $('<span />', { class: `is-${row.type}` });
+				if (row.icon && display !== 'label_only') {
+					chip.append($('<span />', { class: `dashicons ${row.icon}`, 'aria-hidden': 'true' }));
 				}
-				button.append($('<span />', {
-					class: 'mmsm-contact-preview-label',
-					text: row.label,
-				}));
-				buttons.append(button);
+				if (display !== 'icon_only') {
+					chip.append($('<b />', { text: row.label }));
+				}
+				fullPreviewList.append(chip);
 			});
-
-			floating.find('.dashicons')
-				.removeClass((index, className) => (className.match(/dashicons-[^\s]+/g) || []).join(' '))
-				.addClass(rows.length === 1 && rows[0].icon ? rows[0].icon : 'dashicons-format-chat')
-				.toggle(rows.length !== 1 || !!rows[0].icon);
-
-			previewCard.toggle(hasInsideMaintenance || rows.length === 0 || !hasPublicDisplay);
-			floating.toggle(hasFloating && rows.length > 0);
-			previewNote.text(
-				!enabled
-					? __('Preview is live, but Contact Channels are currently off.', 'maneuvrez-maintenance-studio')
-					: (
-						hasPublicDisplay
-							? __('Preview updates instantly as you change placement, labels, colors, and destinations.', 'maneuvrez-maintenance-studio')
-							: __('Choose a maintenance or live-site placement to publish these buttons.', 'maneuvrez-maintenance-studio')
-					)
-			);
+			fullPreviewFloating
+				.removeClass('is-shape-rounded is-shape-pill is-shape-circle is-shape-square is-color-theme is-color-brand is-color-custom is-position-bottom_left is-position-bottom_right is-position-top_left is-position-top_right')
+				.addClass(`is-shape-${shape} is-color-${colorMode} is-position-${position}`)
+				.css(previewStyles)
+				.empty()
+				.append(display === 'label_only' ? '' : $('<span />', { class: 'dashicons dashicons-format-chat', 'aria-hidden': 'true' }))
+				.append(display === 'icon_only' ? '' : $('<b />', { text: floatingLabel }))
+				.toggleClass('is-hidden', !hasMaintenanceFloating || rows.length === 0);
 		};
 
 		const toggleCustomColorFields = () => {
@@ -787,6 +1345,10 @@ jQuery(document).ready(($) => {
 			toggleCustomColorFields();
 			updateContactStatus();
 		});
+		$('#mmsm-contact-channels-enabled').on('change', () => {
+			toggleCustomColorFields();
+			updateContactStatus();
+		});
 		contactBuilder.on('input change', 'input[name$="[contact_channels_heading]"], input[name$="[contact_channels_description]"], input[name$="[contact_channels_primary_label]"], input[name$="[contact_channels_background_color]"], input[name$="[contact_channels_text_color]"], input[name$="[contact_channels_icon_color]"], input[name$="[contact_channels_hover_background_color]"], input[name$="[contact_channels_hover_text_color]"]', updateContactStatus);
 		contactBuilder.on('click', '[data-contact-color-tab]', function onContactColorStateClick() {
 			switchCustomColorPanel($(this));
@@ -798,5 +1360,50 @@ jQuery(document).ready(($) => {
 
 		toggleCustomColorFields();
 		updateContactStatus();
+	}
+
+	const settingsForm = $('.mmsm-settings-content');
+
+	if (settingsForm.length) {
+		const initialState = settingsForm.serialize();
+		const editStatus = $('[data-settings-edit-status]');
+		let isSubmitting = false;
+		const updateEditStatus = () => {
+			const isDirty = settingsForm.serialize() !== initialState;
+
+			editStatus
+				.toggleClass('has-unsaved-changes', isDirty)
+				.text(isDirty
+					? __('Unsaved edits — save to update the page.', 'maneuvrez-maintenance-studio')
+					: __('All editor changes are saved.', 'maneuvrez-maintenance-studio'));
+		};
+
+		settingsForm.on('submit', () => {
+			isSubmitting = true;
+		});
+		settingsForm.on('input change', 'input, textarea, select', updateEditStatus);
+
+		$('.mmsm-settings-nav-item:not([aria-current="page"])').on('click', (event) => {
+			if (settingsForm.serialize() === initialState) {
+				return;
+			}
+
+			if (!window.confirm(__('You have unsaved changes. Leave this area without saving?', 'maneuvrez-maintenance-studio'))) {
+				event.preventDefault();
+			}
+		});
+
+		$(window).on('beforeunload', (event) => {
+			if (isSubmitting || settingsForm.serialize() === initialState) {
+				return undefined;
+			}
+
+			event.preventDefault();
+			event.originalEvent.returnValue = '';
+			return '';
+		});
+
+		updateEditStatus();
+
 	}
 });
