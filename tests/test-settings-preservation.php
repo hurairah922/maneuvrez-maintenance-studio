@@ -23,6 +23,13 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 	private $original_post = array();
 
 	/**
+	 * Original query data restored after each test.
+	 *
+	 * @var array<string,mixed>
+	 */
+	private $original_get = array();
+
+	/**
 	 * Create an administrator for the settings callback.
 	 *
 	 * @return void
@@ -31,6 +38,7 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 		parent::set_up();
 
 		$this->original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test setup preserves request globals; production submissions use a nonce.
+		$this->original_get  = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test setup preserves request globals; production tab selection is read-only.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		delete_option( MMSM_SETTINGS_OPTION );
 	}
@@ -42,17 +50,18 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 	 */
 	public function tear_down() {
 		$_POST = $this->original_post;
+		$_GET  = $this->original_get;
 		delete_option( MMSM_SETTINGS_OPTION );
 
 		parent::tear_down();
 	}
 
 	/**
-	 * Every schema key must belong to exactly one current settings tab.
+	 * Every schema key must belong to exactly one current task area.
 	 *
 	 * @return void
 	 */
-	public function test_current_tab_ownership_covers_schema_exactly_once() {
+	public function test_current_area_ownership_covers_schema_exactly_once() {
 		$owned_keys = array();
 
 		foreach ( array_keys( $this->get_tab_payloads( $this->build_custom_settings() ) ) as $tab ) {
@@ -65,11 +74,11 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Saving any current tab leaves every other tab's normalized values intact.
+	 * Saving any current area leaves every other area's normalized values intact.
 	 *
 	 * @return void
 	 */
-	public function test_each_current_tab_save_preserves_every_unowned_setting() {
+	public function test_each_current_area_save_preserves_every_unowned_setting() {
 		$baseline = $this->build_custom_settings();
 
 		foreach ( $this->get_tab_payloads( $baseline ) as $tab => $payload ) {
@@ -97,12 +106,11 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 		$baseline = $this->build_custom_settings();
 
 		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$access_payload = $this->get_tab_payloads( $baseline )['access_visibility'];
+		unset( $access_payload['enabled'] );
 		$saved = $this->save_tab(
-			'general',
-			array(
-				'page_title' => 'General save',
-				'message'    => 'Only general fields were submitted.',
-			),
+			'access_visibility',
+			$access_payload,
 			array(
 				'mmsm_contact_channels_present' => '1',
 				'mmsm_social_links_present'     => '1',
@@ -115,9 +123,11 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 		$this->assertSame( 1, $saved['show_progress'] );
 
 		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$maintenance_payload = $this->get_tab_payloads( $baseline )['maintenance_page'];
+		unset( $maintenance_payload['social_links'] );
 		$saved = $this->save_tab(
-			'social_links',
-			array( 'social_links_display' => 'icon_only' ),
+			'maintenance_page',
+			$maintenance_payload,
 			array( 'mmsm_social_links_present' => '1' )
 		);
 
@@ -125,12 +135,11 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 		$this->assertSame( $baseline['contact_channels_items'], $saved['contact_channels_items'] );
 
 		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$maintenance_payload = $this->get_tab_payloads( $baseline )['maintenance_page'];
+		unset( $maintenance_payload['contact_channels_enabled'], $maintenance_payload['contact_channels_items'] );
 		$saved = $this->save_tab(
-			'contact_channels',
-			array(
-				'contact_channels_maintenance_display' => 'inside',
-				'contact_channels_live_display'        => 'off',
-			),
+			'maintenance_page',
+			$maintenance_payload,
 			array( 'mmsm_contact_channels_present' => '1' )
 		);
 
@@ -149,9 +158,9 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 		$payloads = $this->get_tab_payloads( $baseline );
 
 		update_option( MMSM_SETTINGS_OPTION, $baseline );
-		$countdown_payload = $payloads['countdown'];
+		$countdown_payload = $payloads['maintenance_page'];
 		unset( $countdown_payload['countdowns']['maintenance']['enabled'] );
-		$saved = $this->save_tab( 'countdown', $countdown_payload );
+		$saved = $this->save_tab( 'maintenance_page', $countdown_payload );
 
 		$this->assertSame( 0, $saved['countdowns']['maintenance']['enabled'] );
 		$this->assertSame( 'Planned launch', $saved['countdowns']['maintenance']['heading'] );
@@ -159,27 +168,27 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 		$this->assertSame( '#123456', $saved['countdowns']['maintenance']['number_color'] );
 
 		update_option( MMSM_SETTINGS_OPTION, $baseline );
-		$contact_payload = $payloads['contact_channels'];
+		$contact_payload = $payloads['maintenance_page'];
 		unset( $contact_payload['contact_channels_enabled'] );
-		$saved = $this->save_tab( 'contact_channels', $contact_payload, array( 'mmsm_contact_channels_present' => '1' ) );
+		$saved = $this->save_tab( 'maintenance_page', $contact_payload, array( 'mmsm_contact_channels_present' => '1' ) );
 
 		$this->assertSame( 0, $saved['contact_channels_enabled'] );
 		$this->assertSame( $baseline['contact_channels_items'], $saved['contact_channels_items'] );
 		$this->assertSame( '#123456', $saved['contact_channels_background_color'] );
 
 		update_option( MMSM_SETTINGS_OPTION, $baseline );
-		$advanced_payload = $payloads['advanced'];
+		$advanced_payload = $payloads['access_visibility'];
 		unset( $advanced_payload['custom_login_enabled'] );
-		$saved = $this->save_tab( 'advanced', $advanced_payload );
+		$saved = $this->save_tab( 'access_visibility', $advanced_payload );
 
 		$this->assertSame( 0, $saved['custom_login_enabled'] );
 		$this->assertSame( 'private-entry', $saved['custom_login_slug'] );
 		$this->assertSame( 'redirect', $saved['custom_login_block_mode'] );
 
 		update_option( MMSM_SETTINGS_OPTION, $baseline );
-		$components_payload = $payloads['components'];
+		$components_payload = $payloads['maintenance_page'];
 		unset( $components_payload['show_progress'] );
-		$saved = $this->save_tab( 'components', $components_payload );
+		$saved = $this->save_tab( 'maintenance_page', $components_payload );
 
 		$this->assertSame( 0, $saved['show_progress'] );
 		$this->assertSame( 42, $saved['progress_value'] );
@@ -214,6 +223,38 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 		$this->assertSame( array( '/status' ), $normalized['bypass_urls'] );
 		$this->assertSame( 'x', $normalized['social_links'][0]['platform'] );
 		$this->assertSame( 'https://x.com/legacy-account', $normalized['social_links'][0]['url'] );
+	}
+
+	/**
+	 * Current navigation exposes four areas and legacy query values resolve safely.
+	 *
+	 * @return void
+	 */
+	public function test_navigation_areas_and_legacy_tab_routing() {
+		$admin       = new Admin();
+		$tabs_method = new ReflectionMethod( Admin::class, 'get_tabs' );
+		$tabs_method->setAccessible( true );
+
+		$this->assertSame( array( 'maintenance_page', 'design', 'access_visibility', 'advanced' ), array_keys( $tabs_method->invoke( $admin ) ) );
+
+		$routes = array(
+			'general'          => 'maintenance_page',
+			'template'         => 'maintenance_page',
+			'components'       => 'maintenance_page',
+			'countdown'        => 'maintenance_page',
+			'contact_channels' => 'maintenance_page',
+			'social_links'     => 'maintenance_page',
+			'design'           => 'design',
+			'advanced'         => 'advanced',
+			'unknown-area'     => 'maintenance_page',
+		);
+		$active_method = new ReflectionMethod( Admin::class, 'get_active_tab' );
+		$active_method->setAccessible( true );
+
+		foreach ( $routes as $requested => $expected ) {
+			$_GET['tab'] = $requested;
+			$this->assertSame( $expected, $active_method->invoke( $admin ), sprintf( '%s did not route to %s.', $requested, $expected ) );
+		}
 	}
 
 	/**
@@ -351,7 +392,7 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Build realistic payloads for all eight current tabs.
+	 * Build realistic payloads for all four task areas.
 	 *
 	 * @param array<string,mixed> $settings Normalized fixture.
 	 * @return array<string,array<string,mixed>>
@@ -359,15 +400,25 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 	private function get_tab_payloads( array $settings ) {
 		$payloads = array();
 
-		foreach ( array( 'general', 'template', 'design', 'components', 'countdown', 'contact_channels', 'social_links', 'advanced' ) as $tab ) {
+		foreach ( array( 'maintenance_page', 'design', 'access_visibility', 'advanced' ) as $tab ) {
 			$payloads[ $tab ] = array_intersect_key( $settings, array_flip( $this->get_tab_field_keys( $tab ) ) );
+		}
+
+		foreach ( array( 'social_x_url', 'social_instagram_url', 'social_facebook_url', 'social_linkedin_url' ) as $legacy_key ) {
+			unset( $payloads['maintenance_page'][ $legacy_key ] );
+		}
+
+		for ( $index = 1; $index <= 4; $index++ ) {
+			foreach ( array( 'platform', 'label', 'url', 'new_tab' ) as $suffix ) {
+				unset( $payloads['maintenance_page'][ 'social_item_' . $index . '_' . $suffix ] );
+			}
 		}
 
 		$service                   = new CountdownService();
 		$countdown                 = $settings['countdowns']['maintenance'];
 		$countdown['target_local'] = $service->format_local_datetime( $countdown['target_timestamp'], wp_timezone() );
 		unset( $countdown['target_timestamp'] );
-		$payloads['countdown']['countdowns'] = array( 'maintenance' => $countdown );
+		$payloads['maintenance_page']['countdowns'] = array( 'maintenance' => $countdown );
 
 		return $payloads;
 	}
@@ -383,8 +434,9 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 	private function save_tab( $tab, array $payload, array $post = array() ) {
 		$_POST = array_merge(
 			array(
-				'mmsm_settings_nonce' => wp_create_nonce( 'mmsm_save_settings' ),
-				'mmsm_active_tab'     => $tab,
+				'mmsm_settings_nonce'    => wp_create_nonce( 'mmsm_save_settings' ),
+				'mmsm_active_tab'        => $tab,
+				'mmsm_navigation_version' => 'areas',
 			),
 			$post
 		);

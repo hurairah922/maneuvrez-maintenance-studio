@@ -998,4 +998,36 @@ jQuery(document).ready(($) => {
 		toggleCustomColorFields();
 		updateContactStatus();
 	}
+
+	const settingsForm = $('.mmsm-settings-content');
+
+	if (settingsForm.length) {
+		const initialState = settingsForm.serialize();
+		let isSubmitting = false;
+
+		settingsForm.on('submit', () => {
+			isSubmitting = true;
+		});
+
+		$('.mmsm-settings-nav-item:not([aria-current="page"])').on('click', (event) => {
+			if (settingsForm.serialize() === initialState) {
+				return;
+			}
+
+			if (!window.confirm(__('You have unsaved changes. Leave this area without saving?', 'maneuvrez-maintenance-studio'))) {
+				event.preventDefault();
+			}
+		});
+
+		$(window).on('beforeunload', (event) => {
+			if (isSubmitting || settingsForm.serialize() === initialState) {
+				return undefined;
+			}
+
+			event.preventDefault();
+			event.originalEvent.returnValue = '';
+			return '';
+		});
+
+	}
 });

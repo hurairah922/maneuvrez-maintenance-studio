@@ -10,6 +10,7 @@ namespace Maneuvrez\MaintenanceModeStudio\Admin;
 use Maneuvrez\MaintenanceModeStudio\Components\SocialLinksComponent;
 use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownScheduler;
 use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
+use Maneuvrez\MaintenanceModeStudio\Frontend\TemplateRegistry;
 use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
 use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
 use Maneuvrez\MaintenanceModeStudio\Support\ContactChannels;
@@ -575,6 +576,10 @@ class Admin {
 		}
 
 		$active_tab = $this->get_active_tab();
+		$settings   = $this->settings_repository->get_settings();
+		$is_enabled = ! empty( $settings['enabled'] );
+		$status_text = $is_enabled ? __( 'On', 'maneuvrez-maintenance-studio' ) : __( 'Off', 'maneuvrez-maintenance-studio' );
+		$status_help = $is_enabled ? __( 'Logged-out visitors see the maintenance page.', 'maneuvrez-maintenance-studio' ) : __( 'Your normal site is visible to visitors.', 'maneuvrez-maintenance-studio' );
 		?>
 		<div class="wrap mmsm-settings-page">
 			<div class="mmsm-settings-header">
@@ -584,6 +589,11 @@ class Admin {
 					<p class="mmsm-settings-intro">
 						<?php echo esc_html__( 'Configure the maintenance page template, core copy, and reusable visitor components without editing code.', 'maneuvrez-maintenance-studio' ); ?>
 					</p>
+				</div>
+				<div class="<?php echo esc_attr( 'mmsm-saved-status ' . ( $is_enabled ? 'is-on' : 'is-off' ) ); ?>" role="status" aria-label="<?php echo esc_attr__( 'Saved maintenance mode status', 'maneuvrez-maintenance-studio' ); ?>">
+					<span><?php echo esc_html__( 'Saved status', 'maneuvrez-maintenance-studio' ); ?></span>
+					<strong><?php echo esc_html( $status_text ); ?></strong>
+					<small><?php echo esc_html( $status_help ); ?></small>
 				</div>
 			</div>
 
@@ -595,6 +605,7 @@ class Admin {
 						<a
 							href="<?php echo esc_url( $this->get_tab_url( $tab_key ) ); ?>"
 							class="<?php echo esc_attr( 'mmsm-settings-nav-item' . ( $active_tab === $tab_key ? ' is-active' : '' ) ); ?>"
+							<?php if ( $active_tab === $tab_key ) : ?>aria-current="page"<?php endif; ?>
 						>
 							<span class="<?php echo esc_attr( 'dashicons ' . $tab['icon'] ); ?>" aria-hidden="true"></span>
 							<span><?php echo esc_html( $tab['label'] ); ?></span>
@@ -609,6 +620,10 @@ class Admin {
 						?>
 						<input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( $this->get_tab_url( $active_tab ) ); ?>" />
 						<input type="hidden" name="mmsm_active_tab" value="<?php echo esc_attr( $active_tab ); ?>" />
+						<input type="hidden" name="mmsm_navigation_version" value="areas" />
+						<?php if ( 'advanced' === $active_tab ) : ?>
+							<input type="hidden" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[template_key]" value="<?php echo esc_attr( (string) $settings['template_key'] ); ?>" />
+						<?php endif; ?>
 						<?php
 						$this->render_active_tab();
 					submit_button( __( 'Save Settings', 'maneuvrez-maintenance-studio' ), 'primary', 'submit', true, array( 'class' => 'mmsm-settings-save-button' ) );
@@ -726,29 +741,32 @@ class Admin {
 			return $existing;
 		}
 
-		$active_tab = isset( $_POST['mmsm_active_tab'] ) ? sanitize_key( wp_unslash( $_POST['mmsm_active_tab'] ) ) : 'general';
+		$requested_tab = isset( $_POST['mmsm_active_tab'] ) ? sanitize_key( wp_unslash( $_POST['mmsm_active_tab'] ) ) : 'maintenance_page';
+		$area_request  = isset( $_POST['mmsm_navigation_version'] ) && 'areas' === sanitize_key( wp_unslash( $_POST['mmsm_navigation_version'] ) );
+		$active_tab    = $area_request ? $this->normalize_area_key( $requested_tab ) : $requested_tab;
+		$tab_keys      = $area_request ? $this->get_tab_field_keys( $active_tab ) : $this->get_legacy_tab_field_keys( $active_tab );
 
-		if ( 'countdown' === $active_tab ) {
+		if ( ( $area_request && 'maintenance_page' === $active_tab ) || ( ! $area_request && 'countdown' === $active_tab ) ) {
 			$input['countdowns'] = $this->prepare_countdowns_for_save( $input, $existing );
 		}
 
-		if ( 'general' === $active_tab ) {
+		if ( ( $area_request && 'access_visibility' === $active_tab ) || ( ! $area_request && 'general' === $active_tab ) ) {
 			$existing = $this->prepare_maintenance_activation( $input, $existing );
 		}
-
-		$tab_keys   = $this->get_tab_field_keys( $active_tab );
 
 		foreach ( $tab_keys as $tab_key ) {
 			unset( $existing[ $tab_key ] );
 		}
 
-		if ( 'social_links' === $active_tab && isset( $_POST['mmsm_social_links_present'] ) && ! isset( $input['social_links'] ) ) {
+		if ( ( 'maintenance_page' === $active_tab || 'social_links' === $active_tab ) && isset( $_POST['mmsm_social_links_present'] ) && ! isset( $input['social_links'] ) ) {
 			$input['social_links'] = array();
 		}
 
-		if ( 'contact_channels' === $active_tab && isset( $_POST['mmsm_contact_channels_present'] ) && ! isset( $input['contact_channels_items'] ) ) {
+		if ( ( 'maintenance_page' === $active_tab || 'contact_channels' === $active_tab ) && isset( $_POST['mmsm_contact_channels_present'] ) && ! isset( $input['contact_channels_items'] ) ) {
 			$input['contact_channels_items'] = array();
 		}
+
+		$input = array_intersect_key( $input, array_flip( $tab_keys ) );
 
 		$mmsm_sanitized_settings = Sanitizer::sanitize_settings( array_merge( $existing, $input ) );
 		update_option( MMSM_REMOVE_DATA_OPTION, ! empty( $mmsm_sanitized_settings['delete_data_on_uninstall'] ) ? 1 : 0, false );
@@ -1076,7 +1094,7 @@ class Admin {
 			<input type="checkbox" id="mmsm-countdown-enabled" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[countdowns][maintenance][enabled]" value="1" <?php checked( 1, (int) $countdown['enabled'] ); ?> />
 			<?php echo esc_html__( 'Show the countdown on the maintenance page.', 'maneuvrez-maintenance-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Maintenance mode itself is still controlled from the General tab.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Maintenance mode itself is controlled in Access & Visibility.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -2862,9 +2880,9 @@ class Admin {
 	 *
 	 * An expired countdown can remain enabled after maintenance mode has already
 	 * been turned off. If an administrator later enables maintenance again from
-	 * the General tab, request reconciliation would otherwise turn it straight
+	 * Access & Visibility, request reconciliation would otherwise turn it straight
 	 * back off. Disable only that expired countdown instance and preserve its
-	 * configuration so it can be given a new target from the Countdown tab.
+	 * configuration so it can be given a new target from the Countdown section.
 	 *
 	 * @param array<string,mixed> $input Submitted settings payload.
 	 * @param array<string,mixed> $existing Existing normalized settings.
@@ -2889,7 +2907,7 @@ class Admin {
 		add_settings_error(
 			MMSM_SETTINGS_OPTION,
 			'mmsm_expired_countdown_disabled',
-			esc_html__( 'Maintenance mode was enabled. Its expired auto-disable countdown was turned off; set a new future target on the Countdown tab before enabling it again.', 'maneuvrez-maintenance-studio' ),
+			esc_html__( 'Maintenance mode was enabled. Its expired auto-disable countdown was turned off; set a new future target in the Countdown section before enabling it again.', 'maneuvrez-maintenance-studio' ),
 			'warning'
 		);
 
@@ -2903,45 +2921,21 @@ class Admin {
 	 */
 	private function get_tabs() {
 		return array(
-			'general'      => array(
-				'label'   => __( 'General', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_general_section',
-				'icon'    => 'dashicons-admin-settings',
+			'maintenance_page' => array(
+				'label' => __( 'Maintenance Page', 'maneuvrez-maintenance-studio' ),
+				'icon'  => 'dashicons-welcome-write-blog',
 			),
-			'template'     => array(
-				'label'   => __( 'Template', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_template_section',
-				'icon'    => 'dashicons-layout',
+			'design'           => array(
+				'label' => __( 'Design', 'maneuvrez-maintenance-studio' ),
+				'icon'  => 'dashicons-admin-appearance',
 			),
-			'design'       => array(
-				'label'   => __( 'Design', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_design_section',
-				'icon'    => 'dashicons-admin-appearance',
+			'access_visibility' => array(
+				'label' => __( 'Access & Visibility', 'maneuvrez-maintenance-studio' ),
+				'icon'  => 'dashicons-visibility',
 			),
-			'components'   => array(
-				'label'   => __( 'Components', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_components_section',
-				'icon'    => 'dashicons-screenoptions',
-			),
-			'countdown'    => array(
-				'label'   => __( 'Countdown', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_countdown_section',
-				'icon'    => 'dashicons-clock',
-			),
-			'contact_channels' => array(
-				'label'   => __( 'Contact Channels', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_contact_channels_section',
-				'icon'    => 'dashicons-format-chat',
-			),
-			'social_links' => array(
-				'label'   => __( 'Social Links', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_social_links_section',
-				'icon'    => 'dashicons-share',
-			),
-			'advanced'     => array(
-				'label'   => __( 'Advanced', 'maneuvrez-maintenance-studio' ),
-				'section' => 'mmsm_advanced_section',
-				'icon'    => 'dashicons-admin-tools',
+			'advanced'          => array(
+				'label' => __( 'Advanced', 'maneuvrez-maintenance-studio' ),
+				'icon'  => 'dashicons-admin-tools',
 			),
 		);
 	}
@@ -2952,14 +2946,32 @@ class Admin {
 	 * @return string
 	 */
 	private function get_active_tab() {
-		$tabs = $this->get_tabs();
-		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only tab selection for admin UI state, sanitized and not persisted.
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'maintenance_page'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only tab selection for admin UI state, sanitized and not persisted.
 
-		if ( ! isset( $tabs[ $tab ] ) ) {
-			return 'general';
+		return $this->normalize_area_key( $tab );
+	}
+
+	/**
+	 * Map current and legacy query values to one of the four task areas.
+	 *
+	 * @param string $tab Requested tab key.
+	 * @return string
+	 */
+	private function normalize_area_key( $tab ) {
+		$legacy_destinations = array(
+			'general'          => 'maintenance_page',
+			'template'         => 'maintenance_page',
+			'components'       => 'maintenance_page',
+			'countdown'        => 'maintenance_page',
+			'contact_channels' => 'maintenance_page',
+			'social_links'     => 'maintenance_page',
+		);
+
+		if ( isset( $legacy_destinations[ $tab ] ) ) {
+			return $legacy_destinations[ $tab ];
 		}
 
-		return $tab;
+		return isset( $this->get_tabs()[ $tab ] ) ? $tab : 'maintenance_page';
 	}
 
 	/**
@@ -2968,48 +2980,184 @@ class Admin {
 	 * @return void
 	 */
 	private function render_active_tab() {
-		$tabs       = $this->get_tabs();
 		$active_tab = $this->get_active_tab();
-		$section_id = $tabs[ $active_tab ]['section'];
 
-		$this->render_section_fields( $section_id, $active_tab );
+		foreach ( $this->get_area_sections( $active_tab ) as $area_section ) {
+			$this->render_section_fields( $area_section, $active_tab );
+		}
+	}
+
+	/**
+	 * Return the semantic cards rendered within a task area.
+	 *
+	 * @param string $area_key Area key.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function get_area_sections( $area_key ) {
+		$areas = array(
+			'maintenance_page' => array(
+				array(
+					'id'      => 'page-type',
+					'section' => 'mmsm_template_section',
+					'title'   => __( 'Page type', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_mode_type' ),
+				),
+				array(
+					'id'      => 'main-copy',
+					'section' => 'mmsm_general_section',
+					'title'   => __( 'Main copy', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_page_title', 'mmsm_message' ),
+				),
+				array(
+					'id'      => 'actions',
+					'section' => 'mmsm_components_section',
+					'title'   => __( 'Page content and actions', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_hero_eyebrow', 'mmsm_primary_action_label', 'mmsm_primary_action_url', 'mmsm_secondary_action_label', 'mmsm_secondary_action_url' ),
+				),
+				array(
+					'id'      => 'status-progress',
+					'section' => 'mmsm_components_section',
+					'title'   => __( 'Status, progress, and email contact', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_status_label', 'mmsm_show_progress', 'mmsm_progress_value', 'mmsm_contact_label', 'mmsm_contact_message', 'mmsm_contact_email' ),
+				),
+				array(
+					'section'  => 'mmsm_countdown_section',
+					'title'    => __( 'Countdown', 'maneuvrez-maintenance-studio' ),
+					'callback' => true,
+				),
+				array(
+					'section'  => 'mmsm_contact_channels_section',
+					'title'    => __( 'Contact channels', 'maneuvrez-maintenance-studio' ),
+					'callback' => true,
+				),
+				array(
+					'section'  => 'mmsm_social_links_section',
+					'title'    => __( 'Social links', 'maneuvrez-maintenance-studio' ),
+					'callback' => true,
+				),
+				array(
+					'id'      => 'footer-login',
+					'section' => 'mmsm_advanced_section',
+					'title'   => __( 'Footer and login presentation', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_show_footer_section', 'mmsm_show_login_button', 'mmsm_login_label' ),
+				),
+			),
+			'design' => array(
+				array(
+					'section'  => 'mmsm_design_section',
+					'title'    => __( 'Design', 'maneuvrez-maintenance-studio' ),
+					'callback' => true,
+				),
+			),
+			'access_visibility' => array(
+				array(
+					'id'      => 'maintenance-status',
+					'section' => 'mmsm_general_section',
+					'title'   => __( 'Maintenance status', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_enabled' ),
+				),
+				array(
+					'id'      => 'login-access',
+					'section' => 'mmsm_advanced_section',
+					'title'   => __( 'Login access', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_custom_login_enabled', 'mmsm_custom_login_slug', 'mmsm_custom_login_block_mode' ),
+				),
+				array(
+					'id'      => 'testing-bypass',
+					'section' => 'mmsm_advanced_section',
+					'title'   => __( 'Temporary testing bypass', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_bypass_query_enabled', 'mmsm_bypass_query_settings' ),
+				),
+				array(
+					'id'      => 'public-urls',
+					'section' => 'mmsm_advanced_section',
+					'title'   => __( 'Always-public pages', 'maneuvrez-maintenance-studio' ),
+					'fields'  => array( 'mmsm_bypass_urls_enabled', 'mmsm_bypass_urls' ),
+				),
+			),
+			'advanced' => array(),
+		);
+
+		if ( count( ( new TemplateRegistry() )->all() ) > 1 ) {
+			$areas['advanced'][] = array(
+				'section' => 'mmsm_template_section',
+				'title'   => __( 'Template', 'maneuvrez-maintenance-studio' ),
+				'fields'  => array( 'mmsm_template_key' ),
+			);
+		}
+
+		$areas['advanced'][] = array(
+			'section' => 'mmsm_advanced_section',
+			'title'   => __( 'Data removal', 'maneuvrez-maintenance-studio' ),
+			'fields'  => array( 'mmsm_delete_data_on_uninstall' ),
+		);
+
+		return isset( $areas[ $area_key ] ) ? $areas[ $area_key ] : $areas['maintenance_page'];
 	}
 
 	/**
 	 * Render a registered section title, description, and fields.
 	 *
-	 * @param string $section_id Settings section id.
+	 * @param array<string,mixed> $area_section Area section definition.
 	 * @param string $active_tab Active tab key.
 	 * @return void
 	 */
-	private function render_section_fields( $section_id, $active_tab ) {
+	private function render_section_fields( array $area_section, $active_tab ) {
 		global $wp_settings_sections, $wp_settings_fields;
+		$section_id = $area_section['section'];
 
 		if ( ! isset( $wp_settings_sections[ $this->page_slug ][ $section_id ] ) ) {
 			return;
 		}
 
 		$section = $wp_settings_sections[ $this->page_slug ][ $section_id ];
-		$has_fields = ! empty( $wp_settings_fields[ $this->page_slug ][ $section_id ] );
+		$registered_fields = ! empty( $wp_settings_fields[ $this->page_slug ][ $section_id ] ) ? $wp_settings_fields[ $this->page_slug ][ $section_id ] : array();
+		$field_ids         = isset( $area_section['fields'] ) ? $area_section['fields'] : array_keys( $registered_fields );
+		$has_fields        = ! empty( $field_ids );
+		$section_slug      = isset( $area_section['id'] ) ? sanitize_html_class( $area_section['id'] ) : str_replace( array( 'mmsm_', '_section' ), '', $section_id );
 		?>
-		<div class="<?php echo esc_attr( 'mmsm-settings-panel mmsm-settings-panel-' . $active_tab ); ?>">
-			<?php if ( ! empty( $section['title'] ) ) : ?>
-				<h2 class="title"><?php echo esc_html( $section['title'] ); ?></h2>
+		<div id="<?php echo esc_attr( $section_slug ); ?>" class="<?php echo esc_attr( 'mmsm-settings-panel mmsm-settings-panel-' . $active_tab . ' mmsm-settings-panel-' . $section_slug ); ?>">
+			<?php if ( ! empty( $area_section['title'] ) ) : ?>
+				<h2 class="title"><?php echo esc_html( $area_section['title'] ); ?></h2>
 			<?php endif; ?>
 			<?php
-			if ( ! empty( $section['callback'] ) ) {
+			if ( ! empty( $area_section['callback'] ) && ! empty( $section['callback'] ) ) {
 				call_user_func( $section['callback'], $section );
 			}
 			?>
 			<?php if ( $has_fields ) : ?>
 				<table class="form-table" role="presentation">
-					<?php do_settings_fields( $this->page_slug, $section_id ); ?>
+					<?php $this->render_registered_fields( $registered_fields, $field_ids ); ?>
 				</table>
 			<?php else : ?>
 				<p class="description"><?php echo esc_html__( 'No extra settings are available in this tab yet.', 'maneuvrez-maintenance-studio' ); ?></p>
 			<?php endif; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render a selected subset of registered WordPress settings fields.
+	 *
+	 * @param array<string,array<string,mixed>> $registered_fields Registered fields keyed by id.
+	 * @param array<int,string>                 $field_ids Field ids to render.
+	 * @return void
+	 */
+	private function render_registered_fields( array $registered_fields, array $field_ids ) {
+		foreach ( $field_ids as $field_id ) {
+			if ( ! isset( $registered_fields[ $field_id ] ) ) {
+				continue;
+			}
+
+			$field = $registered_fields[ $field_id ];
+			$class = ! empty( $field['args']['class'] ) ? ' class="' . esc_attr( $field['args']['class'] ) . '"' : '';
+			?>
+			<tr<?php echo $class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Constructed from an escaped class attribute above. ?>>
+				<th scope="row"><?php echo esc_html( $field['title'] ); ?></th>
+				<td><?php call_user_func( $field['callback'], $field['args'] ); ?></td>
+			</tr>
+			<?php
+		}
 	}
 
 	/**
@@ -3134,28 +3282,10 @@ class Admin {
 	 */
 	private function get_tab_field_keys( $tab_key ) {
 		$map = array(
-			'general'      => array(
-				'enabled',
+			'maintenance_page' => array(
+				'mode_type',
 				'page_title',
 				'message',
-			),
-			'template'     => array(
-				'mode_type',
-				'template_key',
-			),
-			'design'       => array(
-				'theme_mode',
-				'primary_color',
-				'background_color',
-				'surface_color',
-				'heading_text_color',
-				'body_text_color',
-				'muted_text_color',
-				'link_text_color',
-				'button_text_color',
-				'border_color',
-			),
-			'components'   => array(
 				'hero_eyebrow',
 				'primary_action_label',
 				'primary_action_url',
@@ -3167,11 +3297,7 @@ class Admin {
 				'contact_label',
 				'contact_message',
 				'contact_email',
-			),
-			'countdown'    => array(
 				'countdowns',
-			),
-			'contact_channels' => array(
 				'contact_channels_enabled',
 				'contact_channels_maintenance_display',
 				'contact_channels_live_display',
@@ -3190,8 +3316,6 @@ class Admin {
 				'contact_channels_hover_background_color',
 				'contact_channels_hover_text_color',
 				'contact_channels_items',
-			),
-			'social_links' => array(
 				'social_links_display',
 				'social_links',
 				'social_x_url',
@@ -3214,10 +3338,24 @@ class Admin {
 				'social_item_4_label',
 				'social_item_4_url',
 				'social_item_4_new_tab',
-			),
-			'advanced'     => array(
-				'show_login_button',
 				'show_footer_section',
+				'show_login_button',
+				'login_label',
+			),
+			'design' => array(
+				'theme_mode',
+				'primary_color',
+				'background_color',
+				'surface_color',
+				'heading_text_color',
+				'body_text_color',
+				'muted_text_color',
+				'link_text_color',
+				'button_text_color',
+				'border_color',
+			),
+			'access_visibility' => array(
+				'enabled',
 				'custom_login_enabled',
 				'custom_login_slug',
 				'custom_login_block_mode',
@@ -3226,11 +3364,34 @@ class Admin {
 				'bypass_query_value',
 				'bypass_urls_enabled',
 				'bypass_urls',
+			),
+			'advanced' => array(
+				'template_key',
 				'delete_data_on_uninstall',
-				'login_label',
 			),
 		);
 
 		return isset( $map[ $tab_key ] ) ? $map[ $tab_key ] : array();
+	}
+
+	/**
+	 * Return ownership used by an already-open legacy eight-tab form.
+	 *
+	 * @param string $tab_key Legacy tab key.
+	 * @return array<int,string>
+	 */
+	private function get_legacy_tab_field_keys( $tab_key ) {
+		$legacy_map = array(
+			'general' => array( 'enabled', 'page_title', 'message' ),
+			'template' => array( 'mode_type', 'template_key' ),
+			'design' => $this->get_tab_field_keys( 'design' ),
+			'components' => array( 'hero_eyebrow', 'primary_action_label', 'primary_action_url', 'secondary_action_label', 'secondary_action_url', 'status_label', 'show_progress', 'progress_value', 'contact_label', 'contact_message', 'contact_email' ),
+			'countdown' => array( 'countdowns' ),
+			'contact_channels' => array( 'contact_channels_enabled', 'contact_channels_maintenance_display', 'contact_channels_live_display', 'contact_channels_logged_in_visibility', 'contact_channels_display_style', 'contact_channels_heading', 'contact_channels_description', 'contact_channels_primary_label', 'contact_channels_position', 'contact_channels_button_shape', 'contact_channels_button_display', 'contact_channels_color_mode', 'contact_channels_background_color', 'contact_channels_text_color', 'contact_channels_icon_color', 'contact_channels_hover_background_color', 'contact_channels_hover_text_color', 'contact_channels_items' ),
+			'social_links' => array( 'social_links_display', 'social_links', 'social_x_url', 'social_instagram_url', 'social_facebook_url', 'social_linkedin_url', 'social_item_1_platform', 'social_item_1_label', 'social_item_1_url', 'social_item_1_new_tab', 'social_item_2_platform', 'social_item_2_label', 'social_item_2_url', 'social_item_2_new_tab', 'social_item_3_platform', 'social_item_3_label', 'social_item_3_url', 'social_item_3_new_tab', 'social_item_4_platform', 'social_item_4_label', 'social_item_4_url', 'social_item_4_new_tab' ),
+			'advanced' => array( 'show_login_button', 'show_footer_section', 'custom_login_enabled', 'custom_login_slug', 'custom_login_block_mode', 'bypass_query_enabled', 'bypass_query_key', 'bypass_query_value', 'bypass_urls_enabled', 'bypass_urls', 'delete_data_on_uninstall', 'login_label' ),
+		);
+
+		return isset( $legacy_map[ $tab_key ] ) ? $legacy_map[ $tab_key ] : array();
 	}
 }

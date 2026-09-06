@@ -3,6 +3,11 @@
 }
 
 .mmsm-settings-page .mmsm-settings-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
 	margin: 0 0 16px;
 }
 
@@ -25,6 +30,40 @@
 .mmsm-settings-page .mmsm-settings-intro {
 	max-width: 64ch;
 	margin: 8px 0 0;
+	color: #50575e;
+}
+
+.mmsm-settings-page .mmsm-saved-status {
+	display: grid;
+	grid-template-columns: auto auto;
+	gap: 2px 8px;
+	min-width: 210px;
+	padding: 12px 14px;
+	border: 1px solid #c3c4c7;
+	border-left-width: 4px;
+	border-radius: 6px;
+	background: #fff;
+}
+
+.mmsm-settings-page .mmsm-saved-status.is-on {
+	border-left-color: #008a20;
+}
+
+.mmsm-settings-page .mmsm-saved-status.is-off {
+	border-left-color: #646970;
+}
+
+.mmsm-settings-page .mmsm-saved-status span,
+.mmsm-settings-page .mmsm-saved-status strong {
+	line-height: 1.4;
+}
+
+.mmsm-settings-page .mmsm-saved-status strong {
+	color: #1d2327;
+}
+
+.mmsm-settings-page .mmsm-saved-status small {
+	grid-column: 1 / -1;
 	color: #50575e;
 }
 
@@ -68,6 +107,11 @@
 	outline: 0;
 }
 
+.mmsm-settings-page .mmsm-settings-nav-item:focus-visible {
+	outline: 2px solid #72aee6;
+	outline-offset: 2px;
+}
+
 .mmsm-settings-page .mmsm-settings-nav-item.is-active {
 	background: #2271b1;
 	color: #fff;
@@ -91,6 +135,7 @@
 .mmsm-settings-page .mmsm-settings-panel {
 	max-width: 980px;
 	min-width: 0;
+	margin-bottom: 18px;
 	padding: 0;
 }
 
@@ -1268,13 +1313,12 @@
 
 	.mmsm-settings-page .mmsm-settings-sidebar {
 		position: static;
-		display: flex;
-		overflow-x: auto;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.mmsm-settings-page .mmsm-settings-nav-item {
-		flex: 0 0 auto;
-		min-width: 150px;
+		min-width: 0;
 	}
 }
 
@@ -1682,6 +1726,43 @@
 }
 
 @media (max-width: 600px) {
+	.mmsm-settings-page .mmsm-settings-header,
+	.mmsm-settings-page .mmsm-saved-status {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-saved-status {
+		width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
+	}
+
+	.mmsm-settings-page .mmsm-saved-status small {
+		grid-column: auto;
+	}
+
+	.mmsm-settings-page .mmsm-settings-sidebar {
+		grid-template-columns: 1fr;
+	}
+
+	.mmsm-settings-page .mmsm-settings-panel {
+		padding: 14px;
+	}
+
+	.mmsm-settings-page .mmsm-settings-panel-contact_channels {
+		padding: 0;
+	}
+
+	.mmsm-settings-page .form-table input[type="text"],
+	.mmsm-settings-page .form-table input[type="email"],
+	.mmsm-settings-page .form-table input[type="url"],
+	.mmsm-settings-page .form-table input[type="number"],
+	.mmsm-settings-page .form-table textarea,
+	.mmsm-settings-page .form-table select {
+		max-width: 100%;
+	}
+
 	.mmsm-settings-page .mmsm-contact-channels-grid,
 	.mmsm-settings-page .mmsm-contact-channel-fields {
 		grid-template-columns: 1fr;
