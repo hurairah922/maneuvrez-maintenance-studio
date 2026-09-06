@@ -58,6 +58,204 @@ jQuery(document).ready(($) => {
 		updatePreview();
 	};
 
+	const initializeCountdownAdmin = () => {
+		const panel = $('.mmsm-settings-panel-countdown');
+		const preview = panel.find('[data-countdown-admin-preview]');
+
+		if (!panel.length || !preview.length) {
+			return;
+		}
+
+		const stage = preview.find('.mmsm-countdown-admin-preview-stage');
+		const enabledField = $('#mmsm-countdown-enabled');
+		const headingField = $('#mmsm-countdown-heading');
+		const descriptionField = $('#mmsm-countdown-description');
+		const targetField = $('#mmsm-countdown-target');
+		const expiryField = $('#mmsm-countdown-expiry-action');
+		const animationField = $('#mmsm-countdown-animation');
+		const animationScopeField = $('#mmsm-countdown-animation-scope');
+		const colorModeField = $('#mmsm-countdown-color-mode');
+		const scheduleButton = panel.find('[data-countdown-schedule-check]');
+		const scheduleResult = panel.find('[data-countdown-schedule-result]');
+
+		const replayPreviewAnimation = (elements, className) => {
+			elements.removeClass(className);
+			if (elements.length) {
+				void elements[0].offsetWidth;
+			}
+			elements.addClass(className);
+		};
+
+		const parseSiteLocalTarget = () => {
+			const value = String(targetField.val() || '');
+			const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+
+			if (!match) {
+				return 0;
+			}
+
+			if (value === String(targetField.data('savedLocal') || '')) {
+				return Number.parseInt(targetField.data('savedTimestamp'), 10) * 1000;
+			}
+
+			const localAsUtc = Date.UTC(
+				Number(match[1]),
+				Number(match[2]) - 1,
+				Number(match[3]),
+				Number(match[4]),
+				Number(match[5]),
+				Number(match[6] || 0),
+			);
+			const timezone = String(targetField.data('siteTimezone') || '');
+
+			try {
+				const formatter = new Intl.DateTimeFormat('en-CA', {
+					timeZone: timezone,
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit',
+					hour: '2-digit',
+					minute: '2-digit',
+					second: '2-digit',
+					hourCycle: 'h23',
+				});
+				let timestamp = localAsUtc;
+
+				for (let iteration = 0; iteration < 2; iteration += 1) {
+					const parts = formatter.formatToParts(new Date(timestamp)).reduce((result, part) => {
+						if (part.type !== 'literal') {
+							result[part.type] = Number(part.value);
+						}
+						return result;
+					}, {});
+					const representedAsUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+					timestamp = localAsUtc - (representedAsUtc - timestamp);
+				}
+
+				return timestamp;
+			} catch (error) {
+				const offsetSeconds = Number.parseInt(targetField.data('siteOffset'), 10) || 0;
+				return localAsUtc - (offsetSeconds * 1000);
+			}
+		};
+
+		const updatePreviewTime = () => {
+			const target = parseSiteLocalTarget();
+			const remaining = target > 0 ? Math.max(0, Math.ceil((target - Date.now()) / 1000)) : 0;
+			const nextValues = {
+				days: Math.floor(remaining / 86400),
+				hours: Math.floor((remaining % 86400) / 3600),
+				minutes: Math.floor((remaining % 3600) / 60),
+				seconds: remaining % 60,
+			};
+			const scope = String(animationScopeField.val() || 'digits');
+
+			Object.entries(nextValues).forEach(([unit, value]) => {
+				const valueElement = preview.find(`[data-countdown-preview-value="${unit}"]`);
+				const nextValue = String(value).padStart(2, '0');
+
+				if (valueElement.text() === nextValue) {
+					return;
+				}
+
+				valueElement.text(nextValue);
+				if (scope === 'digits' || scope === 'both') {
+					replayPreviewAnimation(valueElement, 'is-previewing');
+				}
+				if (scope === 'cards' || scope === 'both') {
+					replayPreviewAnimation(valueElement.closest('[data-countdown-preview-unit]'), 'is-previewing-card');
+				}
+			});
+		};
+
+		const updatePreview = () => {
+			const enabled = enabledField.prop('checked');
+			const heading = String(headingField.val() || '').trim() || __('Launching in', 'maneuvrez-maintenance-studio');
+			const description = String(descriptionField.val() || '').trim();
+			const animation = String(animationField.val() || 'slide');
+			const animationScope = String(animationScopeField.val() || 'digits');
+			const customColors = colorModeField.val() === 'custom';
+
+			preview.toggleClass('is-disabled', !enabled);
+			preview.find('[data-countdown-preview-status]')
+				.toggleClass('is-enabled', enabled)
+				.text(enabled ? __('Enabled', 'maneuvrez-maintenance-studio') : __('Disabled', 'maneuvrez-maintenance-studio'));
+			preview.find('[data-countdown-preview-heading]').text(heading);
+			preview.find('[data-countdown-preview-description]').text(description).toggleClass('is-hidden', !description);
+
+			['days', 'hours', 'minutes', 'seconds'].forEach((unit) => {
+				const visible = panel.find(`input[name$="[show_${unit}]"]`).prop('checked');
+				preview.find(`[data-countdown-preview-unit="${unit}"]`).toggleClass('is-hidden', !visible);
+			});
+
+			panel.find('.mmsm-countdown-finished-dependent').toggleClass('is-hidden', expiryField.val() !== 'show_message');
+			panel.find('.mmsm-countdown-custom-colors').toggleClass('is-hidden', !customColors);
+			stage.removeClass('is-animation-none is-animation-fade is-animation-slide is-animation-flip is-animation-pulse is-animation-bounce is-animation-roll').addClass(`is-animation-${animation}`);
+			stage.removeClass('is-scope-digits is-scope-cards is-scope-both').addClass(`is-scope-${animationScope}`);
+			updatePreviewTime();
+
+			if (customColors) {
+				stage.css({
+					'--mmsm-countdown-preview-bg': panel.find('input[name$="[background_color]"]').val() || '#f0f6fc',
+					'--mmsm-countdown-preview-number': panel.find('input[name$="[number_color]"]').val() || '#1d2327',
+					'--mmsm-countdown-preview-label': panel.find('input[name$="[label_color]"]').val() || '#646970',
+					'--mmsm-countdown-preview-border': panel.find('input[name$="[border_color]"]').val() || '#c3c4c7',
+				});
+			} else {
+				stage.css({
+					'--mmsm-countdown-preview-bg': '',
+					'--mmsm-countdown-preview-number': '',
+					'--mmsm-countdown-preview-label': '',
+					'--mmsm-countdown-preview-border': '',
+				});
+			}
+		};
+
+		panel.on('input change', 'input, textarea, select', updatePreview);
+		animationField.add(animationScopeField).on('change', () => {
+			const scope = String(animationScopeField.val() || 'digits');
+			if (scope === 'digits' || scope === 'both') {
+				replayPreviewAnimation(preview.find('.mmsm-countdown-admin-preview-grid b'), 'is-previewing');
+			}
+			if (scope === 'cards' || scope === 'both') {
+				replayPreviewAnimation(preview.find('[data-countdown-preview-unit]:not(.is-hidden)'), 'is-previewing-card');
+			}
+		});
+
+		const tickPreview = () => {
+			updatePreviewTime();
+			window.setTimeout(tickPreview, 1000 - (Date.now() % 1000) + 20);
+		};
+
+		scheduleButton.on('click', () => {
+			if (typeof mmsmCountdownAdmin === 'undefined') {
+				return;
+			}
+
+			scheduleButton.prop('disabled', true);
+			scheduleResult.text(__('Checking the one-time event…', 'maneuvrez-maintenance-studio'));
+
+			$.post(mmsmCountdownAdmin.ajaxUrl, {
+				action: 'mmsm_countdown_schedule_check',
+				nonce: mmsmCountdownAdmin.nonce,
+			})
+				.done((response) => {
+					const message = response && response.data && response.data.message
+						? response.data.message
+						: __('The scheduling check did not return a result.', 'maneuvrez-maintenance-studio');
+
+					scheduleResult.text(message);
+				})
+				.fail(() => {
+					scheduleResult.text(__('The scheduling check failed. Please reload the page and try again.', 'maneuvrez-maintenance-studio'));
+				})
+				.always(() => scheduleButton.prop('disabled', false));
+		});
+
+		updatePreview();
+		window.setTimeout(tickPreview, 1000);
+	};
+
 	const bypassBuilder = $('.mmsm-bypass-query-builder');
 
 	const initializeBypassPreview = () => {
@@ -202,6 +400,7 @@ jQuery(document).ready(($) => {
 	initializeAdvancedVisibility();
 	initializeCustomLoginPreview();
 	initializeDesignPreview();
+	initializeCountdownAdmin();
 
 	const builder = $('.mmsm-social-links-builder');
 

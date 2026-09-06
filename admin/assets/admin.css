@@ -94,6 +94,10 @@
 	padding: 0;
 }
 
+.mmsm-settings-page .mmsm-settings-panel-countdown {
+	max-width: 1180px;
+}
+
 .mmsm-settings-page .mmsm-settings-panel:not(.mmsm-settings-panel-contact_channels) {
 	padding: 18px;
 	border: 1px solid #dcdcde;
@@ -247,6 +251,330 @@
 
 .mmsm-settings-page .mmsm-color-picker {
 	max-width: 120px;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview {
+	position: sticky;
+	top: 44px;
+	z-index: 5;
+	max-width: 720px;
+	margin-top: 16px;
+	padding: 16px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #f6f7f7;
+	box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview.is-disabled {
+	opacity: 0.68;
+}
+
+.mmsm-settings-page .mmsm-countdown-schedule-check {
+	max-width: 720px;
+	margin-top: 12px;
+	padding: 14px 16px;
+	border-left: 4px solid #2271b1;
+	background: #f0f6fc;
+}
+
+.mmsm-settings-page .mmsm-countdown-schedule-check p {
+	margin: 6px 0 10px;
+}
+
+.mmsm-settings-page .mmsm-countdown-schedule-check .description {
+	margin-bottom: 0;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-header {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-header span {
+	padding: 3px 9px;
+	border-radius: 999px;
+	background: #dcdcde;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-header span.is-enabled {
+	background: #008a20;
+	color: #fff;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage {
+	padding: 18px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage > strong {
+	display: block;
+	font-size: 18px;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage > p {
+	margin: 6px 0 14px;
+	color: #646970;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage > p.is-hidden,
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid > div.is-hidden {
+	display: none;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid > div {
+	min-width: 0;
+	padding: 12px 5px;
+	border: 1px solid var(--mmsm-countdown-preview-border, #c3c4c7);
+	border-radius: 7px;
+	background: var(--mmsm-countdown-preview-bg, #f0f6fc);
+	text-align: center;
+	transform-origin: center;
+	will-change: opacity, transform;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid b,
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid span {
+	display: block;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid b {
+	backface-visibility: hidden;
+	color: var(--mmsm-countdown-preview-number, #1d2327);
+	font-size: clamp(18px, 3vw, 28px);
+	font-variant-numeric: tabular-nums;
+	transform-origin: center;
+	will-change: opacity, transform;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-grid span {
+	margin-top: 5px;
+	color: var(--mmsm-countdown-preview-label, #646970);
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage.is-animation-fade b.is-previewing {
+	animation: mmsm-admin-countdown-fade 440ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage.is-animation-slide b.is-previewing {
+	animation: mmsm-admin-countdown-slide 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage.is-animation-flip b.is-previewing {
+	animation: mmsm-admin-countdown-flip 560ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage.is-animation-pulse b.is-previewing {
+	animation: mmsm-admin-countdown-pulse 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage.is-animation-bounce b.is-previewing {
+	animation: mmsm-admin-countdown-bounce 620ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+.mmsm-settings-page .mmsm-countdown-admin-preview-stage.is-animation-roll b.is-previewing {
+	animation: mmsm-admin-countdown-roll 560ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mmsm-settings-page .is-animation-fade [data-countdown-preview-unit].is-previewing-card { animation: mmsm-admin-card-fade 480ms ease-out; }
+.mmsm-settings-page .is-animation-slide [data-countdown-preview-unit].is-previewing-card { animation: mmsm-admin-card-slide 560ms cubic-bezier(0.16, 1, 0.3, 1); }
+.mmsm-settings-page .is-animation-flip [data-countdown-preview-unit].is-previewing-card { animation: mmsm-admin-card-flip 620ms cubic-bezier(0.2, 0.75, 0.25, 1); }
+.mmsm-settings-page .is-animation-pulse [data-countdown-preview-unit].is-previewing-card { animation: mmsm-admin-card-pulse 540ms cubic-bezier(0.22, 1, 0.36, 1); }
+.mmsm-settings-page .is-animation-bounce [data-countdown-preview-unit].is-previewing-card { animation: mmsm-admin-card-bounce 660ms cubic-bezier(0.2, 0.8, 0.25, 1); }
+.mmsm-settings-page .is-animation-roll [data-countdown-preview-unit].is-previewing-card { animation: mmsm-admin-card-roll 600ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+.mmsm-settings-page .mmsm-countdown-unit-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 18px;
+}
+
+.mmsm-settings-page .mmsm-countdown-expiry-help {
+	max-width: 68ch;
+	margin-bottom: 0;
+	color: #50575e;
+	list-style: disc;
+}
+
+.mmsm-settings-page .mmsm-countdown-custom-colors {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(180px, 1fr));
+	gap: 12px 18px;
+	max-width: 640px;
+	margin: 14px 0;
+	padding: 14px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #f6f7f7;
+}
+
+.mmsm-settings-page .mmsm-countdown-custom-colors label,
+.mmsm-settings-page .mmsm-countdown-custom-colors label > span {
+	display: block;
+}
+
+.mmsm-settings-page .mmsm-countdown-custom-colors label > span {
+	margin-bottom: 6px;
+	font-weight: 600;
+}
+
+.mmsm-settings-page .mmsm-countdown-custom-colors.is-hidden,
+.mmsm-settings-page .mmsm-countdown-finished-dependent.is-hidden {
+	display: none;
+}
+
+@keyframes mmsm-admin-countdown-fade {
+	0% { opacity: 0; filter: blur(3px); }
+	100% { opacity: 1; filter: blur(0); }
+}
+
+@keyframes mmsm-admin-countdown-slide {
+	0% {
+		opacity: 0;
+		transform: translateY(-0.55em);
+	}
+
+	60% {
+		opacity: 1;
+		transform: translateY(0.08em);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes mmsm-admin-countdown-flip {
+	0% { opacity: 0; transform: perspective(280px) rotateX(-88deg) scale(0.96); }
+	65% { opacity: 1; transform: perspective(280px) rotateX(10deg) scale(1); }
+	100% { opacity: 1; transform: perspective(280px) rotateX(0); }
+}
+
+@keyframes mmsm-admin-countdown-pulse {
+	0% {
+		opacity: 0.35;
+		transform: scale(0.72);
+	}
+
+	60% {
+		opacity: 1;
+		transform: scale(1.12);
+	}
+
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes mmsm-admin-countdown-bounce {
+	0% { opacity: 0; transform: translateY(-0.7em) scaleY(0.85); }
+	45% { opacity: 1; transform: translateY(0.16em) scaleY(1.04); }
+	72% { transform: translateY(-0.07em) scaleY(0.98); }
+	100% { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+@keyframes mmsm-admin-countdown-roll {
+	0% { opacity: 0; transform: translateY(-0.55em) rotate(-12deg) scale(0.9); }
+	65% { opacity: 1; transform: translateY(0.08em) rotate(2deg) scale(1.03); }
+	100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+
+@keyframes mmsm-admin-card-fade {
+	0% { opacity: 0.45; }
+	100% { opacity: 1; }
+}
+
+@keyframes mmsm-admin-card-slide {
+	0% { opacity: 0.5; transform: translateY(-10px); }
+	65% { opacity: 1; transform: translateY(2px); }
+	100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mmsm-admin-card-flip {
+	0% { opacity: 0.5; transform: perspective(500px) rotateX(-18deg) scale(0.97); }
+	65% { opacity: 1; transform: perspective(500px) rotateX(4deg) scale(1.01); }
+	100% { opacity: 1; transform: perspective(500px) rotateX(0) scale(1); }
+}
+
+@keyframes mmsm-admin-card-pulse {
+	0% { transform: scale(0.94); }
+	60% { transform: scale(1.035); }
+	100% { transform: scale(1); }
+}
+
+@keyframes mmsm-admin-card-bounce {
+	0% { opacity: 0.6; transform: translateY(-12px) scaleY(0.96); }
+	48% { opacity: 1; transform: translateY(3px) scaleY(1.02); }
+	75% { transform: translateY(-1px) scaleY(0.99); }
+	100% { transform: translateY(0) scaleY(1); }
+}
+
+@keyframes mmsm-admin-card-roll {
+	0% { opacity: 0.55; transform: translateY(-9px) rotate(-2.5deg) scale(0.97); }
+	65% { opacity: 1; transform: translateY(2px) rotate(0.7deg) scale(1.01); }
+	100% { transform: translateY(0) rotate(0) scale(1); }
+}
+
+@media (min-width: 1380px) {
+	.mmsm-settings-page .mmsm-settings-panel-countdown {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+		gap: 12px 24px;
+		align-items: start;
+	}
+
+	.mmsm-settings-page .mmsm-settings-panel-countdown > .title { grid-column: 1; grid-row: 1; }
+	.mmsm-settings-page .mmsm-settings-panel-countdown > p:first-of-type { grid-column: 1; grid-row: 2; }
+	.mmsm-settings-page .mmsm-settings-panel-countdown > .mmsm-countdown-schedule-check { grid-column: 1; grid-row: 3; }
+	.mmsm-settings-page .mmsm-settings-panel-countdown > .form-table { grid-column: 1; grid-row: 4; }
+	.mmsm-settings-page .mmsm-settings-panel-countdown > .mmsm-countdown-admin-preview {
+		grid-column: 2;
+		grid-row: 1 / span 4;
+		align-self: start;
+		margin-top: 0;
+	}
+}
+
+@media (max-width: 782px) {
+	.mmsm-settings-page .mmsm-countdown-admin-preview {
+		position: static;
+	}
+
+	.mmsm-settings-page .mmsm-countdown-admin-preview-grid,
+	.mmsm-settings-page .mmsm-countdown-custom-colors {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 480px) {
+	.mmsm-settings-page .mmsm-countdown-admin-preview-grid,
+	.mmsm-settings-page .mmsm-countdown-custom-colors {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mmsm-settings-page .mmsm-countdown-admin-preview-stage b.is-previewing,
+	.mmsm-settings-page .mmsm-countdown-admin-preview-stage [data-countdown-preview-unit].is-previewing-card {
+		animation: none;
+	}
 }
 
 .mmsm-settings-page .mmsm-contact-channels-builder {

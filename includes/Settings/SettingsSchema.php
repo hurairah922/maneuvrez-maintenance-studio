@@ -41,6 +41,10 @@ class SettingsSchema {
 		}
 
 		return array(
+			'countdowns'             => array(
+				'type'    => 'repeater',
+				'default' => self::get_default_countdowns(),
+			),
 			'enabled'                => array(
 				'type'    => 'checkbox',
 				'default' => 0,
@@ -306,6 +310,47 @@ class SettingsSchema {
 				'default' => '',
 			),
 		) + $social_fields;
+	}
+
+	/**
+	 * Return the normalized default countdown instance map.
+	 *
+	 * The keyed shape allows future instances to reuse the countdown domain
+	 * without exposing a multi-countdown interface in the first release.
+	 *
+	 * @return array<string,array<string,mixed>>
+	 */
+	public static function get_default_countdowns() {
+		return array(
+			'maintenance' => self::get_default_countdown_instance(),
+		);
+	}
+
+	/**
+	 * Return the normalized defaults for a countdown instance.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public static function get_default_countdown_instance() {
+		return array(
+			'enabled'          => 0,
+			'target_timestamp' => 0,
+			'heading'          => 'Launching in',
+			'description'      => '',
+			'show_days'        => 1,
+			'show_hours'       => 1,
+			'show_minutes'     => 1,
+			'show_seconds'     => 1,
+			'expiry_action'    => 'hold_zero',
+			'finished_message' => '',
+			'animation_style'  => 'slide',
+			'animation_scope'  => 'digits',
+			'color_mode'       => 'theme',
+			'background_color' => '',
+			'number_color'     => '',
+			'label_color'      => '',
+			'border_color'     => '',
+		);
 	}
 
 	/**

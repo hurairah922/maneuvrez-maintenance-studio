@@ -21,25 +21,26 @@ class TemplateRegistry {
 	public function all() {
 		return array(
 			'default' => array(
-				'key'         => 'default',
-				'name'        => __( 'Default', 'maneuvrez-maintenance-studio' ),
-				'description' => __( 'A polished maintenance page with reusable status, contact, social, and login sections.', 'maneuvrez-maintenance-studio' ),
-				'file'        => MMSM_PLUGIN_PATH . 'templates/public/default.php',
-				'zones'       => array( 'main', 'footer' ),
-					'assets'      => array(
-						'styles'  => array( 'mmsm-public-template-default' ),
-						'scripts' => array( 'mmsm-public-template-default' ),
+				'key'           => 'default',
+				'name'          => __( 'Default', 'maneuvrez-maintenance-studio' ),
+				'description'   => __( 'A polished maintenance page with reusable status, contact, social, and login sections.', 'maneuvrez-maintenance-studio' ),
+				'file'          => MMSM_PLUGIN_PATH . 'templates/public/default.php',
+				'zones'         => array( 'main', 'footer' ),
+				'assets'        => array(
+					'styles'  => array( 'mmsm-public-template-default' ),
+					'scripts' => array( 'mmsm-public-template-default' ),
+				),
+				'asset_sources' => array(
+					'styles'  => array(
+						'mmsm-public-template-default' => 'assets/css/public-template-default.css',
 					),
-					'asset_sources' => array(
-						'styles'  => array(
-							'mmsm-public-template-default' => 'assets/css/public-template-default.css',
-						),
-						'scripts' => array(
-							'mmsm-public-template-default' => 'assets/js/public-template-default.js',
-						),
+					'scripts' => array(
+						'mmsm-public-template-default' => 'assets/js/public-template-default.js',
+						'mmsm-countdown'               => 'assets/js/countdown.js',
 					),
-					'layout'      => array(
-					'main'   => array( 'hero', 'status_progress', 'contact_reveal', 'contact_channels' ),
+				),
+				'layout'        => array(
+					'main'   => array( 'hero', 'countdown', 'status_progress', 'contact_reveal', 'contact_channels' ),
 					'footer' => array( 'social_links', 'login' ),
 				),
 			),
