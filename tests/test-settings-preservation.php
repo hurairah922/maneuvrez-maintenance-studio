@@ -195,6 +195,79 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Collapsed editor cards keep their fields in the form and preserve values.
+	 *
+	 * @return void
+	 */
+	public function test_collapsed_maintenance_cards_keep_submittable_saved_values() {
+		$baseline = $this->build_custom_settings();
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+
+		$admin = new Admin();
+		$admin->register_settings();
+		$method = new ReflectionMethod( Admin::class, 'render_maintenance_page_editor' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $admin );
+		$output = (string) ob_get_clean();
+
+		$this->assertSame( 6, substr_count( $output, 'data-optional-card=' ) );
+		$this->assertStringContainsString( '<details class="mmsm-card-disclosure"', $output );
+		$this->assertStringContainsString( 'aria-expanded="false"', $output );
+		$this->assertStringContainsString( 'aria-controls="mmsm-countdown-editor"', $output );
+		$this->assertStringContainsString( 'Text above heading', $output );
+		$this->assertStringContainsString( 'When the countdown ends', $output );
+		$this->assertStringContainsString( 'mmsm_settings[secondary_action_url]', $output );
+		$this->assertStringContainsString( 'mmsm_settings[countdowns][maintenance][heading]', $output );
+		$this->assertStringContainsString( 'mmsm_settings[contact_channels_items]', $output );
+		$this->assertStringContainsString( 'mmsm_settings[social_links]', $output );
+		$this->assertStringContainsString( 'mmsm_settings[login_label]', $output );
+		$this->assertStringNotContainsString( ' disabled=', $output );
+		$this->assertSame( 1, substr_count( $output, 'id="mmsm-contact-channels-enabled"' ) );
+		$this->assertLessThan( strpos( $output, 'mmsm-optional-sections' ), strpos( $output, 'mmsm_settings[primary_action_url]' ) );
+		$this->assertLessThan( strpos( $output, 'Customize countdown' ), strpos( $output, 'When the countdown ends' ) );
+
+		$saved = $this->save_tab( 'maintenance_page', $this->get_tab_payloads( $baseline )['maintenance_page'] );
+		$this->assertSame( $baseline['secondary_action_url'], $saved['secondary_action_url'] );
+		$this->assertSame( $baseline['countdowns']['maintenance']['heading'], $saved['countdowns']['maintenance']['heading'] );
+		$this->assertSame( $baseline['contact_channels_items'], $saved['contact_channels_items'] );
+		$this->assertSame( $baseline['social_links'], $saved['social_links'] );
+		$this->assertSame( $baseline['login_label'], $saved['login_label'] );
+	}
+
+	/**
+	 * Incomplete action pairs cannot replace a valid saved action.
+	 *
+	 * @return void
+	 */
+	public function test_incomplete_action_pair_keeps_previously_saved_pair() {
+		$baseline = $this->build_custom_settings();
+		$payload  = $this->get_tab_payloads( $baseline )['maintenance_page'];
+
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$payload['primary_action_label']   = '';
+		$payload['primary_action_url']     = 'https://example.com/orphaned';
+		$payload['secondary_action_label'] = 'Incomplete secondary';
+		$payload['secondary_action_url']   = '';
+		$saved                             = $this->save_tab( 'maintenance_page', $payload );
+
+		$this->assertSame( $baseline['primary_action_label'], $saved['primary_action_label'] );
+		$this->assertSame( $baseline['primary_action_url'], $saved['primary_action_url'] );
+		$this->assertSame( $baseline['secondary_action_label'], $saved['secondary_action_label'] );
+		$this->assertSame( $baseline['secondary_action_url'], $saved['secondary_action_url'] );
+
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$payload                         = $this->get_tab_payloads( $baseline )['maintenance_page'];
+		$payload['primary_action_label'] = 'Invalid destination';
+		$payload['primary_action_url']   = '/relative-path';
+		$saved                           = $this->save_tab( 'maintenance_page', $payload );
+
+		$this->assertSame( $baseline['primary_action_label'], $saved['primary_action_label'] );
+		$this->assertSame( $baseline['primary_action_url'], $saved['primary_action_url'] );
+	}
+
+	/**
 	 * Sparse pre-schema settings gain defaults without losing recognized values.
 	 *
 	 * @return void

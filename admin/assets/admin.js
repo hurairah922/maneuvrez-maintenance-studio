@@ -510,6 +510,112 @@ jQuery(document).ready(($) => {
 		}
 	};
 
+	const initializeMaintenanceEditor = () => {
+		const editor = $('.mmsm-optional-sections');
+
+		if (!editor.length) {
+			return;
+		}
+
+		const updateDisclosureState = (details) => {
+			$(details).children('summary').first().attr('aria-expanded', details.open ? 'true' : 'false');
+		};
+
+		$('.mmsm-card-disclosure, .mmsm-local-disclosure').each(function initializeDisclosure() {
+			updateDisclosureState(this);
+		}).on('toggle', function onDisclosureToggle() {
+			updateDisclosureState(this);
+		});
+
+		const setCardSummary = (type, message) => {
+			editor.find(`[data-optional-card="${type}"] [data-card-summary]`).first().text(message);
+		};
+
+		const updateActionGroup = (type) => {
+			const group = $(`[data-action-group="${type}"]`);
+			const labelField = group.find(`input[name$="[${type}_action_label]"]`);
+			const urlField = group.find(`input[name$="[${type}_action_url]"]`);
+			const validation = group.find('[data-action-validation]');
+			const label = String(labelField.val() || '').trim();
+			const url = String(urlField.val() || '').trim();
+			const serverMessage = String(validation.attr('data-server-error') || '');
+			let message = '';
+
+			if (urlField.length) {
+				urlField[0].setCustomValidity('');
+			}
+
+			if (url && !label) {
+				message = __('Add a label or remove the URL. An action needs both values.', 'maneuvrez-maintenance-studio');
+			} else if (label && !url) {
+				message = __('Add a full URL or remove the label. An action needs both values.', 'maneuvrez-maintenance-studio');
+			} else if (url && urlField.length && urlField[0].validity.typeMismatch) {
+				message = __('Enter a valid full URL beginning with http:// or https://.', 'maneuvrez-maintenance-studio');
+			}
+
+			if (labelField.length) {
+				labelField[0].setCustomValidity(message);
+			}
+			if (urlField.length) {
+				urlField[0].setCustomValidity(message);
+			}
+			validation.text(message || serverMessage).toggleClass('is-error', !!(message || serverMessage));
+
+			if (type === 'secondary') {
+				if (!label && !url) {
+					setCardSummary(type, __('Not configured.', 'maneuvrez-maintenance-studio'));
+				} else if (message) {
+					setCardSummary(type, message);
+				} else {
+					setCardSummary(type, `${__('Configured', 'maneuvrez-maintenance-studio')}: ${label}`);
+				}
+			}
+		};
+
+		const updateCardSummaries = () => {
+			updateActionGroup('primary');
+			updateActionGroup('secondary');
+
+			const progressEnabled = $('#mmsm-show-progress').prop('checked');
+			const progressValue = String($('#mmsm-progress-value').val() || '0');
+			$('.mmsm-progress-value-dependent').toggleClass('is-hidden', !progressEnabled).attr('aria-hidden', progressEnabled ? 'false' : 'true');
+			setCardSummary('status-progress', progressEnabled
+				? `${__('Progress is on at', 'maneuvrez-maintenance-studio')} ${progressValue}%.`
+				: __('Progress is off; status text remains available.', 'maneuvrez-maintenance-studio'));
+
+			const countdownEnabled = $('#mmsm-countdown-enabled').prop('checked');
+			const countdownTarget = String($('#mmsm-countdown-target').val() || '').replace('T', ' ');
+			const expiryLabel = String($('#mmsm-countdown-expiry-action option:selected').text() || '').trim();
+			setCardSummary('countdown', `${countdownEnabled ? __('On', 'maneuvrez-maintenance-studio') : __('Off', 'maneuvrez-maintenance-studio')} · ${countdownTarget || __('No target time', 'maneuvrez-maintenance-studio')} · ${expiryLabel}`);
+
+			const contactEnabled = $('#mmsm-contact-channels-enabled').prop('checked');
+			const contactCount = $('.mmsm-contact-channel-list [data-contact-channel-item]').filter(function configuredContact() {
+				return String($(this).find('.mmsm-contact-channel-value').val() || '').trim() !== '';
+			}).length;
+			setCardSummary('contact-channels', `${contactEnabled ? __('On', 'maneuvrez-maintenance-studio') : __('Off', 'maneuvrez-maintenance-studio')} · ${contactCount} ${contactCount === 1 ? __('configured channel', 'maneuvrez-maintenance-studio') : __('configured channels', 'maneuvrez-maintenance-studio')}`);
+
+			const socialCount = $('.mmsm-social-links-list [data-social-item]').filter(function configuredSocialLink() {
+				return String($(this).find('.mmsm-social-url-input').val() || '').trim() !== '';
+			}).length;
+			const footerEnabled = $('#mmsm-show-footer-section').prop('checked');
+			const loginEnabled = $('#mmsm-show-login-button').prop('checked');
+			setCardSummary('social-links', `${socialCount} ${socialCount === 1 ? __('configured link', 'maneuvrez-maintenance-studio') : __('configured links', 'maneuvrez-maintenance-studio')}${footerEnabled ? '' : ` · ${__('Hidden while the footer is off', 'maneuvrez-maintenance-studio')}`}`);
+			$('.mmsm-login-label-dependent').toggleClass('is-hidden', !loginEnabled).attr('aria-hidden', loginEnabled ? 'false' : 'true');
+			setCardSummary('footer-login', footerEnabled
+				? (loginEnabled ? __('Footer and login link are shown.', 'maneuvrez-maintenance-studio') : __('Footer is shown without a login link.', 'maneuvrez-maintenance-studio'))
+				: __('Footer is hidden; saved footer settings are retained.', 'maneuvrez-maintenance-studio'));
+		};
+
+		$('.mmsm-settings-content').on('input change', 'input, textarea, select', function onMaintenanceFieldChange() {
+			$(this).closest('[data-action-group]').find('[data-action-validation]').attr('data-server-error', '');
+			updateCardSummaries();
+		});
+		$('.mmsm-settings-content').on('click', '.mmsm-add-social-item, .mmsm-remove-social-item, .mmsm-add-contact-channel, .mmsm-remove-contact-channel', () => {
+			window.setTimeout(updateCardSummaries, 0);
+		});
+		updateCardSummaries();
+	};
+
 	const bypassBuilder = $('.mmsm-bypass-query-builder');
 
 	const initializeBypassPreview = () => {
@@ -656,6 +762,7 @@ jQuery(document).ready(($) => {
 	initializeDesignPreview();
 	initializeFullPagePreview();
 	initializeCountdownAdmin();
+	initializeMaintenanceEditor();
 
 	const builder = $('.mmsm-social-links-builder');
 
@@ -972,7 +1079,7 @@ jQuery(document).ready(($) => {
 		};
 
 		const updateContactStatus = () => {
-			const enabled = contactBuilder.find('input[name$="[contact_channels_enabled]"]').prop('checked');
+			const enabled = $('#mmsm-contact-channels-enabled').prop('checked');
 			const maintenance = contactBuilder.find('select[name$="[contact_channels_maintenance_display]"]').val();
 			const live = contactBuilder.find('select[name$="[contact_channels_live_display]"]').val();
 			const displayStyle = contactBuilder.find('select[name$="[contact_channels_display_style]"]').val();
@@ -1045,7 +1152,7 @@ jQuery(document).ready(($) => {
 		};
 
 		const updateContactPreview = () => {
-			const enabled = contactBuilder.find('input[name$="[contact_channels_enabled]"]').prop('checked');
+			const enabled = $('#mmsm-contact-channels-enabled').prop('checked');
 			const maintenance = contactBuilder.find('select[name$="[contact_channels_maintenance_display]"]').val();
 			const shape = contactBuilder.find('select[name$="[contact_channels_button_shape]"]').val() || 'rounded';
 			const display = contactBuilder.find('select[name$="[contact_channels_button_display]"]').val() || 'icon_label';
@@ -1238,6 +1345,10 @@ jQuery(document).ready(($) => {
 			toggleCustomColorFields();
 			updateContactStatus();
 		});
+		$('#mmsm-contact-channels-enabled').on('change', () => {
+			toggleCustomColorFields();
+			updateContactStatus();
+		});
 		contactBuilder.on('input change', 'input[name$="[contact_channels_heading]"], input[name$="[contact_channels_description]"], input[name$="[contact_channels_primary_label]"], input[name$="[contact_channels_background_color]"], input[name$="[contact_channels_text_color]"], input[name$="[contact_channels_icon_color]"], input[name$="[contact_channels_hover_background_color]"], input[name$="[contact_channels_hover_text_color]"]', updateContactStatus);
 		contactBuilder.on('click', '[data-contact-color-tab]', function onContactColorStateClick() {
 			switchCustomColorPanel($(this));
@@ -1255,11 +1366,22 @@ jQuery(document).ready(($) => {
 
 	if (settingsForm.length) {
 		const initialState = settingsForm.serialize();
+		const editStatus = $('[data-settings-edit-status]');
 		let isSubmitting = false;
+		const updateEditStatus = () => {
+			const isDirty = settingsForm.serialize() !== initialState;
+
+			editStatus
+				.toggleClass('has-unsaved-changes', isDirty)
+				.text(isDirty
+					? __('Unsaved edits — save to update the page.', 'maneuvrez-maintenance-studio')
+					: __('All editor changes are saved.', 'maneuvrez-maintenance-studio'));
+		};
 
 		settingsForm.on('submit', () => {
 			isSubmitting = true;
 		});
+		settingsForm.on('input change', 'input, textarea, select', updateEditStatus);
 
 		$('.mmsm-settings-nav-item:not([aria-current="page"])').on('click', (event) => {
 			if (settingsForm.serialize() === initialState) {
@@ -1280,6 +1402,8 @@ jQuery(document).ready(($) => {
 			event.originalEvent.returnValue = '';
 			return '';
 		});
+
+		updateEditStatus();
 
 	}
 });
