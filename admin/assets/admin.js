@@ -78,67 +78,242 @@ jQuery(document).ready(($) => {
 			return;
 		}
 
-		const value = (selector) => String($(selector).val() || '').trim();
-		const updatePreview = () => {
-			const modeField = $('#mmsm-mode-type');
-			if (modeField.length) {
-				preview.find('[data-preview-mode]').text(
-					modeField.val() === 'coming_soon'
-						? __('Coming soon', 'maneuvrez-maintenance-studio')
-						: __('Maintenance', 'maneuvrez-maintenance-studio'),
-				);
+		const expandButton = preview.find('[data-preview-expand]');
+		const closeButton = preview.find('[data-preview-close]');
+		const responsiveToolbar = preview.find('[data-preview-responsive-toolbar]');
+		const deviceFrame = preview.find('[data-preview-device-frame]');
+		const publicPreviewFrame = preview.find('[data-public-preview-frame]');
+		const widthField = preview.find('[data-preview-width]');
+		const heightField = preview.find('[data-preview-height]');
+		const viewportPresets = {
+			desktop: { width: 1440, height: 900 },
+			tablet: { width: 768, height: 1024 },
+			mobile: { width: 390, height: 844 },
+		};
+		let previewWidth = 1440;
+		let previewHeight = 900;
+		let previouslyFocused = null;
+		let previewRequest = null;
+		let previewRefreshTimer = null;
+
+		const clamp = (number, minimum, maximum) => Math.min(maximum, Math.max(minimum, number));
+		const updateDeviceFrame = () => {
+			previewWidth = clamp(Number.parseInt(widthField.val(), 10) || previewWidth, 320, 2560);
+			previewHeight = clamp(Number.parseInt(heightField.val(), 10) || previewHeight, 400, 1600);
+
+			widthField.val(previewWidth);
+			heightField.val(previewHeight);
+			preview.find('[data-preview-preset]').each(function updatePresetState() {
+				const preset = viewportPresets[String($(this).data('previewPreset'))];
+				const isActive = preset && preset.width === previewWidth && preset.height === previewHeight;
+				$(this).toggleClass('is-active', isActive).attr('aria-pressed', isActive ? 'true' : 'false');
+			});
+			deviceFrame.css({ width: `${previewWidth}px`, height: `${previewHeight}px` });
+		};
+
+		const closeExpandedPreview = () => {
+			if (!preview.hasClass('is-expanded')) {
+				return;
 			}
 
-			const titleField = $('#mmsm-page-title');
-			if (titleField.length) {
-				preview.find('[data-preview-page-title]').text(value('#mmsm-page-title') || __('Page title', 'maneuvrez-maintenance-studio'));
-				preview.find('[data-preview-message]').text(value('#mmsm-message'));
-			}
+			preview.removeClass('is-expanded').removeAttr('role aria-modal');
+			expandButton.attr('aria-expanded', 'false').prop('hidden', false);
+			closeButton.prop('hidden', true);
+			responsiveToolbar.prop('hidden', true);
+			deviceFrame.css({ width: '', height: '' });
+			$(document.body).removeClass('mmsm-preview-is-expanded');
+			$(document).off('keydown.mmsmPreviewDialog');
 
-			const eyebrowField = $('#mmsm-hero-eyebrow');
-			if (eyebrowField.length) {
-				const eyebrow = value('#mmsm-hero-eyebrow');
-				const primaryAction = value('#mmsm-primary-action-label');
-				const secondaryAction = value('#mmsm-secondary-action-label');
-				const primaryUrl = value('#mmsm-primary-action-url');
-				const secondaryUrl = value('#mmsm-secondary-action-url');
-
-				preview.find('[data-preview-eyebrow]').text(eyebrow).toggleClass('is-hidden', !eyebrow);
-				preview.find('[data-preview-primary-action]').text(primaryAction).toggleClass('is-hidden', !primaryAction || !primaryUrl);
-				preview.find('[data-preview-secondary-action]').text(secondaryAction).toggleClass('is-hidden', !secondaryAction || !secondaryUrl);
-			}
-
-			const statusField = $('#mmsm-status-label');
-			if (statusField.length) {
-				const progress = Math.min(100, Math.max(0, Number.parseInt(value('#mmsm-progress-value'), 10) || 0));
-				preview.find('[data-preview-status-label]').text(value('#mmsm-status-label'));
-				preview.find('[data-preview-progress]').toggleClass('is-hidden', !$('#mmsm-show-progress').prop('checked')).find('i').css('width', `${progress}%`);
-
-				const email = value('#mmsm-contact-email');
-				preview.find('[data-preview-simple-contact]').toggleClass('is-hidden', !email);
-				preview.find('[data-preview-contact-label]').text(value('#mmsm-contact-label'));
-				preview.find('[data-preview-contact-message]').text(value('#mmsm-contact-message'));
-				preview.find('[data-preview-contact-email]').text(email);
-			}
-
-			const footerField = $('#mmsm-show-footer-section');
-			if (footerField.length) {
-				preview.find('[data-preview-footer]').toggleClass('is-hidden', !footerField.prop('checked'));
-				preview.find('[data-preview-login]')
-					.text(value('#mmsm-login-label'))
-					.toggleClass('is-hidden', !$('#mmsm-show-login-button').prop('checked'));
+			if (previouslyFocused && document.contains(previouslyFocused)) {
+				previouslyFocused.focus();
 			}
 		};
 
-		$('.mmsm-settings-stack').on('input change', 'input, textarea, select', updatePreview);
-		updatePreview();
+		const handleDialogKeydown = (event) => {
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				closeExpandedPreview();
+				return;
+			}
+
+			if (event.key === 'Tab') {
+				const focusable = preview.find('button:not([hidden]):not(:disabled), input:not([hidden]):not(:disabled)').filter(':visible');
+				const first = focusable.first()[0];
+				const last = focusable.last()[0];
+
+				if (event.shiftKey && document.activeElement === first) {
+					event.preventDefault();
+					last.focus();
+				} else if (!event.shiftKey && document.activeElement === last) {
+					event.preventDefault();
+					first.focus();
+				}
+			}
+		};
+
+		const openExpandedPreview = () => {
+			previouslyFocused = document.activeElement;
+			preview.addClass('is-expanded').attr({
+				role: 'dialog',
+				'aria-modal': 'true',
+			});
+			expandButton.attr('aria-expanded', 'true').prop('hidden', true);
+			closeButton.prop('hidden', false);
+			responsiveToolbar.prop('hidden', false);
+			$(document.body).addClass('mmsm-preview-is-expanded');
+			$(document).on('keydown.mmsmPreviewDialog', handleDialogKeydown);
+			updateDeviceFrame();
+			closeButton.trigger('focus');
+		};
+
+		expandButton.on('click', openExpandedPreview);
+		closeButton.on('click', closeExpandedPreview);
+		preview.find('[data-preview-preset]').on('click', function applyPreviewPreset() {
+			const preset = viewportPresets[String($(this).data('previewPreset'))];
+
+			if (!preset) {
+				return;
+			}
+
+			widthField.val(preset.width);
+			heightField.val(preset.height);
+			updateDeviceFrame();
+		});
+		widthField.add(heightField).on('change', updateDeviceFrame);
+		preview.find('[data-preview-resize]').on('pointerdown', function beginFrameResize(event) {
+			if (!preview.hasClass('is-expanded')) {
+				return;
+			}
+
+			event.preventDefault();
+			const handle = this;
+			const direction = String($(handle).data('previewResize') || '');
+			const startX = event.clientX;
+			const startY = event.clientY;
+			const startWidth = previewWidth;
+			const startHeight = previewHeight;
+			const changesWidth = direction.includes('e') || direction.includes('w');
+			const changesHeight = direction.includes('n') || direction.includes('s');
+			const resizeCursors = {
+				n: 'ns-resize',
+				ne: 'nesw-resize',
+				e: 'ew-resize',
+				se: 'nwse-resize',
+				s: 'ns-resize',
+				sw: 'nesw-resize',
+				w: 'ew-resize',
+				nw: 'nwse-resize',
+			};
+
+			handle.setPointerCapture(event.pointerId);
+			deviceFrame.addClass('is-resizing').css('cursor', resizeCursors[direction] || 'nwse-resize');
+
+			const resizeFrame = (moveEvent) => {
+				const horizontalChange = moveEvent.clientX - startX;
+				const verticalChange = moveEvent.clientY - startY;
+
+				if (changesWidth) {
+					widthField.val(startWidth + (direction.includes('w') ? -horizontalChange : horizontalChange));
+				}
+				if (changesHeight) {
+					heightField.val(startHeight + (direction.includes('n') ? -verticalChange : verticalChange));
+				}
+
+				updateDeviceFrame();
+			};
+
+			const finishFrameResize = (endEvent) => {
+				if (handle.hasPointerCapture(endEvent.pointerId)) {
+					handle.releasePointerCapture(endEvent.pointerId);
+				}
+				handle.removeEventListener('pointermove', resizeFrame);
+				handle.removeEventListener('pointerup', finishFrameResize);
+				handle.removeEventListener('pointercancel', finishFrameResize);
+				deviceFrame.removeClass('is-resizing').css('cursor', '');
+			};
+
+			handle.addEventListener('pointermove', resizeFrame);
+			handle.addEventListener('pointerup', finishFrameResize);
+			handle.addEventListener('pointercancel', finishFrameResize);
+		});
+
+		if (typeof window.ResizeObserver !== 'undefined') {
+			const frameObserver = new window.ResizeObserver((entries) => {
+				if (!preview.hasClass('is-expanded') || !entries.length) {
+					return;
+				}
+
+				const dimensions = entries[0].contentRect;
+				previewWidth = clamp(Math.round(dimensions.width), 320, 2560);
+				previewHeight = clamp(Math.round(dimensions.height), 400, 1600);
+				widthField.val(previewWidth);
+				heightField.val(previewHeight);
+				preview.find('[data-preview-preset]').each(function updateResizedPresetState() {
+					const preset = viewportPresets[String($(this).data('previewPreset'))];
+					const isActive = preset && preset.width === previewWidth && preset.height === previewHeight;
+					$(this).toggleClass('is-active', isActive).attr('aria-pressed', isActive ? 'true' : 'false');
+				});
+			});
+
+			frameObserver.observe(deviceFrame[0]);
+		}
+
+		const refreshRenderedPreview = () => {
+			const settingsForm = preview.closest('form');
+			const requestData = settingsForm.serializeArray().filter((field) => field.name !== 'action' && field.name !== '_wpnonce');
+			requestData.push({ name: 'action', value: 'mmsm_render_page_preview' });
+			requestData.push({ name: 'nonce', value: String(preview.data('previewNonce') || '') });
+
+			if (previewRequest) {
+				previewRequest.abort();
+			}
+
+			preview.addClass('is-loading');
+			previewRequest = $.ajax({
+				url: String(preview.data('previewUrl') || ''),
+				method: 'POST',
+				data: requestData,
+				dataType: 'html',
+			})
+				.done((markup) => {
+					if (publicPreviewFrame.length) {
+						publicPreviewFrame[0].srcdoc = markup;
+					}
+				})
+				.always(() => {
+					preview.removeClass('is-loading');
+					previewRequest = null;
+				});
+		};
+
+		const scheduleRenderedPreviewRefresh = () => {
+			window.clearTimeout(previewRefreshTimer);
+			previewRefreshTimer = window.setTimeout(refreshRenderedPreview, 350);
+		};
+
+		preview.closest('form').on('input change', 'input, textarea, select', function onPreviewSettingChange(event) {
+			if ($(event.target).closest('[data-page-preview]').length) {
+				return;
+			}
+
+			scheduleRenderedPreviewRefresh();
+		});
+		if (typeof window.MutationObserver !== 'undefined') {
+			const formObserver = new window.MutationObserver(scheduleRenderedPreviewRefresh);
+			const settingsStack = preview.closest('form').find('.mmsm-settings-stack')[0];
+
+			if (settingsStack) {
+				formObserver.observe(settingsStack, { childList: true, subtree: true });
+			}
+		}
+
 	};
 
 	const initializeCountdownAdmin = () => {
 		const panel = $('.mmsm-settings-panel-countdown');
 		const preview = $('[data-countdown-admin-preview]');
 
-		if (!panel.length || !preview.length) {
+		if (!panel.length) {
 			return;
 		}
 
@@ -330,7 +505,9 @@ jQuery(document).ready(($) => {
 		});
 
 		updatePreview();
-		window.setTimeout(tickPreview, 1000);
+		if (preview.length) {
+			window.setTimeout(tickPreview, 1000);
+		}
 	};
 
 	const bypassBuilder = $('.mmsm-bypass-query-builder');
@@ -674,7 +851,7 @@ jQuery(document).ready(($) => {
 						return;
 					}
 
-					currentRow.find('.mmsm-social-icon-id').val(attachment.id);
+					currentRow.find('.mmsm-social-icon-id').val(attachment.id).trigger('change');
 					currentRow.find('.mmsm-social-icon-preview').attr('src', attachment.url).removeClass('is-hidden');
 					currentRow.find('.mmsm-remove-social-icon').removeClass('is-hidden');
 					updateSocialRowPreview(currentRow);
@@ -687,7 +864,7 @@ jQuery(document).ready(($) => {
 				event.preventDefault();
 
 				const currentRow = $(this).closest('[data-social-item]');
-				currentRow.find('.mmsm-social-icon-id').val('0');
+				currentRow.find('.mmsm-social-icon-id').val('0').trigger('change');
 				currentRow.find('.mmsm-social-icon-preview').attr('src', '').addClass('is-hidden');
 				$(this).addClass('is-hidden');
 				updateSocialRowPreview(currentRow);

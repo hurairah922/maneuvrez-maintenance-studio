@@ -258,28 +258,35 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Maintenance Page and Design use the same complete preview shell.
+	 * Maintenance Page and Design use the same real-template preview shell.
 	 *
 	 * @return void
 	 */
-	public function test_maintenance_and_design_share_full_page_preview() {
-		$admin    = new Admin();
-		$method   = new ReflectionMethod( Admin::class, 'render_full_page_preview' );
-		$settings = $this->build_custom_settings();
+	public function test_maintenance_and_design_share_real_template_preview() {
+		$admin  = new Admin();
+		$method = new ReflectionMethod( Admin::class, 'render_full_page_preview' );
 		$method->setAccessible( true );
 
 		foreach ( array( 'maintenance_page', 'design' ) as $area ) {
 			ob_start();
-			$method->invoke( $admin, $settings, $area );
+			$method->invoke( $admin, $area );
 			$output = (string) ob_get_clean();
 
 			$this->assertSame( 1, substr_count( $output, 'data-page-preview' ) );
 			$this->assertStringContainsString( 'data-preview-area="' . $area . '"', $output );
-			$this->assertStringContainsString( 'data-preview-page-title', $output );
-			$this->assertStringContainsString( 'data-countdown-admin-preview', $output );
-			$this->assertStringContainsString( 'data-preview-contact-channel-list', $output );
-			$this->assertStringContainsString( 'data-preview-social-list', $output );
-			$this->assertStringContainsString( 'data-preview-footer', $output );
+			$this->assertStringContainsString( 'data-preview-expand', $output );
+			$this->assertStringContainsString( 'aria-expanded="false"', $output );
+			$this->assertStringContainsString( 'data-preview-close hidden', $output );
+			$this->assertStringContainsString( 'data-preview-responsive-toolbar hidden', $output );
+			$this->assertStringContainsString( 'data-preview-device-frame', $output );
+			$this->assertStringContainsString( 'data-preview-width', $output );
+			$this->assertStringContainsString( 'data-preview-height', $output );
+			$this->assertStringContainsString( 'data-public-preview-frame', $output );
+			$this->assertStringContainsString( 'action=mmsm_render_page_preview', $output );
+			$this->assertStringContainsString( 'sandbox="allow-scripts"', $output );
+			$this->assertSame( 8, substr_count( $output, 'data-preview-resize=' ) );
+			$this->assertStringNotContainsString( 'data-preview-zoom', $output );
+			$this->assertStringNotContainsString( 'data-countdown-admin-preview', $output );
 		}
 	}
 
