@@ -52,15 +52,91 @@ jQuery(document).ready(($) => {
 					preview.css(variable, color);
 				}
 			});
+
+			const themeField = $('#mmsm-theme-mode');
+			if (themeField.length) {
+				const theme = String(themeField.val() || 'light');
+				const themeLabels = {
+					dark: __('Dark', 'maneuvrez-maintenance-studio'),
+					light: __('Light', 'maneuvrez-maintenance-studio'),
+					system: __('System', 'maneuvrez-maintenance-studio'),
+				};
+
+				preview.attr('data-preview-theme', theme);
+				preview.find('[data-preview-theme-label]').text(themeLabels[theme] || themeLabels.light);
+			}
 		};
 
-		$(document.body).on('input change', Object.keys(colorMap).map((key) => `input[name$="[${key}]"]`).join(','), updatePreview);
+		$(document.body).on('input change', `${Object.keys(colorMap).map((key) => `input[name$="[${key}]"]`).join(',')}, #mmsm-theme-mode`, updatePreview);
+		updatePreview();
+	};
+
+	const initializeFullPagePreview = () => {
+		const preview = $('[data-page-preview]');
+
+		if (!preview.length) {
+			return;
+		}
+
+		const value = (selector) => String($(selector).val() || '').trim();
+		const updatePreview = () => {
+			const modeField = $('#mmsm-mode-type');
+			if (modeField.length) {
+				preview.find('[data-preview-mode]').text(
+					modeField.val() === 'coming_soon'
+						? __('Coming soon', 'maneuvrez-maintenance-studio')
+						: __('Maintenance', 'maneuvrez-maintenance-studio'),
+				);
+			}
+
+			const titleField = $('#mmsm-page-title');
+			if (titleField.length) {
+				preview.find('[data-preview-page-title]').text(value('#mmsm-page-title') || __('Page title', 'maneuvrez-maintenance-studio'));
+				preview.find('[data-preview-message]').text(value('#mmsm-message'));
+			}
+
+			const eyebrowField = $('#mmsm-hero-eyebrow');
+			if (eyebrowField.length) {
+				const eyebrow = value('#mmsm-hero-eyebrow');
+				const primaryAction = value('#mmsm-primary-action-label');
+				const secondaryAction = value('#mmsm-secondary-action-label');
+				const primaryUrl = value('#mmsm-primary-action-url');
+				const secondaryUrl = value('#mmsm-secondary-action-url');
+
+				preview.find('[data-preview-eyebrow]').text(eyebrow).toggleClass('is-hidden', !eyebrow);
+				preview.find('[data-preview-primary-action]').text(primaryAction).toggleClass('is-hidden', !primaryAction || !primaryUrl);
+				preview.find('[data-preview-secondary-action]').text(secondaryAction).toggleClass('is-hidden', !secondaryAction || !secondaryUrl);
+			}
+
+			const statusField = $('#mmsm-status-label');
+			if (statusField.length) {
+				const progress = Math.min(100, Math.max(0, Number.parseInt(value('#mmsm-progress-value'), 10) || 0));
+				preview.find('[data-preview-status-label]').text(value('#mmsm-status-label'));
+				preview.find('[data-preview-progress]').toggleClass('is-hidden', !$('#mmsm-show-progress').prop('checked')).find('i').css('width', `${progress}%`);
+
+				const email = value('#mmsm-contact-email');
+				preview.find('[data-preview-simple-contact]').toggleClass('is-hidden', !email);
+				preview.find('[data-preview-contact-label]').text(value('#mmsm-contact-label'));
+				preview.find('[data-preview-contact-message]').text(value('#mmsm-contact-message'));
+				preview.find('[data-preview-contact-email]').text(email);
+			}
+
+			const footerField = $('#mmsm-show-footer-section');
+			if (footerField.length) {
+				preview.find('[data-preview-footer]').toggleClass('is-hidden', !footerField.prop('checked'));
+				preview.find('[data-preview-login]')
+					.text(value('#mmsm-login-label'))
+					.toggleClass('is-hidden', !$('#mmsm-show-login-button').prop('checked'));
+			}
+		};
+
+		$('.mmsm-settings-stack').on('input change', 'input, textarea, select', updatePreview);
 		updatePreview();
 	};
 
 	const initializeCountdownAdmin = () => {
 		const panel = $('.mmsm-settings-panel-countdown');
-		const preview = panel.find('[data-countdown-admin-preview]');
+		const preview = $('[data-countdown-admin-preview]');
 
 		if (!panel.length || !preview.length) {
 			return;
@@ -177,6 +253,7 @@ jQuery(document).ready(($) => {
 			const customColors = colorModeField.val() === 'custom';
 
 			preview.toggleClass('is-disabled', !enabled);
+			preview.toggleClass('is-hidden', !enabled);
 			preview.find('[data-countdown-preview-status]')
 				.toggleClass('is-enabled', enabled)
 				.text(enabled ? __('Enabled', 'maneuvrez-maintenance-studio') : __('Disabled', 'maneuvrez-maintenance-studio'));
@@ -400,6 +477,7 @@ jQuery(document).ready(($) => {
 	initializeAdvancedVisibility();
 	initializeCustomLoginPreview();
 	initializeDesignPreview();
+	initializeFullPagePreview();
 	initializeCountdownAdmin();
 
 	const builder = $('.mmsm-social-links-builder');
@@ -481,6 +559,36 @@ jQuery(document).ready(($) => {
 			});
 		};
 
+		const updateFullPageSocialPreview = () => {
+			const previewList = $('[data-preview-social-list]');
+
+			if (!previewList.length) {
+				return;
+			}
+
+			const display = String(builder.find('select[name$="[social_links_display]"]').val() || 'icon_label');
+			previewList.empty();
+
+			list.children('[data-social-item]').each(function collectSocialPreview() {
+				const row = $(this);
+				const url = String(row.find('.mmsm-social-url-input').val() || '').trim();
+
+				if (!url) {
+					return;
+				}
+
+				const chip = $('<span />');
+				const icon = getSocialRowIconMarkup(row);
+				const color = String(row.find('.mmsm-social-icon-color-picker').val() || '').trim();
+				icon.css('color', color || '');
+				chip.append(icon);
+				if (display !== 'icon_only') {
+					chip.append($('<b />', { text: getSocialRowLabel(row) }));
+				}
+				previewList.append(chip);
+			});
+		};
+
 		const updateSocialRowPreview = (row) => {
 			const platform = row.find('.mmsm-social-platform-select').val();
 			const url = String(row.find('.mmsm-social-url-input').val() || '').trim();
@@ -497,6 +605,7 @@ jQuery(document).ready(($) => {
 			row.find('[data-social-item-state]')
 				.toggleClass('is-ready', !!url)
 				.text(url ? __('Ready', 'maneuvrez-maintenance-studio') : __('Needs URL', 'maneuvrez-maintenance-studio'));
+			updateFullPageSocialPreview();
 		};
 
 		const toggleCustomFields = (row) => {
@@ -534,6 +643,7 @@ jQuery(document).ready(($) => {
 			row.on('click', '.mmsm-remove-social-item', function onRemoveItem() {
 				$(this).closest('[data-social-item]').remove();
 				ensureOneRow();
+				updateFullPageSocialPreview();
 			});
 
 			row.on('click', '.mmsm-upload-social-icon', function onUploadIcon(event) {
@@ -603,6 +713,8 @@ jQuery(document).ready(($) => {
 			event.preventDefault();
 			addRow();
 		});
+		builder.on('change', 'select[name$="[social_links_display]"]', updateFullPageSocialPreview);
+		updateFullPageSocialPreview();
 	}
 
 	const contactBuilder = $('.mmsm-contact-channels-builder');
@@ -758,7 +870,6 @@ jQuery(document).ready(($) => {
 		const updateContactPreview = () => {
 			const enabled = contactBuilder.find('input[name$="[contact_channels_enabled]"]').prop('checked');
 			const maintenance = contactBuilder.find('select[name$="[contact_channels_maintenance_display]"]').val();
-			const live = contactBuilder.find('select[name$="[contact_channels_live_display]"]').val();
 			const shape = contactBuilder.find('select[name$="[contact_channels_button_shape]"]').val() || 'rounded';
 			const display = contactBuilder.find('select[name$="[contact_channels_button_display]"]').val() || 'icon_label';
 			const colorMode = contactBuilder.find('select[name$="[contact_channels_color_mode]"]').val() || 'theme';
@@ -768,80 +879,44 @@ jQuery(document).ready(($) => {
 			const floatingLabel = String(contactBuilder.find('input[name$="[contact_channels_primary_label]"]').val() || '').trim() || __('Contact Us', 'maneuvrez-maintenance-studio');
 			const rows = getContactRowsForPreview();
 			const hasInsideMaintenance = enabled && (maintenance === 'inside' || maintenance === 'both');
-			const hasFloating = enabled && (live === 'floating' || maintenance === 'floating' || maintenance === 'both');
-			const hasPublicDisplay = hasInsideMaintenance || hasFloating;
-			const stage = contactBuilder.find('[data-contact-preview-stage]');
-			const buttons = contactBuilder.find('[data-contact-preview-buttons]');
-			const previewCard = contactBuilder.find('.mmsm-contact-channels-preview-card');
-			const floating = contactBuilder.find('[data-contact-preview-floating]');
-			const previewNote = contactBuilder.find('[data-contact-preview-note]');
-
-			stage
-				.removeClass('is-shape-rounded is-shape-pill is-shape-circle is-shape-square is-display-icon_label is-display-icon_only is-display-label_only is-color-theme is-color-brand is-color-custom is-position-bottom_left is-position-bottom_right is-position-top_left is-position-top_right is-empty is-disabled')
-				.addClass(`is-shape-${shape}`)
-				.addClass(`is-display-${display}`)
-				.addClass(`is-color-${colorMode}`)
-				.addClass(`is-position-${position}`)
-				.toggleClass('is-empty', rows.length === 0)
-				.toggleClass('is-disabled', !enabled || !hasPublicDisplay);
-
-			stage.css({
+			const hasMaintenanceFloating = enabled && (maintenance === 'floating' || maintenance === 'both');
+			const fullPreviewChannels = $('[data-preview-contact-channels]');
+			const fullPreviewList = $('[data-preview-contact-channel-list]');
+			const fullPreviewFloating = $('[data-preview-contact-floating]');
+			const previewStyles = {
 				'--mmsm-contact-preview-bg': contactBuilder.find('input[name$="[contact_channels_background_color]"]').val() || '#2271b1',
 				'--mmsm-contact-preview-text': contactBuilder.find('input[name$="[contact_channels_text_color]"]').val() || '#ffffff',
 				'--mmsm-contact-preview-icon': contactBuilder.find('input[name$="[contact_channels_icon_color]"]').val() || contactBuilder.find('input[name$="[contact_channels_text_color]"]').val() || '#ffffff',
 				'--mmsm-contact-preview-hover-bg': contactBuilder.find('input[name$="[contact_channels_hover_background_color]"]').val() || contactBuilder.find('input[name$="[contact_channels_background_color]"]').val() || '#135e96',
 				'--mmsm-contact-preview-hover-text': contactBuilder.find('input[name$="[contact_channels_hover_text_color]"]').val() || contactBuilder.find('input[name$="[contact_channels_text_color]"]').val() || '#ffffff',
-			});
+			};
 
-			contactBuilder.find('[data-contact-preview-heading]').text(heading);
-			contactBuilder.find('[data-contact-preview-description]').text(
-				description || (
-					enabled
-						? __('Contact buttons will appear here with the selected display style.', 'maneuvrez-maintenance-studio')
-						: __('Turn on Contact Channels to publish this visitor contact path.', 'maneuvrez-maintenance-studio')
-				)
-			);
-			contactBuilder.find('[data-contact-preview-floating-label]').text(floatingLabel);
-			contactBuilder.find('[data-contact-preview-count]').text(
-				rows.length
-					? `${rows.length} ${__('ready', 'maneuvrez-maintenance-studio')}`
-					: __('Preview', 'maneuvrez-maintenance-studio')
-			);
-
-			buttons.empty();
+			fullPreviewChannels.toggleClass('is-hidden', !hasInsideMaintenance || rows.length === 0);
+			fullPreviewChannels.find('[data-preview-contact-channels-heading]').text(heading);
+			fullPreviewChannels.find('[data-preview-contact-channels-description]').text(description);
+			fullPreviewList
+				.removeClass('is-shape-rounded is-shape-pill is-shape-circle is-shape-square is-display-icon_label is-display-icon_only is-display-label_only is-color-theme is-color-brand is-color-custom')
+				.addClass(`is-shape-${shape} is-display-${display} is-color-${colorMode}`)
+				.css(previewStyles)
+				.empty();
 			rows.forEach((row) => {
-				const button = $('<span />', {
-					class: `mmsm-contact-preview-button is-${row.type}`,
-				});
-				if (row.icon) {
-					button.append($('<span />', {
-						class: `dashicons ${row.icon}`,
-						'aria-hidden': 'true',
-					}));
+				const chip = $('<span />', { class: `is-${row.type}` });
+				if (row.icon && display !== 'label_only') {
+					chip.append($('<span />', { class: `dashicons ${row.icon}`, 'aria-hidden': 'true' }));
 				}
-				button.append($('<span />', {
-					class: 'mmsm-contact-preview-label',
-					text: row.label,
-				}));
-				buttons.append(button);
+				if (display !== 'icon_only') {
+					chip.append($('<b />', { text: row.label }));
+				}
+				fullPreviewList.append(chip);
 			});
-
-			floating.find('.dashicons')
-				.removeClass((index, className) => (className.match(/dashicons-[^\s]+/g) || []).join(' '))
-				.addClass(rows.length === 1 && rows[0].icon ? rows[0].icon : 'dashicons-format-chat')
-				.toggle(rows.length !== 1 || !!rows[0].icon);
-
-			previewCard.toggle(hasInsideMaintenance || rows.length === 0 || !hasPublicDisplay);
-			floating.toggle(hasFloating && rows.length > 0);
-			previewNote.text(
-				!enabled
-					? __('Preview is live, but Contact Channels are currently off.', 'maneuvrez-maintenance-studio')
-					: (
-						hasPublicDisplay
-							? __('Preview updates instantly as you change placement, labels, colors, and destinations.', 'maneuvrez-maintenance-studio')
-							: __('Choose a maintenance or live-site placement to publish these buttons.', 'maneuvrez-maintenance-studio')
-					)
-			);
+			fullPreviewFloating
+				.removeClass('is-shape-rounded is-shape-pill is-shape-circle is-shape-square is-color-theme is-color-brand is-color-custom is-position-bottom_left is-position-bottom_right is-position-top_left is-position-top_right')
+				.addClass(`is-shape-${shape} is-color-${colorMode} is-position-${position}`)
+				.css(previewStyles)
+				.empty()
+				.append(display === 'label_only' ? '' : $('<span />', { class: 'dashicons dashicons-format-chat', 'aria-hidden': 'true' }))
+				.append(display === 'icon_only' ? '' : $('<b />', { text: floatingLabel }))
+				.toggleClass('is-hidden', !hasMaintenanceFloating || rows.length === 0);
 		};
 
 		const toggleCustomColorFields = () => {

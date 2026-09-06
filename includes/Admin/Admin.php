@@ -625,7 +625,18 @@ class Admin {
 							<input type="hidden" name="<?php echo esc_attr( MMSM_SETTINGS_OPTION ); ?>[template_key]" value="<?php echo esc_attr( (string) $settings['template_key'] ); ?>" />
 						<?php endif; ?>
 						<?php
-						$this->render_active_tab();
+						if ( in_array( $active_tab, array( 'maintenance_page', 'design' ), true ) ) {
+							?>
+							<div class="mmsm-editor-workspace">
+								<div class="mmsm-settings-stack">
+									<?php $this->render_active_tab(); ?>
+								</div>
+								<?php $this->render_full_page_preview( $settings, $active_tab ); ?>
+							</div>
+							<?php
+						} else {
+							$this->render_active_tab();
+						}
 					submit_button( __( 'Save Settings', 'maneuvrez-maintenance-studio' ), 'primary', 'submit', true, array( 'class' => 'mmsm-settings-save-button' ) );
 					?>
 				</form>
@@ -943,38 +954,163 @@ class Admin {
 	 * @return void
 	 */
 	public function render_design_section() {
-		$settings = $this->get_settings();
-		$style    = sprintf(
-			'--mmsm-design-preview-bg:%1$s;--mmsm-design-preview-surface:%2$s;--mmsm-design-preview-primary:%3$s;--mmsm-design-preview-heading:%4$s;--mmsm-design-preview-body:%5$s;--mmsm-design-preview-muted:%6$s;--mmsm-design-preview-link:%7$s;--mmsm-design-preview-button-text:%8$s;--mmsm-design-preview-border:%9$s;',
-			esc_attr( (string) $settings['background_color'] ),
-			esc_attr( (string) $settings['surface_color'] ),
-			esc_attr( (string) $settings['primary_color'] ),
-			esc_attr( (string) $settings['heading_text_color'] ),
-			esc_attr( (string) $settings['body_text_color'] ),
-			esc_attr( (string) $settings['muted_text_color'] ),
-			esc_attr( (string) $settings['link_text_color'] ),
-			esc_attr( (string) $settings['button_text_color'] ),
-			esc_attr( (string) $settings['border_color'] )
+		echo '<p>' . esc_html__( 'Use the full-page preview to check every color role and appearance mode together.', 'maneuvrez-maintenance-studio' ) . '</p>';
+	}
+
+	/**
+	 * Render the shared lightweight maintenance-page preview.
+	 *
+	 * @param array<string,mixed> $settings Normalized settings.
+	 * @param string              $active_tab Active task area.
+	 * @return void
+	 */
+	private function render_full_page_preview( array $settings, $active_tab ) {
+		$countdown = $this->countdown_service->get_instance( $settings, CountdownService::INSTANCE_MAINTENANCE );
+		$remaining = $this->countdown_service->get_remaining_seconds( $countdown );
+		$mode_label = 'coming_soon' === $settings['mode_type'] ? __( 'Coming soon', 'maneuvrez-maintenance-studio' ) : __( 'Maintenance', 'maneuvrez-maintenance-studio' );
+		$theme_labels = array(
+			'light'  => __( 'Light', 'maneuvrez-maintenance-studio' ),
+			'dark'   => __( 'Dark', 'maneuvrez-maintenance-studio' ),
+			'system' => __( 'System', 'maneuvrez-maintenance-studio' ),
+		);
+		$theme_label = $theme_labels[ $settings['theme_mode'] ] ?? $theme_labels['light'];
+		$style = sprintf(
+			'--mmsm-design-preview-bg:%1$s;--mmsm-design-preview-surface:%2$s;--mmsm-design-preview-primary:%3$s;--mmsm-design-preview-heading:%4$s;--mmsm-design-preview-body:%5$s;--mmsm-design-preview-muted:%6$s;--mmsm-design-preview-link:%7$s;--mmsm-design-preview-button-text:%8$s;--mmsm-design-preview-border:%9$s;--mmsm-contact-preview-bg:%10$s;--mmsm-contact-preview-text:%11$s;--mmsm-contact-preview-icon:%12$s;--mmsm-contact-preview-hover-bg:%13$s;--mmsm-contact-preview-hover-text:%14$s;',
+			(string) $settings['background_color'],
+			(string) $settings['surface_color'],
+			(string) $settings['primary_color'],
+			(string) $settings['heading_text_color'],
+			(string) $settings['body_text_color'],
+			(string) $settings['muted_text_color'],
+			(string) $settings['link_text_color'],
+			(string) $settings['button_text_color'],
+			(string) $settings['border_color'],
+			(string) $settings['contact_channels_background_color'],
+			(string) $settings['contact_channels_text_color'],
+			(string) $settings['contact_channels_icon_color'],
+			(string) $settings['contact_channels_hover_background_color'],
+			(string) $settings['contact_channels_hover_text_color']
+		);
+		$preview_units = array(
+			'days'    => array( floor( $remaining / DAY_IN_SECONDS ), __( 'Days', 'maneuvrez-maintenance-studio' ) ),
+			'hours'   => array( floor( ( $remaining % DAY_IN_SECONDS ) / HOUR_IN_SECONDS ), __( 'Hours', 'maneuvrez-maintenance-studio' ) ),
+			'minutes' => array( floor( ( $remaining % HOUR_IN_SECONDS ) / MINUTE_IN_SECONDS ), __( 'Minutes', 'maneuvrez-maintenance-studio' ) ),
+			'seconds' => array( $remaining % MINUTE_IN_SECONDS, __( 'Seconds', 'maneuvrez-maintenance-studio' ) ),
+		);
+		$has_contact_items = false;
+		foreach ( $settings['contact_channels_items'] as $contact_item ) {
+			if ( ! empty( $contact_item['value'] ) ) {
+				$has_contact_items = true;
+				break;
+			}
+		}
+		$contact_display  = $has_contact_items && ! empty( $settings['contact_channels_enabled'] ) && in_array( $settings['contact_channels_maintenance_display'], array( 'inside', 'both' ), true );
+		$contact_floating = $has_contact_items && ! empty( $settings['contact_channels_enabled'] ) && in_array( $settings['contact_channels_maintenance_display'], array( 'floating', 'both' ), true );
+		$contact_icons    = array(
+			'whatsapp'  => 'dashicons-format-chat',
+			'messenger' => 'dashicons-format-chat',
+			'phone'     => 'dashicons-phone',
+			'email'     => 'dashicons-email-alt',
+			'directions' => 'dashicons-location-alt',
+			'custom'    => 'dashicons-admin-links',
+		);
+		$social_icons = array(
+			'facebook'  => 'dashicons-facebook-alt',
+			'instagram' => 'dashicons-admin-links',
+			'linkedin'  => 'dashicons-admin-links',
+			'x'         => 'dashicons-twitter',
+			'youtube'   => 'dashicons-video-alt3',
+			'github'    => 'dashicons-admin-links',
+			'tiktok'    => 'dashicons-video-alt3',
+			'threads'    => 'dashicons-share-alt',
+			'website'   => 'dashicons-admin-site',
+			'email'     => 'dashicons-email-alt',
+			'custom'    => 'dashicons-admin-links',
 		);
 		?>
-		<p><?php echo esc_html__( 'Use WordPress color pickers for the safe theme color roles that drive light, dark, and system modes.', 'maneuvrez-maintenance-studio' ); ?></p>
-		<div class="mmsm-design-preview" data-design-preview style="<?php echo esc_attr( $style ); ?>">
-			<div class="mmsm-design-preview-canvas">
-				<div class="mmsm-design-preview-card">
-					<span class="mmsm-design-preview-kicker"><?php echo esc_html__( 'Maintenance preview', 'maneuvrez-maintenance-studio' ); ?></span>
-					<strong><?php echo esc_html__( "We'll be back soon", 'maneuvrez-maintenance-studio' ); ?></strong>
-					<p><?php echo esc_html__( 'A compact live sample of your background, surface, text, border, link, and button colors.', 'maneuvrez-maintenance-studio' ); ?></p>
-					<div class="mmsm-design-preview-actions">
-						<span class="mmsm-design-preview-button"><?php echo esc_html__( 'Notify me', 'maneuvrez-maintenance-studio' ); ?></span>
-						<span class="mmsm-design-preview-link"><?php echo esc_html__( 'Contact support', 'maneuvrez-maintenance-studio' ); ?></span>
+		<aside class="mmsm-full-page-preview" data-page-preview data-design-preview data-preview-area="<?php echo esc_attr( $active_tab ); ?>" data-preview-theme="<?php echo esc_attr( (string) $settings['theme_mode'] ); ?>" style="<?php echo esc_attr( $style ); ?>" aria-label="<?php echo esc_attr__( 'Full maintenance page preview', 'maneuvrez-maintenance-studio' ); ?>">
+			<div class="mmsm-full-page-preview-header">
+				<div>
+					<strong><?php echo esc_html__( 'Full page preview', 'maneuvrez-maintenance-studio' ); ?></strong>
+					<span><?php echo esc_html__( 'Updates as you edit', 'maneuvrez-maintenance-studio' ); ?></span>
+				</div>
+				<span class="mmsm-preview-theme-badge" data-preview-theme-label><?php echo esc_html( $theme_label ); ?></span>
+			</div>
+			<div class="mmsm-full-page-preview-viewport">
+				<div class="mmsm-preview-main-card">
+					<span class="mmsm-preview-mode" data-preview-mode><?php echo esc_html( $mode_label ); ?></span>
+					<span class="mmsm-preview-eyebrow<?php echo '' === $settings['hero_eyebrow'] ? ' is-hidden' : ''; ?>" data-preview-eyebrow><?php echo esc_html( (string) $settings['hero_eyebrow'] ); ?></span>
+					<h2 data-preview-page-title><?php echo esc_html( (string) $settings['page_title'] ); ?></h2>
+					<p data-preview-message><?php echo esc_html( (string) $settings['message'] ); ?></p>
+					<div class="mmsm-preview-actions" data-preview-actions>
+						<span class="mmsm-preview-primary-action<?php echo '' === $settings['primary_action_label'] || '' === $settings['primary_action_url'] ? ' is-hidden' : ''; ?>" data-preview-primary-action><?php echo esc_html( (string) $settings['primary_action_label'] ); ?></span>
+						<span class="mmsm-preview-secondary-action<?php echo '' === $settings['secondary_action_label'] || '' === $settings['secondary_action_url'] ? ' is-hidden' : ''; ?>" data-preview-secondary-action><?php echo esc_html( (string) $settings['secondary_action_label'] ); ?></span>
+					</div>
+
+					<div class="mmsm-full-preview-section mmsm-countdown-admin-preview<?php echo empty( $countdown['enabled'] ) ? ' is-disabled is-hidden' : ''; ?>" data-countdown-admin-preview>
+						<div class="mmsm-countdown-admin-preview-header">
+							<strong data-countdown-preview-heading><?php echo esc_html( (string) $countdown['heading'] ); ?></strong>
+							<span class="<?php echo ! empty( $countdown['enabled'] ) ? 'is-enabled' : ''; ?>" data-countdown-preview-status><?php echo ! empty( $countdown['enabled'] ) ? esc_html__( 'Enabled', 'maneuvrez-maintenance-studio' ) : esc_html__( 'Disabled', 'maneuvrez-maintenance-studio' ); ?></span>
+						</div>
+						<p class="<?php echo '' === $countdown['description'] ? 'is-hidden' : ''; ?>" data-countdown-preview-description><?php echo esc_html( (string) $countdown['description'] ); ?></p>
+						<div class="mmsm-countdown-admin-preview-stage <?php echo esc_attr( 'is-animation-' . $countdown['animation_style'] . ' is-scope-' . $countdown['animation_scope'] ); ?>">
+							<div class="mmsm-countdown-admin-preview-grid">
+								<?php foreach ( $preview_units as $unit => $preview_unit ) : ?>
+									<div class="<?php echo empty( $countdown[ 'show_' . $unit ] ) ? 'is-hidden' : ''; ?>" data-countdown-preview-unit="<?php echo esc_attr( $unit ); ?>">
+										<b data-countdown-preview-value="<?php echo esc_attr( $unit ); ?>"><?php echo esc_html( str_pad( (string) $preview_unit[0], 2, '0', STR_PAD_LEFT ) ); ?></b>
+										<span><?php echo esc_html( $preview_unit[1] ); ?></span>
+									</div>
+								<?php endforeach; ?>
+							</div>
+						</div>
+					</div>
+
+					<div class="mmsm-full-preview-section" data-preview-status-section>
+						<strong data-preview-status-label><?php echo esc_html( (string) $settings['status_label'] ); ?></strong>
+						<div class="mmsm-preview-progress<?php echo empty( $settings['show_progress'] ) ? ' is-hidden' : ''; ?>" data-preview-progress><i style="width:<?php echo esc_attr( (string) $settings['progress_value'] ); ?>%"></i></div>
+					</div>
+
+					<div class="mmsm-full-preview-section<?php echo '' === $settings['contact_email'] ? ' is-hidden' : ''; ?>" data-preview-simple-contact>
+						<strong data-preview-contact-label><?php echo esc_html( (string) $settings['contact_label'] ); ?></strong>
+						<p data-preview-contact-message><?php echo esc_html( (string) $settings['contact_message'] ); ?></p>
+						<span data-preview-contact-email><?php echo esc_html( (string) $settings['contact_email'] ); ?></span>
+					</div>
+
+					<div class="mmsm-full-preview-section<?php echo $contact_display ? '' : ' is-hidden'; ?>" data-preview-contact-channels>
+						<strong data-preview-contact-channels-heading><?php echo esc_html( (string) $settings['contact_channels_heading'] ); ?></strong>
+						<p data-preview-contact-channels-description><?php echo esc_html( (string) $settings['contact_channels_description'] ); ?></p>
+						<div class="<?php echo esc_attr( 'mmsm-preview-chip-list is-shape-' . $settings['contact_channels_button_shape'] . ' is-display-' . $settings['contact_channels_button_display'] . ' is-color-' . $settings['contact_channels_color_mode'] ); ?>" data-preview-contact-channel-list>
+							<?php foreach ( $settings['contact_channels_items'] as $item ) : ?>
+								<?php if ( ! empty( $item['value'] ) ) : ?>
+									<span class="<?php echo esc_attr( 'is-' . $item['type'] ); ?>">
+										<?php if ( 'label_only' !== $settings['contact_channels_button_display'] ) : ?><i class="dashicons <?php echo esc_attr( $contact_icons[ $item['type'] ] ?? $contact_icons['custom'] ); ?>" aria-hidden="true"></i><?php endif; ?>
+										<?php if ( 'icon_only' !== $settings['contact_channels_button_display'] ) : ?><b><?php echo esc_html( '' !== $item['label'] ? $item['label'] : ucfirst( str_replace( '_', ' ', $item['type'] ) ) ); ?></b><?php endif; ?>
+									</span>
+								<?php endif; ?>
+							<?php endforeach; ?>
+						</div>
 					</div>
 				</div>
-				<div class="mmsm-design-preview-panel">
-					<span><?php echo esc_html__( 'Progress', 'maneuvrez-maintenance-studio' ); ?></span>
-					<div><i></i></div>
+				<span class="<?php echo esc_attr( 'mmsm-preview-floating-contact is-shape-' . $settings['contact_channels_button_shape'] . ' is-color-' . $settings['contact_channels_color_mode'] . ' is-position-' . $settings['contact_channels_position'] . ( $contact_floating ? '' : ' is-hidden' ) ); ?>" data-preview-contact-floating>
+					<?php if ( 'label_only' !== $settings['contact_channels_button_display'] ) : ?><i class="dashicons dashicons-format-chat" aria-hidden="true"></i><?php endif; ?>
+					<?php if ( 'icon_only' !== $settings['contact_channels_button_display'] ) : ?><b><?php echo esc_html( (string) $settings['contact_channels_primary_label'] ); ?></b><?php endif; ?>
+				</span>
+
+				<div class="mmsm-preview-footer<?php echo empty( $settings['show_footer_section'] ) ? ' is-hidden' : ''; ?>" data-preview-footer>
+					<div class="mmsm-preview-chip-list" data-preview-social-list>
+						<?php foreach ( $settings['social_links'] as $item ) : ?>
+							<?php if ( ! empty( $item['url'] ) ) : ?>
+								<span>
+									<i class="dashicons <?php echo esc_attr( $social_icons[ $item['platform'] ] ?? $social_icons['custom'] ); ?>" aria-hidden="true"></i>
+									<?php if ( 'icon_only' !== $settings['social_links_display'] ) : ?><b><?php echo esc_html( 'custom' === $item['platform'] && '' !== $item['custom_name'] ? $item['custom_name'] : ucfirst( (string) $item['platform'] ) ); ?></b><?php endif; ?>
+								</span>
+							<?php endif; ?>
+						<?php endforeach; ?>
+					</div>
+					<span class="mmsm-preview-login<?php echo empty( $settings['show_login_button'] ) ? ' is-hidden' : ''; ?>" data-preview-login><?php echo esc_html( (string) $settings['login_label'] ); ?></span>
 				</div>
 			</div>
-		</div>
+		</aside>
 		<?php
 	}
 
@@ -988,51 +1124,14 @@ class Admin {
 	}
 
 	/**
-	 * Render the countdown section description and lightweight preview.
+	 * Render the countdown section description and scheduling health controls.
 	 *
 	 * @return void
 	 */
 	public function render_countdown_section() {
-		$countdown = $this->get_maintenance_countdown();
-		$schedule  = $this->countdown_scheduler->get_status( CountdownService::INSTANCE_MAINTENANCE );
-		$remaining = $this->countdown_service->get_remaining_seconds( $countdown );
-		$preview_classes = array(
-			'mmsm-countdown-admin-preview',
-			! empty( $countdown['enabled'] ) ? '' : 'is-disabled',
-		);
-		$stage_classes = array(
-			'mmsm-countdown-admin-preview-stage',
-			'is-animation-' . sanitize_html_class( (string) $countdown['animation_style'] ),
-			'is-scope-' . sanitize_html_class( (string) $countdown['animation_scope'] ),
-		);
+		$schedule = $this->countdown_scheduler->get_status( CountdownService::INSTANCE_MAINTENANCE );
 		?>
 		<p><?php echo esc_html__( 'Schedule one countdown for the maintenance or coming-soon page. The selected time uses the WordPress site timezone.', 'maneuvrez-maintenance-studio' ); ?></p>
-		<div class="<?php echo esc_attr( trim( implode( ' ', $preview_classes ) ) ); ?>" data-countdown-admin-preview>
-			<div class="mmsm-countdown-admin-preview-header">
-				<strong><?php echo esc_html__( 'Live layout preview', 'maneuvrez-maintenance-studio' ); ?></strong>
-				<span class="<?php echo ! empty( $countdown['enabled'] ) ? 'is-enabled' : ''; ?>" data-countdown-preview-status><?php echo ! empty( $countdown['enabled'] ) ? esc_html__( 'Enabled', 'maneuvrez-maintenance-studio' ) : esc_html__( 'Disabled', 'maneuvrez-maintenance-studio' ); ?></span>
-			</div>
-			<div class="<?php echo esc_attr( implode( ' ', $stage_classes ) ); ?>">
-				<strong data-countdown-preview-heading><?php echo esc_html( (string) $countdown['heading'] ); ?></strong>
-				<p class="<?php echo '' === (string) $countdown['description'] ? 'is-hidden' : ''; ?>" data-countdown-preview-description><?php echo esc_html( (string) $countdown['description'] ); ?></p>
-				<div class="mmsm-countdown-admin-preview-grid">
-					<?php
-					$preview_units = array(
-						'days'    => array( 'value' => floor( $remaining / DAY_IN_SECONDS ), 'label' => __( 'Days', 'maneuvrez-maintenance-studio' ) ),
-						'hours'   => array( 'value' => floor( ( $remaining % DAY_IN_SECONDS ) / HOUR_IN_SECONDS ), 'label' => __( 'Hours', 'maneuvrez-maintenance-studio' ) ),
-						'minutes' => array( 'value' => floor( ( $remaining % HOUR_IN_SECONDS ) / MINUTE_IN_SECONDS ), 'label' => __( 'Minutes', 'maneuvrez-maintenance-studio' ) ),
-						'seconds' => array( 'value' => $remaining % MINUTE_IN_SECONDS, 'label' => __( 'Seconds', 'maneuvrez-maintenance-studio' ) ),
-					);
-					foreach ( $preview_units as $unit => $preview_unit ) :
-						?>
-						<div class="<?php echo empty( $countdown[ 'show_' . $unit ] ) ? 'is-hidden' : ''; ?>" data-countdown-preview-unit="<?php echo esc_attr( $unit ); ?>">
-							<b data-countdown-preview-value="<?php echo esc_attr( $unit ); ?>"><?php echo esc_html( str_pad( (string) $preview_unit['value'], 2, '0', STR_PAD_LEFT ) ); ?></b>
-							<span><?php echo esc_html( $preview_unit['label'] ); ?></span>
-						</div>
-					<?php endforeach; ?>
-				</div>
-			</div>
-		</div>
 		<div class="mmsm-countdown-schedule-check">
 			<strong><?php echo esc_html__( 'Server scheduling check', 'maneuvrez-maintenance-studio' ); ?></strong>
 			<p data-countdown-schedule-result>
@@ -2238,27 +2337,6 @@ class Admin {
 						</script>
 					</div>
 				</div>
-				<aside class="mmsm-contact-channels-preview" aria-live="polite">
-					<div class="mmsm-contact-channels-preview-header">
-						<div>
-							<span class="mmsm-contact-channels-eyebrow"><?php echo esc_html__( 'Live preview', 'maneuvrez-maintenance-studio' ); ?></span>
-							<h3><?php echo esc_html__( 'Visitor view', 'maneuvrez-maintenance-studio' ); ?></h3>
-						</div>
-						<span class="mmsm-contact-channels-preview-count" data-contact-preview-count><?php echo esc_html__( '0 ready', 'maneuvrez-maintenance-studio' ); ?></span>
-					</div>
-					<div class="mmsm-contact-channels-preview-stage" data-contact-preview-stage>
-						<div class="mmsm-contact-channels-preview-card">
-							<strong data-contact-preview-heading><?php echo esc_html( (string) $settings['contact_channels_heading'] ); ?></strong>
-							<p data-contact-preview-description><?php echo esc_html( (string) $settings['contact_channels_description'] ); ?></p>
-							<div class="mmsm-contact-channels-preview-buttons" data-contact-preview-buttons></div>
-						</div>
-						<button type="button" class="mmsm-contact-channels-preview-floating" data-contact-preview-floating>
-							<span class="dashicons dashicons-format-chat" aria-hidden="true"></span>
-							<span data-contact-preview-floating-label><?php echo esc_html( (string) $settings['contact_channels_primary_label'] ); ?></span>
-						</button>
-					</div>
-					<p class="description" data-contact-preview-note><?php echo esc_html__( 'Preview updates as you choose placement, labels, colors, and destinations.', 'maneuvrez-maintenance-studio' ); ?></p>
-				</aside>
 			</div>
 		</div>
 		<?php

@@ -258,6 +258,32 @@ class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Maintenance Page and Design use the same complete preview shell.
+	 *
+	 * @return void
+	 */
+	public function test_maintenance_and_design_share_full_page_preview() {
+		$admin    = new Admin();
+		$method   = new ReflectionMethod( Admin::class, 'render_full_page_preview' );
+		$settings = $this->build_custom_settings();
+		$method->setAccessible( true );
+
+		foreach ( array( 'maintenance_page', 'design' ) as $area ) {
+			ob_start();
+			$method->invoke( $admin, $settings, $area );
+			$output = (string) ob_get_clean();
+
+			$this->assertSame( 1, substr_count( $output, 'data-page-preview' ) );
+			$this->assertStringContainsString( 'data-preview-area="' . $area . '"', $output );
+			$this->assertStringContainsString( 'data-preview-page-title', $output );
+			$this->assertStringContainsString( 'data-countdown-admin-preview', $output );
+			$this->assertStringContainsString( 'data-preview-contact-channel-list', $output );
+			$this->assertStringContainsString( 'data-preview-social-list', $output );
+			$this->assertStringContainsString( 'data-preview-footer', $output );
+		}
+	}
+
+	/**
 	 * Return a normalized, non-default-heavy fixture spanning all ownership groups.
 	 *
 	 * @return array<string,mixed>
