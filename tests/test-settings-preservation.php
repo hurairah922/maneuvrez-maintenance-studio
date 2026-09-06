@@ -1,0 +1,407 @@
+<?php
+/**
+ * Settings ownership and preservation regression tests.
+ *
+ * @package MaintenanceModeStudio
+ */
+
+use Maneuvrez\MaintenanceModeStudio\Admin\Admin;
+use Maneuvrez\MaintenanceModeStudio\Countdown\CountdownService;
+use Maneuvrez\MaintenanceModeStudio\Security\Sanitizer;
+use Maneuvrez\MaintenanceModeStudio\Settings\SettingsRepository;
+use Maneuvrez\MaintenanceModeStudio\Settings\SettingsSchema;
+
+/**
+ * Proves that the current tab-based save contract cannot erase unrelated data.
+ */
+class Test_MMSM_Settings_Preservation extends WP_UnitTestCase {
+	/**
+	 * Original request data restored after each test.
+	 *
+	 * @var array<string,mixed>
+	 */
+	private $original_post = array();
+
+	/**
+	 * Create an administrator for the settings callback.
+	 *
+	 * @return void
+	 */
+	public function set_up() {
+		parent::set_up();
+
+		$this->original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test setup preserves request globals; production submissions use a nonce.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		delete_option( MMSM_SETTINGS_OPTION );
+	}
+
+	/**
+	 * Restore request and option state.
+	 *
+	 * @return void
+	 */
+	public function tear_down() {
+		$_POST = $this->original_post;
+		delete_option( MMSM_SETTINGS_OPTION );
+
+		parent::tear_down();
+	}
+
+	/**
+	 * Every schema key must belong to exactly one current settings tab.
+	 *
+	 * @return void
+	 */
+	public function test_current_tab_ownership_covers_schema_exactly_once() {
+		$owned_keys = array();
+
+		foreach ( array_keys( $this->get_tab_payloads( $this->build_custom_settings() ) ) as $tab ) {
+			$owned_keys = array_merge( $owned_keys, $this->get_tab_field_keys( $tab ) );
+		}
+
+		$this->assertSame( array(), array_diff( array_keys( SettingsSchema::get_fields() ), $owned_keys ), 'Schema keys are missing from tab ownership.' );
+		$this->assertSame( array(), array_diff( $owned_keys, array_keys( SettingsSchema::get_fields() ) ), 'Tab ownership contains keys outside the schema.' );
+		$this->assertSame( count( $owned_keys ), count( array_unique( $owned_keys ) ), 'A setting key is owned by more than one tab.' );
+	}
+
+	/**
+	 * Saving any current tab leaves every other tab's normalized values intact.
+	 *
+	 * @return void
+	 */
+	public function test_each_current_tab_save_preserves_every_unowned_setting() {
+		$baseline = $this->build_custom_settings();
+
+		foreach ( $this->get_tab_payloads( $baseline ) as $tab => $payload ) {
+			update_option( MMSM_SETTINGS_OPTION, $baseline );
+			$before = ( new SettingsRepository() )->get_settings();
+			$saved  = $this->save_tab( $tab, $payload );
+			$owned  = array_flip( $this->get_tab_field_keys( $tab ) );
+
+			foreach ( $before as $key => $value ) {
+				if ( isset( $owned[ $key ] ) ) {
+					continue;
+				}
+
+				$this->assertSame( $value, $saved[ $key ], sprintf( '%s changed while saving the %s tab.', $key, $tab ) );
+			}
+		}
+	}
+
+	/**
+	 * Missing checkbox and repeater controls clear only their active owner group.
+	 *
+	 * @return void
+	 */
+	public function test_omitted_controls_are_scoped_to_the_active_tab() {
+		$baseline = $this->build_custom_settings();
+
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$saved = $this->save_tab(
+			'general',
+			array(
+				'page_title' => 'General save',
+				'message'    => 'Only general fields were submitted.',
+			),
+			array(
+				'mmsm_contact_channels_present' => '1',
+				'mmsm_social_links_present'     => '1',
+			)
+		);
+
+		$this->assertSame( 0, $saved['enabled'] );
+		$this->assertSame( $baseline['contact_channels_items'], $saved['contact_channels_items'] );
+		$this->assertSame( $baseline['social_links'], $saved['social_links'] );
+		$this->assertSame( 1, $saved['show_progress'] );
+
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$saved = $this->save_tab(
+			'social_links',
+			array( 'social_links_display' => 'icon_only' ),
+			array( 'mmsm_social_links_present' => '1' )
+		);
+
+		$this->assertSame( array(), $saved['social_links'] );
+		$this->assertSame( $baseline['contact_channels_items'], $saved['contact_channels_items'] );
+
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$saved = $this->save_tab(
+			'contact_channels',
+			array(
+				'contact_channels_maintenance_display' => 'inside',
+				'contact_channels_live_display'        => 'off',
+			),
+			array( 'mmsm_contact_channels_present' => '1' )
+		);
+
+		$this->assertSame( 0, $saved['contact_channels_enabled'] );
+		$this->assertSame( array(), $saved['contact_channels_items'] );
+		$this->assertSame( $baseline['social_links'], $saved['social_links'] );
+	}
+
+	/**
+	 * Disabling optional features keeps submitted child configuration available.
+	 *
+	 * @return void
+	 */
+	public function test_disabled_optional_features_preserve_their_child_values() {
+		$baseline = $this->build_custom_settings();
+		$payloads = $this->get_tab_payloads( $baseline );
+
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$countdown_payload = $payloads['countdown'];
+		unset( $countdown_payload['countdowns']['maintenance']['enabled'] );
+		$saved = $this->save_tab( 'countdown', $countdown_payload );
+
+		$this->assertSame( 0, $saved['countdowns']['maintenance']['enabled'] );
+		$this->assertSame( 'Planned launch', $saved['countdowns']['maintenance']['heading'] );
+		$this->assertSame( 'show_message', $saved['countdowns']['maintenance']['expiry_action'] );
+		$this->assertSame( '#123456', $saved['countdowns']['maintenance']['number_color'] );
+
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$contact_payload = $payloads['contact_channels'];
+		unset( $contact_payload['contact_channels_enabled'] );
+		$saved = $this->save_tab( 'contact_channels', $contact_payload, array( 'mmsm_contact_channels_present' => '1' ) );
+
+		$this->assertSame( 0, $saved['contact_channels_enabled'] );
+		$this->assertSame( $baseline['contact_channels_items'], $saved['contact_channels_items'] );
+		$this->assertSame( '#123456', $saved['contact_channels_background_color'] );
+
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$advanced_payload = $payloads['advanced'];
+		unset( $advanced_payload['custom_login_enabled'] );
+		$saved = $this->save_tab( 'advanced', $advanced_payload );
+
+		$this->assertSame( 0, $saved['custom_login_enabled'] );
+		$this->assertSame( 'private-entry', $saved['custom_login_slug'] );
+		$this->assertSame( 'redirect', $saved['custom_login_block_mode'] );
+
+		update_option( MMSM_SETTINGS_OPTION, $baseline );
+		$components_payload = $payloads['components'];
+		unset( $components_payload['show_progress'] );
+		$saved = $this->save_tab( 'components', $components_payload );
+
+		$this->assertSame( 0, $saved['show_progress'] );
+		$this->assertSame( 42, $saved['progress_value'] );
+	}
+
+	/**
+	 * Sparse pre-schema settings gain defaults without losing recognized values.
+	 *
+	 * @return void
+	 */
+	public function test_old_sparse_settings_normalize_without_data_loss() {
+		$old_settings = array(
+			'enabled'              => 1,
+			'page_title'           => 'Legacy maintenance title',
+			'message'              => 'Legacy maintenance message',
+			'primary_color'        => '#112233',
+			'contact_email'        => 'legacy@example.com',
+			'social_x_url'         => 'https://x.com/legacy-account',
+			'custom_login_enabled' => 1,
+			'custom_login_slug'    => 'legacy-entry',
+			'bypass_urls_enabled'  => 1,
+			'bypass_urls'          => array( '/status/' ),
+		);
+		$normalized   = Sanitizer::get_settings( $old_settings );
+
+		$this->assertSame( array_keys( SettingsSchema::get_fields() ), array_keys( $normalized ) );
+		$this->assertSame( 'Legacy maintenance title', $normalized['page_title'] );
+		$this->assertSame( 'Legacy maintenance message', $normalized['message'] );
+		$this->assertSame( '#112233', $normalized['primary_color'] );
+		$this->assertSame( 'legacy@example.com', $normalized['contact_email'] );
+		$this->assertSame( 'legacy-entry', $normalized['custom_login_slug'] );
+		$this->assertSame( array( '/status' ), $normalized['bypass_urls'] );
+		$this->assertSame( 'x', $normalized['social_links'][0]['platform'] );
+		$this->assertSame( 'https://x.com/legacy-account', $normalized['social_links'][0]['url'] );
+	}
+
+	/**
+	 * Return a normalized, non-default-heavy fixture spanning all ownership groups.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function build_custom_settings() {
+		$settings = Sanitizer::get_default_settings();
+
+		foreach ( SettingsSchema::get_fields() as $key => $field ) {
+			switch ( $field['type'] ) {
+				case 'checkbox':
+					$settings[ $key ] = 1;
+					break;
+				case 'color':
+					$settings[ $key ] = '#123456';
+					break;
+				case 'number':
+					$settings[ $key ] = 42;
+					break;
+			}
+		}
+
+		$settings['mode_type']                             = 'coming_soon';
+		$settings['theme_mode']                            = 'dark';
+		$settings['page_title']                            = 'Configured title';
+		$settings['message']                               = 'Configured message';
+		$settings['hero_eyebrow']                          = 'Configured eyebrow';
+		$settings['primary_action_label']                  = 'Primary action';
+		$settings['primary_action_url']                    = 'https://example.com/primary';
+		$settings['secondary_action_label']                = 'Secondary action';
+		$settings['secondary_action_url']                  = 'https://example.com/secondary';
+		$settings['status_label']                          = 'Configured status';
+		$settings['contact_label']                         = 'Configured contact';
+		$settings['contact_message']                       = 'Configured contact message';
+		$settings['contact_email']                         = 'owner@example.com';
+		$settings['custom_login_slug']                     = 'private-entry';
+		$settings['custom_login_block_mode']               = 'redirect';
+		$settings['bypass_query_key']                      = 'access_key';
+		$settings['bypass_query_value']                    = 'access_value';
+		$settings['bypass_urls']                           = array( '/public-status' );
+		$settings['contact_channels_maintenance_display']  = 'both';
+		$settings['contact_channels_live_display']         = 'floating';
+		$settings['contact_channels_logged_in_visibility'] = 'show_all';
+		$settings['contact_channels_display_style']        = 'reveal';
+		$settings['contact_channels_heading']              = 'Contact heading';
+		$settings['contact_channels_description']          = 'Contact description';
+		$settings['contact_channels_primary_label']        = 'Open contacts';
+		$settings['contact_channels_position']             = 'top_left';
+		$settings['contact_channels_button_shape']         = 'pill';
+		$settings['contact_channels_button_display']       = 'icon_only';
+		$settings['contact_channels_color_mode']           = 'custom';
+		$settings['contact_channels_items']                = array(
+			array(
+				'type'              => 'email',
+				'country_code'      => '',
+				'value'             => 'support@example.com',
+				'label'             => 'Email support',
+				'prefilled_message' => '',
+				'icon_source'       => 'default',
+				'icon_library'      => 'dashicons',
+				'icon_value'        => '',
+				'open_new_tab'      => 1,
+			),
+		);
+		$settings['countdowns']['maintenance']             = array(
+			'enabled'          => 1,
+			'target_timestamp' => time() + DAY_IN_SECONDS,
+			'heading'          => 'Planned launch',
+			'description'      => 'A configured countdown',
+			'show_days'        => 1,
+			'show_hours'       => 1,
+			'show_minutes'     => 1,
+			'show_seconds'     => 1,
+			'expiry_action'    => 'show_message',
+			'finished_message' => 'We are live.',
+			'animation_style'  => 'pulse',
+			'animation_scope'  => 'both',
+			'color_mode'       => 'custom',
+			'background_color' => '#123456',
+			'number_color'     => '#123456',
+			'label_color'      => '#123456',
+			'border_color'     => '#123456',
+		);
+		$settings['social_links_display']                  = 'icon_only';
+		$settings['social_links']                          = array(
+			array(
+				'platform'       => 'x',
+				'url'            => 'https://x.com/example',
+				'custom_name'    => '',
+				'custom_icon_id' => 0,
+				'icon_source'    => 'platform',
+				'icon_library'   => '',
+				'icon_value'     => '',
+				'icon_color'     => '#123456',
+				'open_new_tab'   => 1,
+			),
+			array(
+				'platform'       => 'instagram',
+				'url'            => 'https://instagram.com/example',
+				'custom_name'    => '',
+				'custom_icon_id' => 0,
+				'icon_source'    => 'platform',
+				'icon_library'   => '',
+				'icon_value'     => '',
+				'icon_color'     => '#123456',
+				'open_new_tab'   => 1,
+			),
+			array(
+				'platform'       => 'facebook',
+				'url'            => 'https://facebook.com/example',
+				'custom_name'    => '',
+				'custom_icon_id' => 0,
+				'icon_source'    => 'platform',
+				'icon_library'   => '',
+				'icon_value'     => '',
+				'icon_color'     => '#123456',
+				'open_new_tab'   => 1,
+			),
+			array(
+				'platform'       => 'linkedin',
+				'url'            => 'https://linkedin.com/company/example',
+				'custom_name'    => '',
+				'custom_icon_id' => 0,
+				'icon_source'    => 'platform',
+				'icon_library'   => '',
+				'icon_value'     => '',
+				'icon_color'     => '#123456',
+				'open_new_tab'   => 1,
+			),
+		);
+
+		return Sanitizer::get_settings( $settings );
+	}
+
+	/**
+	 * Build realistic payloads for all eight current tabs.
+	 *
+	 * @param array<string,mixed> $settings Normalized fixture.
+	 * @return array<string,array<string,mixed>>
+	 */
+	private function get_tab_payloads( array $settings ) {
+		$payloads = array();
+
+		foreach ( array( 'general', 'template', 'design', 'components', 'countdown', 'contact_channels', 'social_links', 'advanced' ) as $tab ) {
+			$payloads[ $tab ] = array_intersect_key( $settings, array_flip( $this->get_tab_field_keys( $tab ) ) );
+		}
+
+		$service                   = new CountdownService();
+		$countdown                 = $settings['countdowns']['maintenance'];
+		$countdown['target_local'] = $service->format_local_datetime( $countdown['target_timestamp'], wp_timezone() );
+		unset( $countdown['target_timestamp'] );
+		$payloads['countdown']['countdowns'] = array( 'maintenance' => $countdown );
+
+		return $payloads;
+	}
+
+	/**
+	 * Run the production settings callback for one tab.
+	 *
+	 * @param string              $tab Tab key.
+	 * @param array<string,mixed> $payload Submitted option value.
+	 * @param array<string,mixed> $post Extra request markers.
+	 * @return array<string,mixed>
+	 */
+	private function save_tab( $tab, array $payload, array $post = array() ) {
+		$_POST = array_merge(
+			array(
+				'mmsm_settings_nonce' => wp_create_nonce( 'mmsm_save_settings' ),
+				'mmsm_active_tab'     => $tab,
+			),
+			$post
+		);
+
+		return ( new Admin() )->sanitize_settings( $payload );
+	}
+
+	/**
+	 * Read the production ownership list without changing its visibility.
+	 *
+	 * @param string $tab Tab key.
+	 * @return array<int,string>
+	 */
+	private function get_tab_field_keys( $tab ) {
+		$method = new ReflectionMethod( Admin::class, 'get_tab_field_keys' );
+		$method->setAccessible( true );
+
+		return $method->invoke( new Admin(), $tab );
+	}
+}
