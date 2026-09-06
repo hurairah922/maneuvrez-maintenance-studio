@@ -197,4 +197,34 @@ class Test_MMSM_Countdown_Admin extends WP_UnitTestCase {
 		$this->assertSame( 'Saved heading', $saved['countdowns']['maintenance']['heading'] );
 		$this->assertSame( $existing['countdowns']['maintenance']['target_timestamp'], $saved['countdowns']['maintenance']['target_timestamp'] );
 	}
+
+	/**
+	 * A stale auto-disable countdown cannot immediately undo a fresh activation.
+	 *
+	 * @return void
+	 */
+	public function test_general_tab_activation_disables_expired_auto_disable_countdown() {
+		$existing = Sanitizer::get_default_settings();
+		$existing['countdowns']['maintenance']['enabled']          = 1;
+		$existing['countdowns']['maintenance']['target_timestamp'] = time() - MINUTE_IN_SECONDS;
+		$existing['countdowns']['maintenance']['expiry_action']    = 'disable_mode';
+		$existing['countdowns']['maintenance']['heading']          = 'Preserved countdown';
+		update_option( MMSM_SETTINGS_OPTION, $existing );
+
+		$_POST['mmsm_settings_nonce'] = wp_create_nonce( 'mmsm_save_settings' );
+		$_POST['mmsm_active_tab']     = 'general';
+
+		$saved = ( new Admin() )->sanitize_settings(
+			array(
+				'enabled'    => 1,
+				'page_title' => 'Maintenance active',
+				'message'    => 'Please check back soon.',
+			)
+		);
+
+		$this->assertSame( 1, $saved['enabled'] );
+		$this->assertSame( 0, $saved['countdowns']['maintenance']['enabled'] );
+		$this->assertSame( 'disable_mode', $saved['countdowns']['maintenance']['expiry_action'] );
+		$this->assertSame( 'Preserved countdown', $saved['countdowns']['maintenance']['heading'] );
+	}
 }

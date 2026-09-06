@@ -262,7 +262,8 @@ class CountdownService {
 		}
 
 		$current['enabled'] = 0;
-		$updated            = update_option( MMSM_SETTINGS_OPTION, $current, false );
+		$current['countdowns'][ $instance_key ]['enabled'] = 0;
+		$updated = update_option( MMSM_SETTINGS_OPTION, $current, false );
 
 		if ( $updated ) {
 			do_action( 'mmsm_countdown_reconciled', $instance_key );

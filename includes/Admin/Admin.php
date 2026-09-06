@@ -732,6 +732,10 @@ class Admin {
 			$input['countdowns'] = $this->prepare_countdowns_for_save( $input, $existing );
 		}
 
+		if ( 'general' === $active_tab ) {
+			$existing = $this->prepare_maintenance_activation( $input, $existing );
+		}
+
 		$tab_keys   = $this->get_tab_field_keys( $active_tab );
 
 		foreach ( $tab_keys as $tab_key ) {
@@ -1271,7 +1275,7 @@ class Admin {
 			/>
 			<?php echo esc_html__( 'Show the maintenance page to logged-out visitors.', 'maneuvrez-maintenance-studio' ); ?>
 		</label>
-		<p class="description"><?php echo esc_html__( 'Administrators keep normal site access while this is enabled.', 'maneuvrez-maintenance-studio' ); ?></p>
+		<p class="description"><?php echo esc_html__( 'Administrators keep normal site access while this is enabled. To test the maintenance page, open the site in a private window or log out.', 'maneuvrez-maintenance-studio' ); ?></p>
 		<?php
 	}
 
@@ -2851,6 +2855,45 @@ class Admin {
 		return array(
 			CountdownService::INSTANCE_MAINTENANCE => $submitted,
 		);
+	}
+
+	/**
+	 * Prevent a stale auto-disable countdown from undoing a fresh activation.
+	 *
+	 * An expired countdown can remain enabled after maintenance mode has already
+	 * been turned off. If an administrator later enables maintenance again from
+	 * the General tab, request reconciliation would otherwise turn it straight
+	 * back off. Disable only that expired countdown instance and preserve its
+	 * configuration so it can be given a new target from the Countdown tab.
+	 *
+	 * @param array<string,mixed> $input Submitted settings payload.
+	 * @param array<string,mixed> $existing Existing normalized settings.
+	 * @return array<string,mixed>
+	 */
+	private function prepare_maintenance_activation( array $input, array $existing ) {
+		if ( ! empty( $existing['enabled'] ) || empty( $input['enabled'] ) ) {
+			return $existing;
+		}
+
+		$countdown = $this->countdown_service->get_instance( $existing, CountdownService::INSTANCE_MAINTENANCE );
+
+		if (
+			'disable_mode' !== (string) $countdown['expiry_action'] ||
+			! $this->countdown_service->is_expired( $countdown )
+		) {
+			return $existing;
+		}
+
+		$existing['countdowns'][ CountdownService::INSTANCE_MAINTENANCE ]['enabled'] = 0;
+
+		add_settings_error(
+			MMSM_SETTINGS_OPTION,
+			'mmsm_expired_countdown_disabled',
+			esc_html__( 'Maintenance mode was enabled. Its expired auto-disable countdown was turned off; set a new future target on the Countdown tab before enabling it again.', 'maneuvrez-maintenance-studio' ),
+			'warning'
+		);
+
+		return $existing;
 	}
 
 	/**

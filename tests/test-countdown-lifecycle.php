@@ -130,9 +130,27 @@ class Test_MMSM_Countdown_Lifecycle extends WP_UnitTestCase {
 		$settings = $this->repository->get_settings();
 
 		$this->assertSame( 0, $settings['enabled'] );
+		$this->assertSame( 0, $settings['countdowns']['maintenance']['enabled'] );
 		$this->assertSame( 'Preserved title', $settings['page_title'] );
 		$this->assertSame( 1, $settings['contact_channels_enabled'] );
 		$this->assertSame( 'floating', $settings['contact_channels_live_display'] );
+	}
+
+	/**
+	 * A consumed auto-disable action cannot disable a later activation.
+	 *
+	 * @return void
+	 */
+	public function test_reactivation_stays_enabled_after_auto_disable_is_consumed() {
+		$this->save_countdown( time() - MINUTE_IN_SECONDS, 'disable_mode' );
+		$this->assertTrue( $this->service->reconcile_instance( CountdownService::INSTANCE_MAINTENANCE ) );
+
+		$settings            = $this->repository->get_settings();
+		$settings['enabled'] = 1;
+		update_option( MMSM_SETTINGS_OPTION, $settings );
+
+		$this->assertFalse( $this->service->reconcile_instance( CountdownService::INSTANCE_MAINTENANCE ) );
+		$this->assertSame( 1, $this->repository->get_settings()['enabled'] );
 	}
 
 	/**
