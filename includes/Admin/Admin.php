@@ -1055,7 +1055,7 @@ class Admin {
 		$settings = $this->settings_repository->get_settings();
 
 		if ( 'POST' === ( isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '' ) ) {
-			$input      = isset( $_POST[ MMSM_SETTINGS_OPTION ] ) && is_array( $_POST[ MMSM_SETTINGS_OPTION ] ) ? wp_unslash( $_POST[ MMSM_SETTINGS_OPTION ] ) : array();
+			$input      = isset( $_POST[ MMSM_SETTINGS_OPTION ] ) && is_array( $_POST[ MMSM_SETTINGS_OPTION ] ) ? wp_unslash( $_POST[ MMSM_SETTINGS_OPTION ] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Structured settings are sanitized by Sanitizer::sanitize_settings() below.
 			$active_tab = isset( $_POST['mmsm_active_tab'] ) ? $this->normalize_area_key( sanitize_key( wp_unslash( $_POST['mmsm_active_tab'] ) ) ) : 'maintenance_page';
 			$area_keys  = $this->get_tab_field_keys( $active_tab );
 

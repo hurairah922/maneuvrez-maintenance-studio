@@ -2,7 +2,7 @@
 Contributors: hurairah922
 Tags: maintenance mode, coming soon, maintenance page, contact buttons, social links
 Requires at least: 6.4
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: 1.3.0
 Requires PHP: 8.0
 License: GPL-2.0-or-later
